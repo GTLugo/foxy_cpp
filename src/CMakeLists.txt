@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.23)
 set(TARGET_NAME "foxy")
 
 set(SOURCE_FILES 
+    "icon.rc"
     "app.ixx"
     "wait.ixx"
     )

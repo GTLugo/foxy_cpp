@@ -28,11 +28,26 @@ namespace foxy {
   export class App final {
   public:
     explicit App(const WindowProperties& props = {}) {
-      LOG(INFO) << "hi, friends!";
+      el::Configurations config{ "res/foxy_cpp/log_config.conf" };
+      el::Loggers::reconfigureAllLoggers(config);
+      el::Helpers::setThreadName("main-thread");
+      LOG(TRACE) << "hi, friends!";
     }
 
     ~App() {
-      LOG(INFO) << "bye, friends!";
+      LOG(TRACE) << "bye, friends!";
     }
+
+    void run() {
+
+    }
+
+  private:
+    void gameLoop() {
+
+    }
+
   };
 }
+
+// if you are reading this, know that Shirakami Fubuki is STILL the best fox waifu friend
