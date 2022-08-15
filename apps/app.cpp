@@ -1,7 +1,8 @@
 #include "foxy/macros.hpp"
 
 import foxy;
+import foxy.wait;
 
 int main() {
-  GREET;
+  foxy::App app{};
 }

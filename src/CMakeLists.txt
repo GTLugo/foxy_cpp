@@ -4,7 +4,10 @@
 cmake_minimum_required(VERSION 3.23)
 set(TARGET_NAME "foxy")
 
-set(SOURCE_FILES "lib.ixx" )
+set(SOURCE_FILES 
+    "app.ixx"
+    "wait.ixx"
+    )
 
 # Add source to this project's executable.
 add_library(${TARGET_NAME} STATIC ${SOURCE_FILES})
@@ -94,6 +97,10 @@ target_link_libraries(${TARGET_NAME}
 target_include_directories(${TARGET_NAME}
     PUBLIC
     "../extern/easyloggingpp/src"
+    )
+target_sources(${TARGET_NAME}
+    PUBLIC
+    "../extern/easyloggingpp/src/easylogging++.cc"
     )
 
 # ImGUI
