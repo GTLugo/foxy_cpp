@@ -1,7 +1,3 @@
-[submodule "extern/glad2"]
-	path = extern/glad2
-	url = https://github.com/Dav1dde/glad.git
-	branch = glad2
 [submodule "extern/glfw"]
 	path = extern/glfw
 	url = https://github.com/glfw/glfw.git

@@ -1,8 +1,8 @@
 @echo off
 SETLOCAL
 @REM echo Working directory: %cd%
-CALL :compile_shader simple_shader, vertex, res/foxy_cpp/shaders, res/foxy_cpp/shaders_out
-CALL :compile_shader simple_shader, fragment, res/foxy_cpp/shaders, res/foxy_cpp/shaders_out
+CALL :compile_shader simple_shader, vertex, res/foxy/shaders, res/foxy/shaders_out
+CALL :compile_shader simple_shader, fragment, res/foxy/shaders, res/foxy/shaders_out
 EXIT /B %ERRORLEVEL%
 
 :compile_shader

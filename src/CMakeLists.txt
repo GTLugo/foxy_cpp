@@ -4,14 +4,19 @@
 cmake_minimum_required(VERSION 3.23)
 set(TARGET_NAME "foxy")
 
+set(HEADER_FILES
+  "../include/foxy/macros.hpp"
+  "../include/foxy/log_macros.hpp"
+)
+
 set(SOURCE_FILES 
-    "icon.rc"
-    "app.ixx"
-    "wait.ixx"
-    )
+  "icon.rc"
+  "core/app.ixx"
+  "util/wait.ixx"
+  "util/log.ixx")
 
 # Add source to this project's executable.
-add_library(${TARGET_NAME} STATIC ${SOURCE_FILES})
+add_library(${TARGET_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
 target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
 target_compile_options(${TARGET_NAME} PUBLIC "/experimental:module")
 
@@ -22,26 +27,17 @@ target_include_directories(${TARGET_NAME} PUBLIC ../include)
 # ===================================================
 # DEPENDENCIES - VCPKG SUGGESTED
 # ===================================================
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 # Boost
 set(Boost_USE_STATIC_RUNTIME ON)
 find_package(Boost REQUIRED
     COMPONENTS
-    container
-    coroutine
-    log
-    system
     thread
     random
     )
 target_link_libraries(${TARGET_NAME}
     PUBLIC
     Boost::headers
-    Boost::container
-    Boost::coroutine
-    Boost::log
-    Boost::system
     Boost::thread
     Boost::random
     )
@@ -50,9 +46,6 @@ target_compile_definitions(${TARGET_NAME}
     BOOST_UUID_FORCE_AUTO_LINK=1
     )
 
-# ===================================================
-# GRAPHICS APIS
-# ===================================================
 # Vulkan
 find_package(Vulkan REQUIRED)
 target_include_directories(${TARGET_NAME}
@@ -68,7 +61,7 @@ target_compile_definitions(${TARGET_NAME} PUBLIC FLUGEL_USE_VULKAN=1)
 message(STATUS "Using VULKAN!")
 
 # ===================================================
-# SUBMODULES
+# DEPENDENCIES - SUBMODULES
 # ===================================================
 
 # GLFW

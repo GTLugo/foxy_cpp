@@ -1,11 +1,10 @@
 ﻿module;
-#define __SPECSTRINGS_STRICT_LEVEL 0 // workaround for annoying macro redef warnings
 
-#include <easylogging++.h>
+#include <foxy/log_macros.hpp>
 
-export module foxy;
+export module foxy.app;
 
-export INITIALIZE_EASYLOGGINGPP
+import foxy.log;
 
 import <iostream>;
 import <string>;
@@ -28,14 +27,12 @@ namespace foxy {
   export class App final {
   public:
     explicit App(const WindowProperties& props = {}) {
-      el::Configurations config{ "res/foxy_cpp/log_config.conf" };
-      el::Loggers::reconfigureAllLoggers(config);
-      el::Helpers::setThreadName("main-thread");
-      LOG(TRACE) << "hi, friends!";
+      Log::init();
+      FOXY_INFO << "Foxy startup: Kon kon kitsune! Hi, friends!";
     }
 
     ~App() {
-      LOG(TRACE) << "bye, friends!";
+      FOXY_INFO << "Foxy shutdown: Otsukon deshita! Bye bye!";
     }
 
     void run() {
@@ -46,7 +43,6 @@ namespace foxy {
     void gameLoop() {
 
     }
-
   };
 }
 

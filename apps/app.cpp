@@ -1,12 +1,11 @@
-#include "foxy/macros.hpp"
+#include "foxy/log_macros.hpp"
 
-import foxy;
-import foxy.wait;
+import foxy.app;
+import foxy.log;
 
 int main(int argCount = 0, char* args[] = nullptr) {
   foxy::App app{};
   app.run();
-  foxy::wait_on_keypress();
 }
 
 #if defined(_WIN32) and defined(NDEBUG)
