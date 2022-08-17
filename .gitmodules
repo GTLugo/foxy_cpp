@@ -10,4 +10,4 @@
 	branch = docking
 [submodule "extern/easyloggingpp"]
 	path = extern/easyloggingpp
-	url = https://github.com/amrayn/easyloggingpp.git
+	url = https://github.com/gtlugo/easyloggingpp.git
