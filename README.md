@@ -8,3 +8,4 @@
  - Boost
  - GLFW
  - GLM
+ - EasyLogging++

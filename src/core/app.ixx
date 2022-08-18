@@ -19,8 +19,8 @@ namespace foxy {
     const int width{ 800 };
     const int height{ 450 };
     //const Renderer::API renderApi{ Renderer::API::OpenGL };
-    const bool vSync{ true };
-    const bool fullScreen{ false };
+    const bool v_sync{ true };
+    const bool full_screen{ false };
     const bool borderless{ false };
   };
 
@@ -40,7 +40,7 @@ namespace foxy {
     }
 
   private:
-    void gameLoop() {
+    void game_loop() {
 
     }
   };
