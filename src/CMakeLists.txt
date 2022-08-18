@@ -58,7 +58,6 @@ target_link_libraries(${TARGET_NAME}
     )
 target_sources(${TARGET_NAME} PRIVATE ${VULKAN_FILES})
 target_compile_definitions(${TARGET_NAME} PUBLIC FLUGEL_USE_VULKAN=1)
-message(STATUS "Using VULKAN!")
 
 # ===================================================
 # DEPENDENCIES - SUBMODULES
@@ -75,7 +74,6 @@ target_link_libraries(${TARGET_NAME}
     PRIVATE
     glfw
     )
-message(STATUS "Using GLFW!")
 
 # GLM
 target_include_directories(${TARGET_NAME}
