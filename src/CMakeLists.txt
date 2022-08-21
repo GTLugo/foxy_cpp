@@ -13,14 +13,26 @@ set(SOURCE_FILES
   "icon.rc"
   "core/app.ixx"
   "util/wait.ixx"
-  "util/log.ixx")
+  "util/log.ixx" 
+  "util/util.ixx"
+)
 
 # Add source to this project's executable.
 add_library(${TARGET_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
 target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
-target_compile_options(${TARGET_NAME} PUBLIC "/experimental:module")
+target_compile_options(${TARGET_NAME} PUBLIC "/experimental:module" "/Zc:preprocessor")
+target_compile_definitions(${TARGET_NAME}
+    PRIVATE
+    _CRT_SECURE_NO_WARNINGS=1
+    WIN32_LEAN_AND_MEAN=1
+    PUBLIC
+    $<$<CONFIG:debug>:FLUGEL_ENABLE_ASSERTS=1>
+    $<$<CONFIG:relwithdebinfo>:FLUGEL_ENABLE_ASSERTS=1>
+)
 
-target_include_directories(${TARGET_NAME} PUBLIC ../include)
+target_include_directories(${TARGET_NAME} PUBLIC "../include")
+
+#target_precompile_headers(${TARGET_NAME} PRIVATE "../include/foxy/fxpch.hpp")
 
 # TODO: Add tests and install targets if needed.
 
@@ -32,12 +44,18 @@ target_include_directories(${TARGET_NAME} PUBLIC ../include)
 set(Boost_USE_STATIC_RUNTIME ON)
 find_package(Boost REQUIRED
     COMPONENTS
+    container
+    coroutine
+    system
     thread
     random
     )
 target_link_libraries(${TARGET_NAME}
     PUBLIC
     Boost::headers
+    Boost::container
+    Boost::coroutine
+    Boost::system
     Boost::thread
     Boost::random
     )
@@ -74,8 +92,9 @@ target_link_libraries(${TARGET_NAME}
     PRIVATE
     glfw
     )
-
+    
 # GLM
+target_compile_definitions(${TARGET_NAME} PUBLIC GLM_FORCE_RADIANS=1)
 target_include_directories(${TARGET_NAME}
     PUBLIC
     "../extern/glm"

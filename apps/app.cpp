@@ -1,4 +1,4 @@
-#include "foxy/log_macros.hpp"
+#include "foxy/foxy_includes.hpp"
 
 import foxy.app;
 import foxy.log;

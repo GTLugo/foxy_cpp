@@ -1,6 +1,6 @@
 ﻿module;
 
-#include <foxy/log_macros.hpp>
+#include "foxy/foxy_includes.hpp"
 
 export module foxy.app;
 
@@ -39,6 +39,9 @@ namespace foxy {
 
     }
 
+    void close() {
+
+    }
   private:
     void game_loop() {
 
