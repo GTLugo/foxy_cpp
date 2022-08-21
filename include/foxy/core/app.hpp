@@ -1,20 +1,21 @@
-﻿module;
+//
+// Created by galex on 8/21/2022.
+//
 
-#include "foxy/foxy_includes.hpp"
+#pragma once
 
-export module foxy.app;
+#include "foxy/util/log.hpp"
+#include "foxy/util/util.hpp"
 
-import foxy.log;
-
-import <iostream>;
-import <string>;
+#include <iostream>
+#include <string>
 
 namespace foxy {
-  export void greet() {
+  void greet() {
     std::cout << "hi, friends!\n";
   }
 
-  export struct WindowProperties {
+  struct WindowProperties {
     const std::string title{ "FOXY FRAMEWORK" };
     const int width{ 800 };
     const int height{ 450 };
@@ -24,7 +25,7 @@ namespace foxy {
     const bool borderless{ false };
   };
 
-  export class App final {
+  class App final {
   public:
     explicit App(const WindowProperties& props = {}) {
       Log::init();
@@ -48,5 +49,3 @@ namespace foxy {
     }
   };
 }
-
-// if you are reading this, know that Shirakami Fubuki is STILL the best fox waifu friend

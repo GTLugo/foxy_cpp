@@ -1,7 +1,4 @@
-#include "foxy/foxy_includes.hpp"
-
-import foxy.app;
-import foxy.log;
+#include "foxy/core/app.hpp"
 
 int main(int argCount = 0, char* args[] = nullptr) {
   foxy::App app{};

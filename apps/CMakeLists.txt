@@ -9,7 +9,7 @@ set(SOURCE_FILES "app.cpp")
 # Add source to this project's executable.
 add_executable(${TARGET_NAME} ${SOURCE_FILES})
 target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
-target_compile_options(${TARGET_NAME} PUBLIC "/experimental:module")
+#target_compile_options(${TARGET_NAME} PUBLIC "/experimental:module")
 
 target_link_libraries(${TARGET_NAME} PRIVATE foxy)
 

@@ -1,22 +1,25 @@
-module;
+//
+// Created by galex on 8/21/2022.
+//
+
+#pragma once
+
 #ifdef _WIN32
   #include <conio.h>
 #else
-  #include <cstdio>
+#include <cstdio>
   #include <termios.h>
   #include <unistd.h>
   #include <fcntl.h>
 #endif
 
-export module foxy.wait;
-
-import <iostream>;
+#include <iostream>
 
 namespace foxy {
-  export bool poll_keyboard() {
-  #ifdef _WIN32
+  bool poll_keyboard() {
+    #ifdef _WIN32
     return _kbhit();
-  #else
+    #else
     struct termios oldt, newt;
     int ch;
     int oldf;
@@ -39,10 +42,10 @@ namespace foxy {
     }
 
     return 0;
-  #endif
+    #endif
   }
 
-  export void wait_on_keypress() {
+  void wait_on_keypress() {
     std::cout << "Press any key to continue...";
     while (!poll_keyboard());
     std::cout << '\n';

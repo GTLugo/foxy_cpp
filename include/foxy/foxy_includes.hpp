@@ -1,16 +1,12 @@
 #pragma once
 
-#ifndef __SPECSTRINGS_STRICT_LEVEL
-#define __SPECSTRINGS_STRICT_LEVEL 0
-#endif
-
 // use #define USE_ASIO in cpp files
 #ifdef _WIN32
-  // fix "WinSock.h has already been included" error
+// fix "WinSock.h has already been included" error
 #ifdef USE_ASIO
-  // Set the proper SDK version before including boost/Asio
+// Set the proper SDK version before including boost/Asio
 #include <SDKDDKVer.h>
-// Note boost/ASIO includes Windows.h. 
+// Note boost/ASIO includes Windows.h.
 #include <boost/asio.hpp>
 #else //  USE_ASIO
 #include <Windows.h>
@@ -19,7 +15,7 @@
 #ifdef USE_ASIO
 #include <boost/asio.hpp>
 #endif // USE_ASIO
-#endif // USE_ASIO
+#endif // _WIN32
 
 //#define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
