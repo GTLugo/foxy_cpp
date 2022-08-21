@@ -1,8 +1,10 @@
 @echo off
 SETLOCAL
 @REM echo Working directory: %cd%
-CALL :compile_shader simple_shader, vertex, res/foxy/shaders, res/foxy/shaders_out
-CALL :compile_shader simple_shader, fragment, res/foxy/shaders, res/foxy/shaders_out
+SET file-path=%1
+SET file-name=%2
+SET shader-type=%3
+CALL :compile_shader %file-name%, %shader-type%, %file-path%, %file-path%_out
 EXIT /B %ERRORLEVEL%
 
 :compile_shader
