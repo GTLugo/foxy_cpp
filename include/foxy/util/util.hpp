@@ -4,9 +4,6 @@
 
 #pragma once
 
-#include <memory>
-#include <cstdint>
-
 namespace foxy {
   using byte = std::uint8_t;
   using i8 = std::int8_t;

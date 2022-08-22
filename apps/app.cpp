@@ -1,8 +1,15 @@
-#include "foxy/core/app.hpp"
+#include "foxy/foxy.hpp"
 
 int main(int argCount = 0, char* args[] = nullptr) {
-  foxy::App app{};
-  app.run();
+  try {
+    foxy::App app{};
+    app.add_global_data()
+        .add_step_before()
+        .add_system_to_step()
+        .run();
+  } catch (const std::exception& e) {
+    std::cerr << e.what();
+  }
 }
 
 #if defined(_WIN32) and defined(NDEBUG)

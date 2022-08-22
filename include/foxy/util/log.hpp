@@ -4,9 +4,12 @@
 
 #pragma once
 
-#include "foxy/log_macros.hpp"
+#include "easylogging++.h"
 
-INITIALIZE_EASYLOGGINGPP
+#ifndef EASYPP_INITIALIZED
+  INITIALIZE_EASYLOGGINGPP
+  #define EASYPP_INITIALIZED
+#endif
 
 #include <filesystem>
 
@@ -21,3 +24,10 @@ namespace foxy {
     }
   };
 }
+
+#define FOXY_TRACE LOG(TRACE)
+#define FOXY_DEBUG LOG(DEBUG)
+#define FOXY_INFO  LOG(INFO)
+#define FOXY_WARN  LOG(WARNING)
+#define FOXY_ERROR LOG(ERROR)
+#define FOXY_FATAL LOG(FATAL)

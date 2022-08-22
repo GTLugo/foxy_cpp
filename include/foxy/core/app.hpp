@@ -4,12 +4,6 @@
 
 #pragma once
 
-#include "foxy/util/log.hpp"
-#include "foxy/util/util.hpp"
-
-#include <iostream>
-#include <string>
-
 namespace foxy {
   void greet() {
     std::cout << "hi, friends!\n";
@@ -27,25 +21,17 @@ namespace foxy {
 
   class App final {
   public:
-    explicit App(const WindowProperties& props = {}) {
-      Log::init();
-      FOXY_INFO << "Foxy startup: Kon kon kitsune! Hi, friends!";
-    }
+    explicit App(const WindowProperties& props = {});
+    ~App();
 
-    ~App() {
-      FOXY_INFO << "Foxy shutdown: Otsukon deshita! Bye bye!";
-    }
+    void run();
+    void close();
 
-    void run() {
+    App& add_global_data();
+    App& add_step_before();
+    App& add_system_to_step();
 
-    }
-
-    void close() {
-
-    }
   private:
-    void game_loop() {
-
-    }
+    void game_loop();
   };
 }

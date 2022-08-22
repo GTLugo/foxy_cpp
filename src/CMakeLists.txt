@@ -5,19 +5,18 @@ cmake_minimum_required(VERSION 3.23)
 set(TARGET_NAME "foxy")
 
 set(HEADER_FILES
-    ../include/foxy/macros.hpp
-    ../include/foxy/log_macros.hpp
+    #../include/foxy/foxy.hpp
     ../include/foxy/core/app.hpp
     ../include/foxy/util/log.hpp
     ../include/foxy/util/util.hpp
-    ../include/foxy/util/wait.hpp)
+    ../include/foxy/util/wait.hpp
+    )
 
 set(SOURCE_FILES
-    core/app.cpp
-    ../include/foxy/core/app.hpp)
+    core/app.cpp)
 
 # Add source to this project's executable.
-add_library(${TARGET_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
+add_library(${TARGET_NAME} STATIC ${SOURCE_FILES})
 target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
 #target_compile_options(${TARGET_NAME} PUBLIC "/experimental:module" "/Zc:preprocessor")
 target_compile_definitions(${TARGET_NAME}
@@ -31,7 +30,7 @@ target_compile_definitions(${TARGET_NAME}
 
 target_include_directories(${TARGET_NAME} PUBLIC "../include")
 
-target_precompile_headers(${TARGET_NAME} PUBLIC "../include/foxy/fxpch.hpp")
+target_precompile_headers(${TARGET_NAME} PRIVATE "../include/foxy/internal/fxpch.hpp")
 
 # TODO: Add tests and install targets if needed.
 
@@ -109,7 +108,7 @@ target_include_directories(${TARGET_NAME}
     "../extern/easyloggingpp/src"
     )
 target_sources(${TARGET_NAME}
-    PUBLIC
+    PRIVATE
     "../extern/easyloggingpp/src/easylogging++.cc"
     )
 
@@ -119,7 +118,7 @@ target_include_directories(${TARGET_NAME}
     "../extern/imgui-docking"
     )
 target_sources(${TARGET_NAME}
-    PUBLIC
+    PRIVATE
     "../extern/imgui-docking/imgui_demo.cpp"
     "../extern/imgui-docking/imgui_draw.cpp"
     "../extern/imgui-docking/imgui_tables.cpp"
