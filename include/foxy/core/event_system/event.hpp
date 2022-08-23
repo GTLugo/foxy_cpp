@@ -1,5 +1,6 @@
 //
 // Created by galex on 8/23/2022.
+// Based entirely upon GLFWPP's event design, which is based upon GLFW's event design
 //
 
 #pragma once

@@ -10,7 +10,6 @@
 
 namespace foxy {
   class Window final: MoveOnly {
-    using CloseEvent = Event<>;
   public:
     struct Properties {
       const std::string title{ "FOXY FRAMEWORK" };
@@ -54,7 +53,7 @@ namespace foxy {
       bool running{true};
 
       // Window events
-      CloseEvent close_event;
+      Event<> close_event;
       // Input events
       Event<> key_event;
       Event<> modifier_event;

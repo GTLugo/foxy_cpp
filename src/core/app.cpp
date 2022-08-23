@@ -9,6 +9,8 @@ namespace foxy {
     FOXY_ASSERT(!instantiated_) << "Attempted second instantiation of foxy::App";
     instantiated_ = true;
 
+    std::clog << greeting_ << '\n';
+
     Log::init();
     FOXY_INFO << "Foxy startup: Kon kon kitsune! Hi, friends!";
 
@@ -22,10 +24,6 @@ namespace foxy {
 
   void App::run() {
     game_loop();
-  }
-
-  void App::close() {
-
   }
 
   App& App::add_global_data() {
