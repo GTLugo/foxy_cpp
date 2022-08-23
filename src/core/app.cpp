@@ -22,10 +22,6 @@ namespace foxy {
     FOXY_INFO << "Foxy shutdown: Otsukon deshita! Bye bye!";
   }
 
-  void App::run() {
-    game_loop();
-  }
-
   App& App::add_global_data() {
     return *this;
   }
@@ -36,6 +32,10 @@ namespace foxy {
 
   App& App::add_system_to_step() {
     return *this;
+  }
+
+  void App::run() {
+    game_loop();
   }
 
   void App::game_loop() {

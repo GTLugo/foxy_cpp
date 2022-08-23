@@ -13,22 +13,24 @@ namespace foxy {
     explicit App(const Window::Properties& properties = {});
     ~App();
 
-    void run();
-
     App& add_global_data();
     App& add_step_before();
     App& add_system_to_step();
 
+    void run();
+
   private:
     static inline bool instantiated_{ false };
     bool running_{ true };
-    const std::string greeting_{R"( ______ ______   ___     __
-|  ____/ __ \ \ / \ \   / /
-| |__ | |  | \ V / \ \_/ /
-|  __|| |  | |> <   \   /
-| |   | |__| / . \   | |
-|_|    \____/_/ \_\  |_|
-                           )"};
+    const std::string greeting_{R"([]=============================[]
+||  ______ ______   ___     __ ||
+|| |  ____/ __ \ \ / \ \   / / ||
+|| | |__ | |  | \ V / \ \_/ /  ||
+|| |  __|| |  | |> <   \   /   ||
+|| | |   | |__| / . \   | |    ||
+|| |_|    \____/_/ \_\  |_|    ||
+||                             ||
+[]=============================[])"};
 
     unique<Window> window_{ nullptr };
 
