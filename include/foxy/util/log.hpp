@@ -6,11 +6,6 @@
 
 #include "easylogging++.h"
 
-#ifndef EASYPP_INITIALIZED
-  INITIALIZE_EASYLOGGINGPP
-  #define EASYPP_INITIALIZED
-#endif
-
 #include <filesystem>
 
 namespace foxy {

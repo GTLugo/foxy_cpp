@@ -4,24 +4,13 @@
 
 #pragma once
 
+#include "window.hpp"
+#include "foxy/core/event_system/event.hpp"
+
 namespace foxy {
-  void greet() {
-    std::cout << "hi, friends!\n";
-  }
-
-  struct WindowProperties {
-    const std::string title{ "FOXY FRAMEWORK" };
-    const int width{ 800 };
-    const int height{ 450 };
-    //const Renderer::API renderApi{ Renderer::API::OpenGL };
-    const bool v_sync{ true };
-    const bool full_screen{ false };
-    const bool borderless{ false };
-  };
-
-  class App final {
+  class App final: NoCopyOrMove {
   public:
-    explicit App(const WindowProperties& props = {});
+    explicit App(const Window::Properties& properties = {});
     ~App();
 
     void run();
@@ -32,6 +21,24 @@ namespace foxy {
     App& add_system_to_step();
 
   private:
+    static inline bool instantiated_{ false };
+    bool running_{ true };
+
+    unique<Window> window_{ nullptr };
+
+    // Main Thread events
+    Event<> main_awake_event_;
+    Event<> main_start_event_;
+    Event<> main_poll_event_;
+    Event<> main_update_event_;
+    Event<> main_stop_event_;
+    // Game Thread events
+    Event<> game_awake_event_;
+    Event<> game_start_event_;
+    Event<> game_tick_event_;
+    Event<> game_update_event_;
+    Event<> game_stop_event_;
+
     void game_loop();
   };
 }

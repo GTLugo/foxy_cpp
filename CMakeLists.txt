@@ -17,8 +17,10 @@ endif()
 # ===================================================
 # SUBMODULES
 # ===================================================
-# GLFW
-add_subdirectory(extern/glfw)
+# GLFWPP
+add_subdirectory(extern/glfwpp)
+## GLFW
+#add_subdirectory(extern/glfw)
 # GLM
 add_subdirectory(extern/glm)
 # EasyLogging++

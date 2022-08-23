@@ -4,16 +4,12 @@
 cmake_minimum_required(VERSION 3.23)
 set(TARGET_NAME "foxy")
 
-set(HEADER_FILES
-    #../include/foxy/foxy.hpp
-    ../include/foxy/core/app.hpp
-    ../include/foxy/util/log.hpp
-    ../include/foxy/util/util.hpp
-    ../include/foxy/util/wait.hpp
-    )
-
 set(SOURCE_FILES
-    core/app.cpp)
+    util/log.cpp
+    core/app.cpp
+    core/window.cpp
+    core/event_system/event.cpp
+    )
 
 # Add source to this project's executable.
 add_library(${TARGET_NAME} STATIC ${SOURCE_FILES})
@@ -24,13 +20,13 @@ target_compile_definitions(${TARGET_NAME}
     _CRT_SECURE_NO_WARNINGS=1
     WIN32_LEAN_AND_MEAN=1
     PUBLIC
-    $<$<CONFIG:debug>:FLUGEL_ENABLE_ASSERTS=1>
-    $<$<CONFIG:relwithdebinfo>:FLUGEL_ENABLE_ASSERTS=1>
+    $<$<CONFIG:debug>:FOXY_ENABLE_ASSERTS=1>
+    $<$<CONFIG:relwithdebinfo>:FOXY_ENABLE_ASSERTS=1>
 )
 
 target_include_directories(${TARGET_NAME} PUBLIC "../include")
 
-target_precompile_headers(${TARGET_NAME} PRIVATE "../include/foxy/internal/fxpch.hpp")
+target_precompile_headers(${TARGET_NAME} PUBLIC "../include/foxy/internal/fxpch.hpp")
 
 # TODO: Add tests and install targets if needed.
 
@@ -73,24 +69,37 @@ target_link_libraries(${TARGET_NAME}
     ${Vulkan_LIBRARIES}
     )
 target_sources(${TARGET_NAME} PRIVATE ${VULKAN_FILES})
-target_compile_definitions(${TARGET_NAME} PUBLIC FLUGEL_USE_VULKAN=1)
+target_compile_definitions(${TARGET_NAME} PUBLIC FOXY_USE_VULKAN=1)
 
 # ===================================================
 # DEPENDENCIES - SUBMODULES
 # ===================================================
 
-# GLFW
+## GLFW
+#target_sources(${TARGET_NAME} PRIVATE ${GLFW_FILES})
+#target_compile_definitions(${TARGET_NAME} PUBLIC FOXY_USE_GLFW=1 GLFW_INCLUDE_NONE=1)
+#target_include_directories(${TARGET_NAME}
+#    PUBLIC
+#    "../extern/glfw/include"
+#    )
+#target_link_libraries(${TARGET_NAME}
+#    PUBLIC
+#    glfw
+#    )
+
+# GLFWPP
 target_sources(${TARGET_NAME} PRIVATE ${GLFW_FILES})
-target_compile_definitions(${TARGET_NAME} PUBLIC FLUGEL_USE_GLFW=1 GLFW_INCLUDE_NONE=1)
+set(GLFWPP_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # disable building GLFWPP examples
+target_compile_definitions(${TARGET_NAME} PUBLIC FOXY_USE_GLFW=1 GLFW_INCLUDE_NONE=1)
 target_include_directories(${TARGET_NAME}
-    PRIVATE
-    "../extern/glfw/include"
+    PUBLIC
+    "../extern/glfwpp/include"
     )
 target_link_libraries(${TARGET_NAME}
-    PRIVATE
-    glfw
+    PUBLIC
+    GLFWPP
     )
-    
+
 # GLM
 target_compile_definitions(${TARGET_NAME} PUBLIC GLM_FORCE_RADIANS=1)
 target_include_directories(${TARGET_NAME}

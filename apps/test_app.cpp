@@ -1,12 +1,13 @@
 #include "foxy/foxy.hpp"
 
-int main(int argCount = 0, char* args[] = nullptr) {
+int main(int, char**) {
   try {
-    foxy::App app{};
-    app.add_global_data()
-        .add_step_before()
-        .add_system_to_step()
-        .run();
+    foxy::App{foxy::Window::Properties{
+      .title = "Foxy App"
+    }}.add_global_data()
+      .add_step_before()
+      .add_system_to_step()
+      .run();
   } catch (const std::exception& e) {
     std::cerr << e.what();
   }

@@ -11,3 +11,6 @@
 [submodule "extern/easyloggingpp"]
 	path = extern/easyloggingpp
 	url = https://github.com/gtlugo/easyloggingpp.git
+[submodule "extern/glfwpp"]
+	path = extern/glfwpp
+	url = https://github.com/janekb04/glfwpp.git
