@@ -9,7 +9,17 @@ namespace foxy {
     FOXY_ASSERT(!instantiated_) << "Attempted second instantiation of foxy::App";
     instantiated_ = true;
 
-    std::clog << greeting_ << '\n';
+    const std::string greeting{R"([]=============================[]
+||  ______ ______   ___     __ ||
+|| |  ____/ __ \ \ / \ \   / / ||
+|| | |__ | |  | \ V / \ \_/ /  ||
+|| |  __|| |  | |> <   \   /   ||
+|| | |   | |__| / . \   | |    ||
+|| |_|    \____/_/ \_\  |_|    ||
+||                             ||
+[]=============================[])"};
+
+    std::clog << greeting << '\n';
 
     Log::init();
     FOXY_INFO << "Foxy startup: Kon kon kitsune! Hi, friends!";

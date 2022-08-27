@@ -1,13 +1,9 @@
 #include "foxy/foxy.hpp"
 
 int main(int, char**) {
-  try {
-    foxy::App{foxy::Window::Properties{
+  foxy::App{foxy::Window::Properties{
       .title = "Foxy App"
-    }}.run();
-  } catch (const std::exception& e) {
-    std::cerr << e.what();
-  }
+  }}.run();
 }
 
 #if defined(_WIN32) and defined(NDEBUG)

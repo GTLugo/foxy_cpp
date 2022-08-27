@@ -22,15 +22,6 @@ namespace foxy {
   private:
     static inline bool instantiated_{ false };
     bool running_{ true };
-    const std::string greeting_{R"([]=============================[]
-||  ______ ______   ___     __ ||
-|| |  ____/ __ \ \ / \ \   / / ||
-|| | |__ | |  | \ V / \ \_/ /  ||
-|| |  __|| |  | |> <   \   /   ||
-|| | |   | |__| / . \   | |    ||
-|| |_|    \____/_/ \_\  |_|    ||
-||                             ||
-[]=============================[])"};
 
     unique<Window> window_{ nullptr };
 

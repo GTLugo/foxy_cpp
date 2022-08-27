@@ -13,7 +13,6 @@ namespace foxy {
     instantiated_ = true;
     glfwSetErrorCallback(glfwErrorCallback);
 
-    i32 major, minor, revision;
     auto version = glfw::getRuntimeVersion();
     FOXY_INFO << "GLFW Version " << version.major << "." << version.minor << "." << version.revision;
 

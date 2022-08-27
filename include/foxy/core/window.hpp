@@ -79,7 +79,7 @@ namespace foxy {
     static inline bool instantiated_{ false };
 
     State state_{};
-    glfw::GlfwLibrary glfw_library_;
+    [[maybe_unused]] glfw::GlfwLibrary glfw_library_;
     glfw::Window glfw_window_;
     const glfw::VideoMode video_mode_;
 

@@ -36,7 +36,7 @@
 #ifdef FOXY_ENABLE_ASSERTS
   #define FOXY_ASSERT(x) if(!(x)) FOXY_FATAL << "FAILED ASSERT: "
 #else
-  #define FOXY_ASSERT(x, ...)
+  #define FOXY_ASSERT(x) if(false) std::clog
 #endif
 
 #define BIT(x) (1 << x)
