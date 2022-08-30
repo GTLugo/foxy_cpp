@@ -4,13 +4,14 @@
 cmake_minimum_required(VERSION 3.23)
 set(TARGET_NAME "test_app")
 
-set(SOURCE_FILES "app.cpp")
+set(SOURCE_FILES "test_app.ixx")
 
 # Add source to this project's executable.
 add_executable(${TARGET_NAME} ${SOURCE_FILES})
 target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
-target_compile_options(${TARGET_NAME} PUBLIC "/experimental:module")
+target_compile_options(${TARGET_NAME} PUBLIC "/bigobj" "/experimental:module" )
 
+target_include_directories(${TARGET_NAME} PRIVATE "../include" "../src")
 target_link_libraries(${TARGET_NAME} PRIVATE foxy)
 
 # TODO: Add tests and install targets if needed.
