@@ -1,27 +1,24 @@
 module;
 
-#include "foxy/log_macros.hpp"
+#include "foxy/internal/foxy_includes.hpp"
+#include "easylogging++.h"
 
-export module foxy.log;
+#ifdef __INTELLISENSE__
+#include "util/util.ixx"
+#endif
+
+export module foxy_log;
+
+#ifndef __INTELLISENSE__
+export import foxy_util;
+#endif
 
 export INITIALIZE_EASYLOGGINGPP
 
-import <memory>;
-import <filesystem>;
-
-namespace foxy {
-  export class Log {
+export namespace foxy {
+  class Log {
   public:
-    static inline std::unique_ptr<Log> instance{ nullptr };
-
     static void init() {
-      if (Log::instance == nullptr) {
-        instance = std::unique_ptr<Log>{ new Log{} };
-      }
-    }
-
-  private:
-    Log() {
       std::filesystem::create_directories("./tmp/logs");
       el::Configurations conf("./res/foxy/log_config.conf");
       el::Loggers::reconfigureAllLoggers(conf);
