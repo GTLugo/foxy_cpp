@@ -1,6 +1,6 @@
 #pragma once
 
-#include "foxy/util/macros.hpp"
+#include "foxy/macros.hpp"
 
 /*----------------------
   VENDOR LIBRARIES

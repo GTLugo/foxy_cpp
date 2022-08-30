@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "foxy/util/log_macros.hpp"
+#include "foxy/log_macros.hpp"
 
 #ifndef FOXY_DEBUG_MODE
   #define FOXY_DEBUG_BREAK

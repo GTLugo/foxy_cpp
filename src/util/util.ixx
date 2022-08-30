@@ -1,6 +1,6 @@
 module;
 
-#include "foxy/util/log_macros.hpp"
+#include "foxy/log_macros.hpp"
 
 #include "foxy/util/glm_types.hpp"
 #include "foxy/util/boost_types.hpp"
