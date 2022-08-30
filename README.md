@@ -9,3 +9,5 @@
  - GLFWPP
  - GLM
  - EasyLogging++
+ - Vulkan
+ - Boost
