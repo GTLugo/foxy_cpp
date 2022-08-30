@@ -70,15 +70,15 @@ namespace foxy {
       FOXY_INFO << "Foxy shutdown: Otsukon deshita! Bye bye!";
     }
 
-    App& add_global_data() {
+    auto add_global_data() -> App& {
       return *this;
     }
 
-    App& add_step_before() {
+    auto add_step_before() -> App& {
       return *this;
     }
 
-    App& add_system_to_step() {
+    auto add_system_to_step() -> App& {
       return *this;
     }
 

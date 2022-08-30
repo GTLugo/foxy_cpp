@@ -1,16 +1,13 @@
 module;
 
 #include "foxy/internal/foxy_includes.hpp"
-
-#define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
-#define VULKAN_HPP_NO_SPACESHIP_OPERATOR 1 // this is a temp fix becasue vk spaceship op is brokey
-#include <vulkan/vulkan_raii.hpp>
+#include "foxy/internal/vulkan.hpp"
 
 #ifdef __INTELLISENSE__
-#include "../util/util.ixx"
+#include "util/util.ixx"
 #endif
 
-export module foxy_context;
+export module foxy_vulkan_context;
 
 #ifndef __INTELLISENSE__
 export import foxy_util;

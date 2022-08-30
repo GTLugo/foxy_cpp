@@ -20,7 +20,10 @@ export auto main(i32 argc, i8** argv) -> i32 {
     foxy::AppCreateInfo{
       .title = "Foxy App"
     }
-  }.run();
+  }.add_system_to_step()
+      .add_global_data()
+      .add_step_before()
+      .run();
 }
 
 export WINMAIN_DEFERRED_TO_FOXY_MAIN

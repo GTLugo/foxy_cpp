@@ -10,7 +10,7 @@ module;
 #ifdef __INTELLISENSE__
 #include "util/util.ixx"
 #include "core/event_system/event.ixx"
-#include "api/context.ixx"
+#include "api/vulkan/renderer.ixx"
 #endif
 
 export module foxy_window;
@@ -18,7 +18,7 @@ export module foxy_window;
 #ifndef __INTELLISENSE__
 export import foxy_util;
 import foxy_events;
-import foxy_context;
+import foxy_vulkan_renderer;
 #endif
 
 namespace foxy {
@@ -42,8 +42,7 @@ namespace foxy {
     Window(const WindowCreateInfo& properties)
       : state_{ properties },
         glfw_library_{ glfw::init() },
-        video_mode_{ glfw::getPrimaryMonitor().getVideoMode() },
-        context_{} {
+        video_mode_{ glfw::getPrimaryMonitor().getVideoMode() } {
       FOXY_ASSERT(!instantiated_) << "Attempted second instantiation of foxy::App";
       instantiated_ = true;
       glfwSetErrorCallback(glfw_error_callback);
@@ -67,6 +66,8 @@ namespace foxy {
       set_vsync(properties.vsync);
       set_fullscreen(properties.fullscreen);
       set_callbacks();
+
+      renderer_ = make_unique<Renderer>();
 
       FOXY_TRACE << "Created Window";
     }
@@ -154,14 +155,17 @@ namespace foxy {
 
     static inline bool instantiated_{ false };
 
-    State state_;
-    glfw::GlfwLibrary glfw_library_;
+    // GLFW
     unique<glfw::Window> glfw_window_;
+    glfw::GlfwLibrary glfw_library_;
     glfw::VideoMode video_mode_;
-    Context context_;
+
+    // Foxy
+    State state_;
+    unique<Renderer> renderer_;
 
     void set_callbacks() {
-    // Foxy
+      // Foxy
       state_.close_event.set_callback(FOXY_LAMBDA(close));
 
       // GLFW

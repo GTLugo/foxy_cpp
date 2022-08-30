@@ -11,7 +11,9 @@ set(SOURCE_FILES
     "util/log.ixx"
     "core/window.ixx"
     "core/event_system/event.ixx"
-    "api/context.ixx"
+    "api/vulkan/context.ixx"
+    "api/vulkan/swapchain.ixx"
+    "api/vulkan/renderer.ixx"
 )
 
 # Add source to this project's executable.
