@@ -18,9 +18,8 @@ endif()
 # SUBMODULES
 # ===================================================
 # GLFWPP
+set(GLFWPP_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # disable building GLFWPP examples
 add_subdirectory(extern/glfwpp)
-## GLFW
-#add_subdirectory(extern/glfw)
 # GLM
 add_subdirectory(extern/glm)
 # EasyLogging++

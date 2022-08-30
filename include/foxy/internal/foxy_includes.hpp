@@ -1,7 +1,6 @@
 #pragma once
 
-#include "foxy/util/util.hpp"
-#include "foxy/util/log.hpp"
+#include "foxy/util/macros.hpp"
 
 /*----------------------
   VENDOR LIBRARIES
@@ -42,6 +41,7 @@
 #include <iomanip>
 #include <filesystem>
 // Utilities
+#include <compare>
 #include <cstdlib>
 #include <algorithm>
 #include <numeric>

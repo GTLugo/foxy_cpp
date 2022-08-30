@@ -12,5 +12,4 @@
 /*----------------------
   FOXY LIBRARY
 ----------------------*/
-#include "foxy/core/app.hpp"
-#include "foxy/util/log.hpp"
+#include "foxy/util/macros.hpp"

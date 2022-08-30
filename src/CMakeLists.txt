@@ -5,28 +5,31 @@ cmake_minimum_required(VERSION 3.23)
 set(TARGET_NAME "foxy")
 
 set(SOURCE_FILES
-    util/log.cpp
-    core/app.cpp
-    core/window.cpp
-    core/event_system/event.cpp
-    )
+    "icon.rc"
+    "app.ixx"
+    "util/util.ixx"
+    "util/log.ixx"
+    "core/window.ixx"
+    "core/event_system/event.ixx"
+    "api/context.ixx"
+)
 
 # Add source to this project's executable.
 add_library(${TARGET_NAME} STATIC ${SOURCE_FILES})
 target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
-#target_compile_options(${TARGET_NAME} PUBLIC "/experimental:module" "/Zc:preprocessor")
+target_compile_options(${TARGET_NAME} PUBLIC "/bigobj" "/experimental:module" )
 target_compile_definitions(${TARGET_NAME}
     PRIVATE
     _CRT_SECURE_NO_WARNINGS=1
     WIN32_LEAN_AND_MEAN=1
     PUBLIC
-    $<$<CONFIG:debug>:FOXY_ENABLE_ASSERTS=1>
-    $<$<CONFIG:relwithdebinfo>:FOXY_ENABLE_ASSERTS=1>
+    $<$<CONFIG:debug>:FOXY_ENABLE_ASSERTS=1;FOXY_DEBUG_MODE=1>
+    $<$<CONFIG:relwithdebinfo>:FOXY_ENABLE_ASSERTS=1;FOXY_DEBUG_MODE=1>
 )
 
-target_include_directories(${TARGET_NAME} PUBLIC "../include")
+target_include_directories(${TARGET_NAME} PUBLIC "../include" ".")
 
-target_precompile_headers(${TARGET_NAME} PUBLIC "../include/foxy/internal/fxpch.hpp")
+#target_precompile_headers(${TARGET_NAME} PUBLIC "../include/foxy/internal/fxpch.hpp")
 
 # TODO: Add tests and install targets if needed.
 
@@ -61,11 +64,11 @@ target_compile_definitions(${TARGET_NAME}
 # Vulkan
 find_package(Vulkan REQUIRED)
 target_include_directories(${TARGET_NAME}
-    PRIVATE
+    PUBLIC
     ${Vulkan_INCLUDE_DIRS}
     )
 target_link_libraries(${TARGET_NAME}
-    PRIVATE
+    PUBLIC
     ${Vulkan_LIBRARIES}
     )
 target_sources(${TARGET_NAME} PRIVATE ${VULKAN_FILES})
@@ -75,21 +78,8 @@ target_compile_definitions(${TARGET_NAME} PUBLIC FOXY_USE_VULKAN=1)
 # DEPENDENCIES - SUBMODULES
 # ===================================================
 
-## GLFW
-#target_sources(${TARGET_NAME} PRIVATE ${GLFW_FILES})
-#target_compile_definitions(${TARGET_NAME} PUBLIC FOXY_USE_GLFW=1 GLFW_INCLUDE_NONE=1)
-#target_include_directories(${TARGET_NAME}
-#    PUBLIC
-#    "../extern/glfw/include"
-#    )
-#target_link_libraries(${TARGET_NAME}
-#    PUBLIC
-#    glfw
-#    )
-
 # GLFWPP
 target_sources(${TARGET_NAME} PRIVATE ${GLFW_FILES})
-set(GLFWPP_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # disable building GLFWPP examples
 target_compile_definitions(${TARGET_NAME} PUBLIC FOXY_USE_GLFW=1 GLFW_INCLUDE_NONE=1)
 target_include_directories(${TARGET_NAME}
     PUBLIC
@@ -121,20 +111,20 @@ target_sources(${TARGET_NAME}
     "../extern/easyloggingpp/src/easylogging++.cc"
     )
 
-# ImGUI
-target_include_directories(${TARGET_NAME}
-    PUBLIC
-    "../extern/imgui-docking"
-    )
-target_sources(${TARGET_NAME}
-    PRIVATE
-    "../extern/imgui-docking/imgui_demo.cpp"
-    "../extern/imgui-docking/imgui_draw.cpp"
-    "../extern/imgui-docking/imgui_tables.cpp"
-    "../extern/imgui-docking/imgui_widgets.cpp"
-    "../extern/imgui-docking/imgui.cpp"
-    )
-# IMGUI RENDER
-target_sources(${TARGET_NAME} PRIVATE "../extern/imgui-docking/backends/imgui_impl_vulkan.cpp")
-# IMGUI WINDOW
-target_sources(${TARGET_NAME} PRIVATE "../extern/imgui-docking/backends/imgui_impl_glfw.cpp")
+## ImGUI
+#target_include_directories(${TARGET_NAME}
+#    PRIVATE
+#    "../extern/imgui"
+#    )
+#target_sources(${TARGET_NAME}
+#    PRIVATE
+#    "../extern/imgui/imgui_demo.cpp"
+#    "../extern/imgui/imgui_draw.cpp"
+#    "../extern/imgui/imgui_tables.cpp"
+#    "../extern/imgui/imgui_widgets.cpp"
+#    "../extern/imgui/imgui.cpp"
+#    )
+## IMGUI RENDER
+#target_sources(${TARGET_NAME} PRIVATE "../extern/imgui/backends/imgui_impl_vulkan.cpp")
+## IMGUI WINDOW
+#target_sources(${TARGET_NAME} PRIVATE "../extern/imgui/backends/imgui_impl_glfw.cpp")
