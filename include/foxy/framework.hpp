@@ -13,3 +13,4 @@
   FOXY LIBRARY
 ----------------------*/
 #include "foxy/macros.hpp"
+#include "foxy/app.hpp"

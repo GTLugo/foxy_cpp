@@ -1,21 +1,9 @@
-module;
+#pragma once
 
-#include "foxy/internal/foxy_includes.hpp"
+#include <filesystem>
 #include "easylogging++.h"
 
-#ifdef __INTELLISENSE__
-#include "util/util.ixx"
-#endif
-
-export module foxy_log;
-
-#ifndef __INTELLISENSE__
-export import foxy_util;
-#endif
-
-export INITIALIZE_EASYLOGGINGPP
-
-export namespace foxy {
+namespace foxy {
   class Log {
   public:
     static void init() {
