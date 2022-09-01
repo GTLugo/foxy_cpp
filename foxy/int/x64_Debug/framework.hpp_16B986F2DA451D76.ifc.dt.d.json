@@ -1,0 +1,12 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "c:\\users\\galex\\onedrive\\dev\\testing\\foxy\\foxy\\include\\foxy\\framework.hpp",
+        "ProvidedModule": "",
+        "Includes": [
+            "c:\\users\\galex\\onedrive\\dev\\testing\\foxy\\foxy\\include\\foxy\\internal\\macros.hpp"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

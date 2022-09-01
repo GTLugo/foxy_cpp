@@ -1,0 +1,11 @@
+{
+    "Version": "1.1",
+    "Data": {
+        "Source": "c:\\users\\galex\\onedrive\\dev\\testing\\foxy\\examples\\example_app\\example_app.cpp",
+        "ProvidedModule": "",
+        "ImportedModules": [
+            "foxy.app"
+        ],
+        "ImportedHeaderUnits": []
+    }
+}

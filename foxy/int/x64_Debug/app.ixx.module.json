@@ -1,0 +1,11 @@
+{
+    "Version": "1.1",
+    "Data": {
+        "Source": "c:\\users\\galex\\onedrive\\dev\\testing\\foxy\\foxy\\src\\foxy\\app.ixx",
+        "ProvidedModule": "foxy.app",
+        "ImportedModules": [],
+        "ImportedHeaderUnits": [
+            "C:\\Program Files\\Microsoft Visual Studio\\2022\\Preview\\VC\\Tools\\MSVC\\14.34.31721\\include\\iostream"
+        ]
+    }
+}

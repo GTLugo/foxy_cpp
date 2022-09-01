@@ -1,0 +1,26 @@
+module;
+
+#include "foxy/internal/foxy_includes.hpp"
+
+export module foxy_events;
+
+import foxy_util;
+
+namespace foxy {
+  export template<typename... Args>
+  class Event {
+  public:
+    template<typename Callback>
+    void set_callback(Callback&& callback_) {
+      handler_function_ = std::forward<Callback>(callback_);
+    }
+
+    void operator()(Args... args_) {
+      if (handler_function_) {
+        handler_function_(args_...);
+      }
+    }
+  private:
+    std::function<void(Args...)> handler_function_;
+  };
+}
