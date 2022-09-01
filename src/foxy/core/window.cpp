@@ -88,5 +88,5 @@ namespace foxy {
     });
   }
 
-  auto Window::native() -> GLFWWindow* { return reinterpret_cast<GLFWWindow*>(glfw_window_); }
+  auto Window::native() -> GLFWwindow* { return glfw_window_; }
 }

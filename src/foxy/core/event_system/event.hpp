@@ -1,7 +1,5 @@
 #pragma once
 
-#include "foxy/internal/includes.hpp"
-
 namespace foxy {
   template<typename... Args>
   class Event {

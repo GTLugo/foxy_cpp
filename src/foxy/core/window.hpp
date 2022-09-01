@@ -4,10 +4,9 @@
 
 #pragma once
 
-#include "foxy/internal/includes.hpp"
-
 #include "foxy/core/event_system/event.hpp"
-#include "GLFW/glfw3.h"
+
+class GLFWwindow;
 
 namespace foxy {
   inline static void glfw_error_callback(int error, const char* message) {
@@ -15,7 +14,6 @@ namespace foxy {
   }
 
   class Renderer;
-  class GLFWWindow;
 
   struct WindowCreateInfo {
     const std::string title{ "FOXY FRAMEWORK" };
@@ -40,7 +38,7 @@ namespace foxy {
     void set_fullscreen(bool enabled);
     void set_hidden(bool hidden);
 
-    auto native() -> GLFWWindow*;
+    auto native() -> GLFWwindow*;
 
     [[nodiscard]] auto title() const -> std::string { 
       return state_.title; 

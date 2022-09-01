@@ -35,7 +35,7 @@ target_compile_definitions(${TARGET_NAME}
 
 target_include_directories(${TARGET_NAME} PUBLIC "../include" ".")
 
-#target_precompile_headers(${TARGET_NAME} PUBLIC "../include/foxy/internal/fxpch.hpp")
+target_precompile_headers(${TARGET_NAME} PUBLIC "../include/foxy/internal/fxpch.hpp")
 
 # TODO: Add tests and install targets if needed.
 
@@ -86,7 +86,7 @@ target_compile_definitions(${TARGET_NAME} PUBLIC FOXY_USE_VULKAN=1)
 
 # GLFW
 target_sources(${TARGET_NAME} PRIVATE ${GLFW_FILES})
-target_compile_definitions(${TARGET_NAME} PUBLIC FOXY_USE_GLFW=1 GLFW_INCLUDE_NONE=1)
+target_compile_definitions(${TARGET_NAME} PUBLIC FOXY_USE_GLFW=1)
 target_include_directories(${TARGET_NAME}
     PRIVATE
     "../extern/glfw/include"

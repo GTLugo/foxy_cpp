@@ -1,9 +1,20 @@
 #include "app.hpp"
 
 #include "foxy/core/window.hpp"
+#include "foxy/core/event_system/event.hpp"
 
 namespace foxy {
-  App::App(const foxy::AppCreateInfo& properties) {
+  App::App(const foxy::AppCreateInfo& properties)
+    : main_awake_event_{},
+      main_start_event_{},
+      main_poll_event_{},
+      main_update_event_{},
+      main_stop_event_{},
+      game_awake_event_{},
+      game_start_event_{},
+      game_tick_event_{},
+      game_update_event_{},
+      game_stop_event_{} {
     FOXY_ASSERT(!instantiated_) << "Attempted second instantiation of foxy::App";
     instantiated_ = true;
 

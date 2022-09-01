@@ -4,12 +4,10 @@
 
 #pragma once
 
-#include "foxy/internal/includes.hpp"
-
-#include "foxy/core/event_system/event.hpp"
-
 namespace foxy {
   class Window;
+  template<class... Args>
+  class Event;
 
   struct AppCreateInfo {
     std::string title{ "FOXY FRAMEWORK" };
@@ -49,17 +47,17 @@ namespace foxy {
     Unique<Window> window_;
 
     // Main Thread events
-    Event<> main_awake_event_;
-    Event<> main_start_event_;
-    Event<> main_poll_event_;
-    Event<> main_update_event_;
-    Event<> main_stop_event_;
+    Unique<Event<>> main_awake_event_;
+    Unique<Event<>> main_start_event_;
+    Unique<Event<>> main_poll_event_;
+    Unique<Event<>> main_update_event_;
+    Unique<Event<>> main_stop_event_;
     // Game Thread events
-    Event<> game_awake_event_;
-    Event<> game_start_event_;
-    Event<> game_tick_event_;
-    Event<> game_update_event_;
-    Event<> game_stop_event_;
+    Unique<Event<>> game_awake_event_;
+    Unique<Event<>> game_start_event_;
+    Unique<Event<>> game_tick_event_;
+    Unique<Event<>> game_update_event_;
+    Unique<Event<>> game_stop_event_;
 
     void game_loop();
   };

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "foxy/internal/includes.hpp"
-
 namespace foxy {
   class Context;
   class Swapchain;

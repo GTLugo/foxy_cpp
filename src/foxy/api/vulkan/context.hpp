@@ -1,7 +1,5 @@
 #pragma once
 
-#include "foxy/internal/includes.hpp"
-
 #include "foxy/api/vulkan/version.hpp"
 #include "foxy/api/vulkan/vulkan.hpp"
 
