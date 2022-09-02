@@ -29,24 +29,26 @@
       "hidden": true
     },
     {
-      "name": "x64_windows_debug",
       "displayName": "Debug: x64-windows",
+      "name": "x64_windows_debug",
       "inherits": "windows-base"
     },
     {
-      "name": "x64_windows_release",
       "displayName": "Release: x64-windows",
+      "name": "x64_windows_release",
       "inherits": "windows-base"
     }
   ],
   "buildPresets": [
     {
-      "name": "x64_windows_debug",
+      "displayName": "x64_windows_debug",
+      "name": "x64_windows_debug_build",
       "configurePreset": "x64_windows_debug",
       "configuration": "Debug"
     },
     {
-      "name": "x64_windows_release",
+      "displayName": "x64_windows_release",
+      "name": "x64_windows_release_build",
       "configurePreset": "x64_windows_release",
       "configuration": "Release"
     }

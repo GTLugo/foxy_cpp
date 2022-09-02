@@ -49,6 +49,8 @@ namespace foxy {
 
   void Window::close() {
     FOXY_TRACE << "Window close requested";
+    glfwDestroyWindow(glfw_window_);
+    glfwTerminate();
     state_.running = false;
   }
 
