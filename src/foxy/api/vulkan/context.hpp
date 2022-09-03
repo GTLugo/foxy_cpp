@@ -1,14 +1,29 @@
 #pragma once
 
-#include "foxy/api/vulkan/version.hpp"
-#include "foxy/api/vulkan/vulkan.hpp"
+namespace vk {
+  namespace raii {
+    class Context;
+    class Instance;
+    class Instance;
+    class PhysicalDevice;
+    class Device;
+  }
+
+  class PhysicalDeviceProperties;
+  class PhysicalDeviceFeatures;
+  class PhysicalDeviceMemoryProperties;
+}
 
 namespace foxy {
+  class Version;
+}
+
+namespace foxy::vulkan {
   class Context {
     using VulkanContext = vk::raii::Context;
-    using Instance = Unique<vk::raii::Instance>;
-    using PhysicalDevice = Unique<vk::raii::PhysicalDevice>;
-    using LogicalDevice = Unique<vk::raii::Device>;
+    using Instance = vk::raii::Instance;
+    using PhysicalDevice = vk::raii::PhysicalDevice;
+    using LogicalDevice = vk::raii::Device;
 
     using DeviceProperties = vk::PhysicalDeviceProperties;
     using DeviceFeatures = vk::PhysicalDeviceFeatures;
@@ -18,18 +33,21 @@ namespace foxy {
     Context();
     ~Context();
 
+    auto instance() -> Unique<Instance>&;
+    auto device() -> Unique<LogicalDevice>&;
+
   private:
-    VulkanContext context_{};
-    Instance instance_;
+    Unique<VulkanContext> context_;
+    Unique<Instance> instance_;
 
-    PhysicalDevice physical_device_;
-    LogicalDevice logical_device_;
-    Version api_version_;
-    Version driver_version_;
+    Unique<PhysicalDevice> physical_device_;
+    Unique<LogicalDevice> logical_device_;
+    Unique<Version> api_version_;
+    Unique<Version> driver_version_;
 
-    DeviceProperties device_properties_; // Stores physical device properties (for e.g. checking device limits)
-    DeviceFeatures device_features_; // Stores phyiscal device features (for e.g. checking if a feature is available)
-    DeviceMemoryProperties device_memory_properties_; // Stores all available memory (type) properties for the physical device
+    Unique<DeviceProperties> device_properties_; // Stores physical device properties (for e.g. checking device limits)
+    Unique<DeviceFeatures> device_features_; // Stores phyiscal device features (for e.g. checking if a feature is available)
+    Unique<DeviceMemoryProperties> device_memory_properties_; // Stores all available memory (type) properties for the physical device
 
   };
 }

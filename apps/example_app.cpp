@@ -9,4 +9,4 @@ auto main(int, char**) -> int {
     .run();
 }
 
-WINMAIN_DEFERRED_TO_MAIN
+DIRECT_WINMAIN_TO_MAIN

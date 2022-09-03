@@ -4,17 +4,7 @@
 #include "foxy/core/event_system/event.hpp"
 
 namespace foxy {
-  App::App(const foxy::AppCreateInfo& properties)
-    : main_awake_event_{},
-      main_start_event_{},
-      main_poll_event_{},
-      main_update_event_{},
-      main_stop_event_{},
-      game_awake_event_{},
-      game_start_event_{},
-      game_tick_event_{},
-      game_update_event_{},
-      game_stop_event_{} {
+  App::App(const foxy::AppCreateInfo& properties) {
     FOXY_ASSERT(!instantiated_) << "Attempted second instantiation of foxy::App";
     instantiated_ = true;
 
@@ -43,6 +33,17 @@ namespace foxy {
     });
 
     window_->set_hidden(false);
+
+    main_awake_event_ = std::make_unique<Event<>>();
+    main_start_event_ = std::make_unique<Event<>>();
+    main_poll_event_ = std::make_unique<Event<>>();
+    main_update_event_ = std::make_unique<Event<>>();
+    main_stop_event_ = std::make_unique<Event<>>();
+    game_awake_event_ = std::make_unique<Event<>>();
+    game_start_event_ = std::make_unique<Event<>>();
+    game_tick_event_ = std::make_unique<Event<>>();
+    game_update_event_ = std::make_unique<Event<>>();
+    game_stop_event_ = std::make_unique<Event<>>();
   }
 
   void App::game_loop() {

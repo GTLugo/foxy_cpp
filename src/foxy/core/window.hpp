@@ -4,15 +4,18 @@
 
 #pragma once
 
-#include "foxy/core/event_system/event.hpp"
-
 class GLFWwindow;
+struct GLFWwindowDestructor {
+  void operator()(GLFWwindow* ptr);
+};
+
+namespace foxy::glfw {
+  class Context;
+}
 
 namespace foxy {
-  inline static void glfw_error_callback(int error, const char* message) {
-    FOXY_ERROR << "GFLW: " << error << " | " << message;
-  }
-
+  template<class... Args>
+  class Event;
   class Renderer;
 
   struct WindowCreateInfo {
@@ -26,6 +29,8 @@ namespace foxy {
 
   class Window {
   public:
+    using UniqueNativeWindow = Unique<GLFWwindow, GLFWwindowDestructor>;
+
     Window(const WindowCreateInfo& properties);
     ~Window();
 
@@ -38,7 +43,7 @@ namespace foxy {
     void set_fullscreen(bool enabled);
     void set_hidden(bool hidden);
 
-    auto native() -> GLFWwindow*;
+    auto native() -> UniqueNativeWindow&;
 
     [[nodiscard]] auto title() const -> std::string { 
       return state_.title; 
@@ -63,28 +68,22 @@ namespace foxy {
       bool running{true};
 
       // Window events
-      Event<> close_event;
+      Unique<Event<>> close_event;
       // Input events
-      Event<> key_event;
-      Event<> modifier_event;
-      Event<> mouse_event;
-      Event<> cursor_event;
-      Event<> scroll_event;
+      Unique<Event<>> key_event;
+      Unique<Event<>> modifier_event;
+      Unique<Event<>> mouse_event;
+      Unique<Event<>> cursor_event;
+      Unique<Event<>> scroll_event;
 
-      explicit State(const WindowCreateInfo& properties) 
-      : title{ properties.title },
-        bounds{ { 69, 69 }, { properties.width, properties.height } },
-        bounds_before_fullscreen{ bounds },
-        vsync{ properties.vsync },
-        fullscreen{ properties.fullscreen },
-        borderless{ properties.borderless },
-        hidden{ true } {}
+      explicit State(const WindowCreateInfo& properties);
     };
 
     static inline bool instantiated_{ false };
 
     // GLFW
-    GLFWwindow* glfw_window_;
+    Unique<glfw::Context> glfw_context_;
+    UniqueNativeWindow glfw_window_;
 
     // Foxy
     State state_;

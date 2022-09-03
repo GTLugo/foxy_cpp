@@ -1,17 +1,25 @@
 #pragma once
 
-#include "foxy/api/vulkan/context.hpp"
+namespace vk::raii {
+  class SurfaceKHR;
+  class SwapchainKHR;
+}
+
+namespace foxy::vulkan {
+  class Context;
+}
 
 namespace foxy {
   class Swapchain {
+    using Surface = vk::raii::SurfaceKHR;
+    using NativeSwapchain = vk::raii::SwapchainKHR;
   public:
-    explicit Swapchain(Shared<Context> context)
-      : context_{std::move(context)} {}
+    explicit Swapchain(Shared<vulkan::Context> context);
 
-    ~Swapchain() = default;
+    ~Swapchain();
   private:
-    Shared<Context> context_;
-    Unique<vk::raii::SurfaceKHR> surface_;
-    Unique<vk::raii::SwapchainKHR> swapchain_;
+    Shared<vulkan::Context> context_;
+    Unique<Surface> surface_;
+    Shared<NativeSwapchain> swapchain_;
   };
 }

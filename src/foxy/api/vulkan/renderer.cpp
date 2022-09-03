@@ -5,7 +5,7 @@
 
 namespace foxy {
   Renderer::Renderer() {
-    context_ = std::make_shared<Context>();
+    context_ = std::make_shared<vulkan::Context>();
     swapchain_ = std::make_unique<Swapchain>(context_);
   }
 

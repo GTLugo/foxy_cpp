@@ -39,19 +39,19 @@
 #define FOXY_LAMBDA(fn) FOXY_LAMBDA_INS(fn, this)
 
 #if defined(_WIN32) and not defined(FOXY_DEBUG_MODE)
-#define WINMAIN_DEFERRED_TO_MAIN \
+#define DIRECT_WINMAIN_TO_MAIN \
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {\
   return main(__argc, __argv);\
 }
 #else
-#define WINMAIN_DEFERRED_TO_MAIN int fubuki_is_cute() { return 0; }
+#define DIRECT_WINMAIN_TO_MAIN int fubuki_is_cute() { return 0; }
 #endif
 
 #if defined(_WIN32) and not defined(FOXY_DEBUG_MODE)
-#define WINMAIN_DEFERRED_TO_FOXY_MAIN \
+#define DIRECT_WINMAIN_TO_FOXY_MAIN \
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {\
   return main(__argc, reinterpret_cast<std::int8_t**>(__argv));\
 }
 #else
-#define WINMAIN_DEFERRED_TO_FOXY_MAIN int fubuki_is_cute() { return 0; }
+#define DIRECT_WINMAIN_TO_FOXY_MAIN int fubuki_is_cute() { return 0; }
 #endif

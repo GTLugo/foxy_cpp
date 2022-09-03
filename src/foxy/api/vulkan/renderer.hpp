@@ -1,7 +1,9 @@
 #pragma once
 
 namespace foxy {
-  class Context;
+  namespace vulkan {
+    class Context;
+  }
   class Swapchain;
 
   class Renderer {
@@ -10,7 +12,7 @@ namespace foxy {
 
     ~Renderer();
   private:
-    Shared<Context> context_;
+    Shared<vulkan::Context> context_;
     Unique<Swapchain> swapchain_;
   };
 }
