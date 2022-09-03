@@ -6,9 +6,9 @@ set(TARGET_NAME "foxy")
 
 set(SOURCE_FILES
     "foxy/icon.rc"
-    "foxy/app.cpp"
     "foxy/util/util.cpp"
     "foxy/util/log.cpp"
+    "foxy/core/app.cpp"
     "foxy/core/window.cpp"
     "foxy/core/event_system/event.cpp"
     "foxy/api/glfw/context.cpp"

@@ -81,6 +81,6 @@
 /*----------------------
   FOXY LIBRARIES
 ----------------------*/
-#include "foxy/macros.hpp"
+#include "foxy/core/macros.hpp"
 #include "foxy/util/util.hpp"
 #include "foxy/util/log.hpp"

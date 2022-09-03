@@ -1,6 +1,6 @@
 #pragma once
 
-#include "foxy/log_macros.hpp"
+#include "foxy/core/log_macros.hpp"
 
 #include "foxy/util/glm_types.hpp"
 #include "foxy/util/boost_types.hpp"

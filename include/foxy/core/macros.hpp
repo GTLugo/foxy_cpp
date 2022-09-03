@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-#include "foxy/log_macros.hpp"
+#include "log_macros.hpp"
 
 #if not defined(FOXY_DEBUG_MODE) and not defined(_WIN32) and defined(SIGTRAP)
 #include <csignal>
