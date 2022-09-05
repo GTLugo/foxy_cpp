@@ -2,9 +2,11 @@
 
 #include "foxy/api/vulkan/version.hpp"
 #include "foxy/api/vulkan/vulkan.hpp"
+#define FOXY_GLFW_INCLUDE_VULKAN
+#include "foxy/api/glfw/glfw.hpp"
 
 namespace foxy::vulkan {
-  Context::Context() {
+  Context::Context(glfw::UniqueWindow& window) {
     context_ = std::make_unique<vk::raii::Context>();
 
     { // vk::raii::Instance
@@ -35,17 +37,35 @@ namespace foxy::vulkan {
     vk::DeviceCreateInfo device_create_info{};
     logical_device_ = std::make_unique<vk::raii::Device>(physical_device_->createDevice(device_create_info, nullptr));
 
+    {
+      VkSurfaceKHR raw_surface;
+      auto result = static_cast<vk::Result>(
+          glfwCreateWindowSurface(static_cast<VkInstance>(**instance_), window.get(), nullptr, &raw_surface)
+      );
+      auto surface = vk::createResultValueType(result, raw_surface);
+      surface_ = std::make_unique<vk::raii::SurfaceKHR>(*instance_, surface);
+    }
+
     FOXY_INFO << "Vulkan Device: " << device_name << " | Device driver version: " << driver_version_->to_string()
               << " | Vulkan API version: " << api_version_->to_string();
+
   }
 
-  Context::~Context() {}
+  Context::~Context() = default;
 
   auto Context::instance() -> Unique<vk::raii::Instance>& {
     return instance_;
   }
 
-  auto Context::device() -> Unique<vk::raii::Device>& {
+  auto Context::physical_device() -> Unique <vk::raii::PhysicalDevice>& {
+    return physical_device_;
+  }
+
+  auto Context::logical_device() -> Unique<vk::raii::Device>& {
     return logical_device_;
+  }
+
+  auto Context::native() -> Unique<Context::VulkanContext>& {
+    return context_;
   }
 }

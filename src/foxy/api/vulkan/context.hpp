@@ -1,5 +1,7 @@
 #pragma once
 
+#include "foxy/api/glfw/unique_window.hpp"
+
 namespace vk {
   namespace raii {
     class Context;
@@ -7,6 +9,7 @@ namespace vk {
     class Instance;
     class PhysicalDevice;
     class Device;
+    class SurfaceKHR;
   }
 
   class PhysicalDeviceProperties;
@@ -24,17 +27,20 @@ namespace foxy::vulkan {
     using Instance = vk::raii::Instance;
     using PhysicalDevice = vk::raii::PhysicalDevice;
     using LogicalDevice = vk::raii::Device;
+    using Surface = vk::raii::SurfaceKHR;
 
     using DeviceProperties = vk::PhysicalDeviceProperties;
     using DeviceFeatures = vk::PhysicalDeviceFeatures;
     using DeviceMemoryProperties = vk::PhysicalDeviceMemoryProperties;
 
   public:
-    Context();
+    Context(glfw::UniqueWindow& window);
     ~Context();
 
     auto instance() -> Unique<Instance>&;
-    auto device() -> Unique<LogicalDevice>&;
+    auto physical_device() -> Unique<PhysicalDevice>&;
+    auto logical_device() -> Unique<LogicalDevice>&;
+    auto native() -> Unique<VulkanContext>&;
 
   private:
     Unique<VulkanContext> context_;
@@ -49,5 +55,6 @@ namespace foxy::vulkan {
     Unique<DeviceFeatures> device_features_; // Stores phyiscal device features (for e.g. checking if a feature is available)
     Unique<DeviceMemoryProperties> device_memory_properties_; // Stores all available memory (type) properties for the physical device
 
+    Unique<Surface> surface_;
   };
 }

@@ -1,5 +1,8 @@
 //
-// Created by galex on 9/1/2022.
+//  Created by Bradley Austin Davis on 2016/03/19
+//
+//  Distributed under the Apache License, Version 2.0.
+//  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
 #pragma once
@@ -7,6 +10,10 @@
 #include "foxy/internal/includes.hpp"
 
 namespace foxy {
+  // Version information for Vulkan is stored in a single 32 bit integer
+  // with individual bits representing the major, minor and patch versions.
+  // The maximum possible major and minor version is 512 (look out nVidia)
+  // while the maximum possible patch version is 2048
   struct Version {
     Version()
         : vulkan_major(0),
@@ -38,8 +45,8 @@ namespace foxy {
       return buffer.str();
     }
 
-    const u32 vulkan_patch : 12;
-    const u32 vulkan_minor : 10;
-    const u32 vulkan_major : 10;
+    const u32 vulkan_patch: 12;
+    const u32 vulkan_minor: 10;
+    const u32 vulkan_major: 10;
   };
 }

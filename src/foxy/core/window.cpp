@@ -4,11 +4,10 @@
 #include "foxy/api/vulkan/renderer.hpp"
 #include "foxy/api/glfw/context.hpp"
 // this is here to expose vulkan functions to glfw
-#include "foxy/api/vulkan/vulkan.hpp"
+#define FOXY_GLFW_INCLUDE_VULKAN
 #include "foxy/api/glfw/glfw.hpp"
 
 namespace foxy {
-
   Window::State::State(const WindowCreateInfo& properties)
       : title{ properties.title },
         bounds{ { 69, 69 }, { properties.width, properties.height } },
@@ -37,7 +36,8 @@ namespace foxy {
     glfwWindowHint(GLFW_RESIZABLE, false);
     glfwWindowHint(GLFW_VISIBLE, false);
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfw_window_ = UniqueNativeWindow{glfwCreateWindow(
+
+    glfw_window_ = glfw::UniqueWindow{glfwCreateWindow(
         properties.width,
         properties.height,
         properties.title.c_str(),
@@ -50,7 +50,7 @@ namespace foxy {
     set_fullscreen(properties.fullscreen);
     set_callbacks();
 
-    renderer_ = std::make_unique<Renderer>();
+    renderer_ = std::make_unique<Renderer>(glfw_window_);
 
     FOXY_TRACE << "Created Window";
   }
@@ -65,7 +65,8 @@ namespace foxy {
 
   void Window::close() {
     FOXY_TRACE << "Window close requested";
-    state_.running = false;
+    glfwSetWindowShouldClose(glfw_window_.get(), true);
+    //state_.running = false;
   }
 
   void Window::set_icon(byte* image, i32 width, i32 height) {
@@ -104,9 +105,9 @@ namespace foxy {
     });
   }
 
-  auto Window::native() -> UniqueNativeWindow& { return glfw_window_; }
-}
+  auto Window::native() -> glfw::UniqueWindow& { return glfw_window_; }
 
-void GLFWwindowDestructor::operator()(GLFWwindow* ptr) {
-  glfwDestroyWindow(ptr);
+  FN Window::running() const -> bool {
+    return !static_cast<bool>(glfwWindowShouldClose(glfw_window_.get()));
+  }
 }

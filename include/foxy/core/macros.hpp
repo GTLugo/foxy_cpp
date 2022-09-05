@@ -31,6 +31,8 @@
   #define FOXY_ASSERT(x) DCHECK(x)
 #endif
 
+#define FN auto
+
 #define BIT(x) (1 << x)
 #define FOXY_BIT_COMPARE_TO(x, y) (x & y) == y
 #define FOXY_STRINGIFY_VAL(x) FOXY_STRINGIFY(x)
@@ -39,19 +41,21 @@
 #define FOXY_LAMBDA(fn) FOXY_LAMBDA_INS(fn, this)
 
 #if defined(_WIN32) and not defined(FOXY_DEBUG_MODE)
-#define DIRECT_WINMAIN_TO_MAIN \
+#define REDIRECT_WINMAIN_TO_MAIN \
+auto main(int, char**) -> int;\
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {\
   return main(__argc, __argv);\
 }
 #else
-#define DIRECT_WINMAIN_TO_MAIN int fubuki_is_cute() { return 0; }
+#define REDIRECT_WINMAIN_TO_MAIN auto __fubuki_is_cute() -> int { return 0; }
 #endif
 
 #if defined(_WIN32) and not defined(FOXY_DEBUG_MODE)
-#define DIRECT_WINMAIN_TO_FOXY_MAIN \
+#define REDIRECT_WINMAIN_TO_FOXY_MAIN \
+auto main(foxy::i32, foxy::i8**) -> foxy::i32;\
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {\
   return main(__argc, reinterpret_cast<std::int8_t**>(__argv));\
 }
 #else
-#define DIRECT_WINMAIN_TO_FOXY_MAIN int fubuki_is_cute() { return 0; }
+#define REDIRECT_WINMAIN_TO_FOXY_MAIN auto __fubuki_is_cute() -> foxy::i32 { return 0; }
 #endif

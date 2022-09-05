@@ -4,10 +4,7 @@
 
 #pragma once
 
-class GLFWwindow;
-struct GLFWwindowDestructor {
-  void operator()(GLFWwindow* ptr);
-};
+#include "foxy/api/glfw/unique_window.hpp"
 
 namespace foxy::glfw {
   class Context;
@@ -29,8 +26,6 @@ namespace foxy {
 
   class Window {
   public:
-    using UniqueNativeWindow = Unique<GLFWwindow, GLFWwindowDestructor>;
-
     Window(const WindowCreateInfo& properties);
     ~Window();
 
@@ -43,17 +38,13 @@ namespace foxy {
     void set_fullscreen(bool enabled);
     void set_hidden(bool hidden);
 
-    auto native() -> UniqueNativeWindow&;
-
-    [[nodiscard]] auto title() const -> std::string { 
-      return state_.title; 
-    }
-
-    [[nodiscard]] auto bounds() const -> Rect { return state_.bounds; }
-    [[nodiscard]] auto vsync() const -> bool { return state_.vsync; }
-    [[nodiscard]] auto fullscreen() const -> bool { return state_.vsync; }
-    [[nodiscard]] auto hidden() const -> bool { return state_.hidden; }
-    [[nodiscard]] auto running() const -> bool { return state_.running; }
+    [[nodiscard]] FN title() const -> std::string { return state_.title; }
+    [[nodiscard]] auto native() -> glfw::UniqueWindow&;
+    [[nodiscard]] FN bounds() const -> Rect { return state_.bounds; }
+    [[nodiscard]] FN vsync() const -> bool { return state_.vsync; }
+    [[nodiscard]] FN fullscreen() const -> bool { return state_.vsync; }
+    [[nodiscard]] FN hidden() const -> bool { return state_.hidden; }
+    [[nodiscard]] FN running() const -> bool;
 
   private:
     struct State {
@@ -83,7 +74,7 @@ namespace foxy {
 
     // GLFW
     Unique<glfw::Context> glfw_context_;
-    UniqueNativeWindow glfw_window_;
+    glfw::UniqueWindow glfw_window_;
 
     // Foxy
     State state_;

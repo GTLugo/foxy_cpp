@@ -12,6 +12,7 @@ set(SOURCE_FILES
     "foxy/core/window.cpp"
     "foxy/core/event_system/event.cpp"
     "foxy/api/glfw/context.cpp"
+    "foxy/api/glfw/unique_window.cpp"
     "foxy/api/vulkan/context.cpp"
     "foxy/api/vulkan/swapchain.cpp"
     "foxy/api/vulkan/renderer.cpp"

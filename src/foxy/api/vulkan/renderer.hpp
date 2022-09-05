@@ -1,5 +1,7 @@
 #pragma once
 
+#include "foxy/api/glfw/unique_window.hpp"
+
 namespace foxy {
   namespace vulkan {
     class Context;
@@ -8,7 +10,7 @@ namespace foxy {
 
   class Renderer {
   public:
-    Renderer();
+    Renderer(glfw::UniqueWindow& window);
 
     ~Renderer();
   private:

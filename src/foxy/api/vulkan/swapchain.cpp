@@ -9,18 +9,10 @@ namespace foxy {
     auto old_swapchain = swapchain_;
 
     {
-      vk::DisplaySurfaceCreateInfoKHR display_surface_create_info{
-
-      };
-      //surface_ = std::make_unique<vk::raii::SurfaceKHR>(*context_->instance(), display_surface_create_info);
-      surface_ = std::make_unique<vk::raii::SurfaceKHR>(nullptr);
-    }
-
-    {
       vk::SwapchainCreateInfoKHR swapchain_create_info{
 
       };
-      //swapchain_ = std::make_unique<vk::raii::SwapchainKHR>(*context_->device(), swapchain_create_info);
+      //swapchain_ = std::make_unique<vk::raii::SwapchainKHR>(*context_->logical_device(), swapchain_create_info);
       swapchain_ = std::make_unique<vk::raii::SwapchainKHR>(nullptr);
     }
   }
