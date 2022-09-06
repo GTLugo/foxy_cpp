@@ -17,12 +17,6 @@
 //#define VKFW_NO_INCLUDE_VULKAN_HPP
 //#include <vkfw/vkfw.hpp>
 
-//namespace foxy::glfw {
-//  struct WindowDestructor {
-//    void operator()(GLFWwindow* ptr) {
-//      glfwDestroyWindow(ptr);
-//    }
-//  };
-//
-//  using UniqueWindow = Unique<GLFWwindow, WindowDestructor>;
-//}
+namespace foxy::glfw {
+  auto required_instance_extensions() -> std::vector<std::string>;
+}

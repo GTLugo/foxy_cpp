@@ -11,3 +11,9 @@
  - EasyLogging++
  - Vulkan
  - Boost
+
+## - Credits -
+ - https://github.com/jherico/Vulkan - Sascha Willems' examples translated to Vulkan's C++ API
+ - https://github.com/blurrypiano/littleVulkanEngine - Brendan Galea's Vulkan series on YouTube
+ - https://github.com/TheCherno/Hazel - The Cherno's game engine series on YouTube
+ - More code snippets credited in comments which I will add here over time

@@ -1,16 +1,16 @@
 #pragma once
 
-#include "foxy/api/glfw/unique_window.hpp"
-
 namespace foxy {
   namespace vulkan {
     class Context;
   }
+
   class Swapchain;
+  class Window;
 
   class Renderer {
   public:
-    Renderer(glfw::UniqueWindow& window);
+    Renderer(Window& window);
 
     ~Renderer();
   private:

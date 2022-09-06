@@ -11,6 +11,7 @@ set(SOURCE_FILES
     "foxy/core/app.cpp"
     "foxy/core/window.cpp"
     "foxy/core/event_system/event.cpp"
+    "foxy/api/glfw/glfw.cpp"
     "foxy/api/glfw/context.cpp"
     "foxy/api/glfw/unique_window.cpp"
     "foxy/api/vulkan/context.cpp"
@@ -26,6 +27,7 @@ target_compile_definitions(${TARGET_NAME}
     PRIVATE
     _CRT_SECURE_NO_WARNINGS=1
     WIN32_LEAN_AND_MEAN=1
+    FOXY_ENABLE_VALIDATION_LAYERS=1
     PUBLIC
     $<$<CONFIG:debug>:FOXY_ENABLE_ASSERTS=1;FOXY_DEBUG_MODE=1>
     $<$<CONFIG:relwithdebinfo>:FOXY_ENABLE_ASSERTS=1;FOXY_DEBUG_MODE=1>

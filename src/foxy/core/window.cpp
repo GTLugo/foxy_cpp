@@ -50,7 +50,7 @@ namespace foxy {
     set_fullscreen(properties.fullscreen);
     set_callbacks();
 
-    renderer_ = std::make_unique<Renderer>(glfw_window_);
+    renderer_ = std::make_unique<Renderer>(*this);
 
     FOXY_TRACE << "Created Window";
   }

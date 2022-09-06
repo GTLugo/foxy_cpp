@@ -32,6 +32,7 @@
 #endif
 
 #define FN auto
+#define MAKE_UNIQUE(x) std::make_unique<decltype(x)>(x)
 
 #define BIT(x) (1 << x)
 #define FOXY_BIT_COMPARE_TO(x, y) (x & y) == y
