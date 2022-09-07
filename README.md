@@ -8,10 +8,12 @@
  - GLFW
  - GLM
  - EasyLogging++
- - Vulkan **\***
- - Boost **\***
+ - Vulkan
 
-**\*** ***"Batteries not included!"*** Separate install required.
+   ***"Batteries not included!"*** Separate install required.
+ - Boost
+
+    ***"Batteries not included!"*** Separate install required.
 
 ## - Credits -
  - https://github.com/jherico/Vulkan - Sascha Willems' examples translated to Vulkan's C++ API
