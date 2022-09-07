@@ -8,8 +8,8 @@
  - GLFW
  - GLM
  - EasyLogging++
- - Vulkan *****
- - Boost *****
+ - Vulkan **\***
+ - Boost **\***
 
 **\*** ***"Batteries not included!"*** Separate install required.
 
