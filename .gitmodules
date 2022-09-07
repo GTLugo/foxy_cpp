@@ -7,5 +7,6 @@
 	path = extern/easyloggingpp
 	url = https://github.com/gtlugo/easyloggingpp.git
 [submodule "extern/glfw"]
+	ignore = dirty
 	path = extern/glfw
 	url = https://github.com/glfw/glfw.git
