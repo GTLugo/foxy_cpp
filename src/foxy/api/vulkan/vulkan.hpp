@@ -8,7 +8,7 @@
 #include <vulkan/vulkan_raii.hpp>
 
 namespace foxy::vulkan {
-  struct DeviceCreateInfo : public vk::DeviceCreateInfo {
+  struct DeviceCreateInfo: public vk::DeviceCreateInfo {
     std::vector<vk::DeviceQueueCreateInfo> device_queues;
     std::vector<std::vector<float>> device_queues_priorities;
 
@@ -41,5 +41,20 @@ namespace foxy::vulkan {
       this->queueCreateInfoCount = static_cast<uint32_t>(device_queues.size());
       this->pQueueCreateInfos = device_queues.data();
     }
+  };
+
+  struct Surface {
+    using Format = vk::Format;
+    using ColorSpace = vk::ColorSpaceKHR;
+
+    Unique<vk::raii::SurfaceKHR> native;
+    Unique<Format> color_format;
+    Unique<ColorSpace> color_space;
+  };
+
+  struct ExtensionData {
+    std::vector<const char*> window_extensions;
+    std::vector<VkExtensionProperties> instance_extensions;
+    std::vector<const char*> enabled_extensions;
   };
 }
