@@ -4,9 +4,14 @@
 #include "foxy/api/vulkan/swapchain.hpp"
 #include "foxy/core/window.hpp"
 
-namespace foxy {
+namespace foxy::ookami {
   Renderer::Renderer(Window& window) {
-    context_ = std::make_shared<vulkan::Context>(window.native());
+    context_ = std::make_shared<vulkan::Context>(
+        window.native()
+        #ifdef NDEBUG
+        ,false
+        #endif
+    );
     //swapchain_ = std::make_unique<Swapchain>(context_, window.bounds());
   }
 

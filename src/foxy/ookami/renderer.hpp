@@ -1,3 +1,7 @@
+//
+// Ookami Renderer by Gabriel Lugo
+//
+
 #pragma once
 
 namespace foxy {
@@ -7,7 +11,9 @@ namespace foxy {
 
   class Swapchain;
   class Window;
+}
 
+namespace foxy::ookami {
   class Renderer {
   public:
     Renderer(Window& window);

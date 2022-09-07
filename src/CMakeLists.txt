@@ -16,7 +16,7 @@ set(SOURCE_FILES
     "foxy/api/glfw/unique_window.cpp"
     "foxy/api/vulkan/context.cpp"
     "foxy/api/vulkan/swapchain.cpp"
-    "foxy/api/vulkan/renderer.cpp"
+    "foxy/ookami/renderer.cpp"
 )
 
 # Add source to this project's executable.

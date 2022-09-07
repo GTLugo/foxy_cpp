@@ -23,7 +23,7 @@ namespace foxy::vulkan {
     using DebugMessenger = vk::raii::DebugUtilsMessengerEXT;
 
   public:
-    Context(glfw::UniqueWindow& window);
+    Context(glfw::UniqueWindow& window, bool enable_validation = true);
     ~Context();
 
     [[nodiscard]] auto instance() -> Unique<Instance>&;
@@ -32,19 +32,12 @@ namespace foxy::vulkan {
     [[nodiscard]] auto surface() -> Unique<Surface>&;
     [[nodiscard]] auto native() -> Unique<VulkanContext>&;
 
-    [[nodiscard]] auto find_queue(const QueueFlags& flags) const -> u32;
-
   private:
-    static inline const bool enable_validation_{
-        #ifdef NDEBUG
-        false
-        #else
-        true
-        #endif
-    };
     static inline const std::vector<const char*> validation_layer_names_ = {
         "VK_LAYER_KHRONOS_validation"
     };
+
+    const bool enable_validation_;
 
     Unique<VulkanContext> context_;
     ExtensionData extension_data_{};
@@ -52,19 +45,22 @@ namespace foxy::vulkan {
     Unique<DebugMessenger> debug_messenger_;
 
     Unique<PhysicalDevice> physical_device_;
+    QueueFamilyIndices queue_family_indices_;
     Unique<LogicalDevice> logical_device_;
-    std::vector<vk::QueueFamilyProperties> queue_family_properties_;
+
+    Unique<vk::raii::Queue> graphics_queue_;
 
     Unique<Surface> surface_;
-    u32 queue_mode_index_{ UINT32_MAX };
 
+    [[nodiscard]] static auto check_validation_layer_support() -> bool;
+
+    [[nodiscard]] auto try_create_debug_messenger() -> Unique<DebugMessenger>;
+    [[nodiscard]] auto get_enabled_extensions() -> std::vector<const char*>;
     [[nodiscard]] auto create_instance() -> Unique<Instance>;
+    [[nodiscard]] auto find_queue_families(const PhysicalDevice& physical_device) -> QueueFamilyIndices;
+    [[nodiscard]] auto device_suitable(const PhysicalDevice& physical_device) -> bool;
     [[nodiscard]] auto pick_physical_device() -> Unique<PhysicalDevice>;
     [[nodiscard]] auto create_logical_device() -> Unique<LogicalDevice>;
     [[nodiscard]] auto create_surface(glfw::UniqueWindow& window) -> Unique<Surface>;
-    [[nodiscard]] auto try_create_debug_messenger() -> Unique<DebugMessenger>;
-
-    auto get_enabled_extensions() -> std::vector<const char*>;
-    auto check_validation_layer_support() -> bool;
   };
 }

@@ -10,15 +10,15 @@ namespace foxy {
     dummy_log_ = std::make_unique<Log>();
     Log::init();
 
-    FOXY_INFO << "[]=============================[]";
-    FOXY_INFO << "||  ______ ______   ___     __ ||";
-    FOXY_INFO << "|| |  ____/ __ \\ \\ / \\ \\   / / ||";
-    FOXY_INFO << "|| | |__ | |  | \\ V / \\ \\_/ /  ||";
-    FOXY_INFO << "|| |  __|| |  | |> <   \\   /   ||";
-    FOXY_INFO << "|| | |   | |__| / . \\   | |    ||";
-    FOXY_INFO << "|| |_|    \\____/_/ \\_\\  |_|    ||";
-    FOXY_INFO << "||                             ||";
-    FOXY_INFO << "[]=============================[]";
+    FOXY_INFO << R"([]=============================[])";
+    FOXY_INFO << R"(||  ______ ______   ___     __ ||)";
+    FOXY_INFO << R"(|| |  ____/ __ \ \ / \ \   / / ||)";
+    FOXY_INFO << R"(|| | |__ | |  | \ V / \ \_/ /  ||)";
+    FOXY_INFO << R"(|| |  __|| |  | |> <   \   /   ||)";
+    FOXY_INFO << R"(|| | |   | |__| / . \   | |    ||)";
+    FOXY_INFO << R"(|| |_|    \____/_/ \_\  |_|    ||)";
+    FOXY_INFO << R"(||                             ||)";
+    FOXY_INFO << R"([]=============================[])";
     FOXY_INFO << "Foxy startup: Kon kon kitsune! Hi, friends!";
 
     window_ = std::make_unique<Window>(WindowCreateInfo{

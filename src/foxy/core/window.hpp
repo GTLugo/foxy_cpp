@@ -10,10 +10,13 @@ namespace foxy::glfw {
   class Context;
 }
 
+namespace foxy::ookami {
+  class Renderer;
+}
+
 namespace foxy {
   template<class... Args>
   class Event;
-  class Renderer;
 
   struct WindowCreateInfo {
     const std::string title{ "FOXY FRAMEWORK" };
@@ -78,7 +81,7 @@ namespace foxy {
 
     // Foxy
     State state_;
-    Unique<Renderer> renderer_;
+    Unique<ookami::Renderer> renderer_;
 
     void set_callbacks();
   };

@@ -1,7 +1,7 @@
 #include "window.hpp"
 
 #include "foxy/core/event_system/event.hpp"
-#include "foxy/api/vulkan/renderer.hpp"
+#include "foxy/ookami/renderer.hpp"
 #include "foxy/api/glfw/context.hpp"
 // this is here to expose vulkan functions to glfw
 #define FOXY_GLFW_INCLUDE_VULKAN
@@ -50,7 +50,7 @@ namespace foxy {
     set_fullscreen(properties.fullscreen);
     set_callbacks();
 
-    renderer_ = std::make_unique<Renderer>(*this);
+    renderer_ = std::make_unique<ookami::Renderer>(*this);
 
     FOXY_TRACE << "Created Window";
   }

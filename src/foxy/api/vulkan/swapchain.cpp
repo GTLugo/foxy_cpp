@@ -6,8 +6,8 @@ namespace foxy {
     auto old_swapchain = swapchain_;
 
     {
-      auto capabilities = context_->physical_device()->getSurfaceCapabilitiesKHR(**context_->surface()->native);
-      auto present_modes = context_->physical_device()->getSurfacePresentModesKHR(**context_->surface()->native);
+      auto capabilities = context_->physical_device()->getSurfaceCapabilitiesKHR(*context_->surface()->native);
+      auto present_modes = context_->physical_device()->getSurfacePresentModesKHR(*context_->surface()->native);
 
       // width and height are either both -1, or both not -1.
       if (capabilities.currentExtent.width == -1) {
