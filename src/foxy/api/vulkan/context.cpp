@@ -12,17 +12,17 @@ namespace foxy::vulkan {
     std::stringstream msg{};
     switch (type) {
       case vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral:
-        msg << "GENERAL";
+        msg << "[GENR] ";
         break;
       case vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation:
-        msg << "VALIDATION";
+        msg << "[VALD] ";
         break;
       case vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance:
-        msg << "PERFORMANCE";
+        msg << "[PERF] ";
         break;
     }
 
-    msg << " | code " << callback_data->messageIdNumber << ", " << callback_data->pMessageIdName << ": " << callback_data->pMessage;
+    msg << callback_data->pMessage << " | code " << callback_data->messageIdNumber << ", " << callback_data->pMessageIdName;
     switch (severity) {
       case vk::DebugUtilsMessageSeverityFlagBitsEXT::eError:
         FOXY_ERROR << msg.str();
