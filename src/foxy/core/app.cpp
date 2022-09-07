@@ -7,20 +7,18 @@ namespace foxy {
   App::App(const foxy::AppCreateInfo& properties) {
     FOXY_ASSERT(!instantiated_) << "Attempted second instantiation of foxy::App";
     instantiated_ = true;
-
-    const std::string greeting{R"([]=============================[]
-||  ______ ______   ___     __ ||
-|| |  ____/ __ \ \ / \ \   / / ||
-|| | |__ | |  | \ V / \ \_/ /  ||
-|| |  __|| |  | |> <   \   /   ||
-|| | |   | |__| / . \   | |    ||
-|| |_|    \____/_/ \_\  |_|    ||
-||                             ||
-[]=============================[])"};
-
-    std::clog << greeting << '\n';
-
+    dummy_log_ = std::make_unique<Log>();
     Log::init();
+
+    FOXY_INFO << "[]=============================[]";
+    FOXY_INFO << "||  ______ ______   ___     __ ||";
+    FOXY_INFO << "|| |  ____/ __ \\ \\ / \\ \\   / / ||";
+    FOXY_INFO << "|| | |__ | |  | \\ V / \\ \\_/ /  ||";
+    FOXY_INFO << "|| |  __|| |  | |> <   \\   /   ||";
+    FOXY_INFO << "|| | |   | |__| / . \\   | |    ||";
+    FOXY_INFO << "|| |_|    \\____/_/ \\_\\  |_|    ||";
+    FOXY_INFO << "||                             ||";
+    FOXY_INFO << "[]=============================[]";
     FOXY_INFO << "Foxy startup: Kon kon kitsune! Hi, friends!";
 
     window_ = std::make_unique<Window>(WindowCreateInfo{
@@ -54,6 +52,5 @@ namespace foxy {
 
   App::~App() {
     instantiated_ = false;
-    FOXY_INFO << "Foxy shutdown: Otsukon deshita! Bye bye!";
   }
 }

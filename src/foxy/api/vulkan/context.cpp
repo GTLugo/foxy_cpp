@@ -5,150 +5,147 @@
 #include "foxy/api/glfw/glfw.hpp"
 
 namespace foxy::vulkan {
-  inline static FN vulkan_error_callback(VkDebugReportFlagsEXT flags,
-                                         VkDebugReportObjectTypeEXT objType,
-                                         uint64_t srcObject,
-                                         size_t location,
-                                         int32_t msgCode,
-                                         const char* pLayerPrefix,
-                                         const char* pMsg,
-                                         void* pUserData) -> VkBool32 {
-    if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
-      FOXY_ERROR << pLayerPrefix << " | code " << msgCode << ": " << pMsg;
-    } else if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT) {
-      FOXY_WARN << pLayerPrefix << " | code " << msgCode << ": " << pMsg;
-    } else if (flags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT) {
-      FOXY_WARN << pLayerPrefix << " | code " << msgCode << ": " << pMsg;
-    } else {
-      return false;
+  inline static VKAPI_ATTR auto vulkan_error_callback(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
+                                                      vk::DebugUtilsMessageTypeFlagBitsEXT type,
+                                                      const vk::DebugUtilsMessengerCallbackDataEXT* callback_data,
+                                                      void*) -> vk::Bool32 {
+    std::stringstream msg{};
+    switch (type) {
+      case vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral:
+        msg << "GENERAL";
+        break;
+      case vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation:
+        msg << "VALIDATION";
+        break;
+      case vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance:
+        msg << "PERFORMANCE";
+        break;
     }
+
+    msg << " | code " << callback_data->messageIdNumber << ", " << callback_data->pMessageIdName << ": " << callback_data->pMessage;
+    switch (severity) {
+      case vk::DebugUtilsMessageSeverityFlagBitsEXT::eError:
+        FOXY_ERROR << msg.str();
+        break;
+      case vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning:
+        FOXY_WARN << msg.str();
+        break;
+      default:
+        FOXY_INFO << msg.str();
+        break;
+    }
+
     return true;
   }
 
   Context::Context(glfw::UniqueWindow& window)
-    : physical_device_{},
-      logical_device_{} {
-    context_ = std::make_unique<vk::raii::Context>();
-    instance_ = create_instance();
-    std::tie(physical_device_, logical_device_) = find_devices();
-    surface_ = create_surface(window);
+    : context_{std::make_unique<vk::raii::Context>()},
+      instance_{nullptr} {
+    create_instance();
+    setup_debug_messenger();
+    find_devices();
+    create_surface(window);
   }
 
   Context::~Context() = default;
 
-  FN Context::instance() -> Unique<vk::raii::Instance>& {
+  auto Context::instance() -> Unique<vk::raii::Instance>& {
     return instance_;
   }
 
-  FN Context::physical_device() -> Unique <vk::raii::PhysicalDevice>& {
+  auto Context::physical_device() -> Unique <vk::raii::PhysicalDevice>& {
     return physical_device_;
   }
 
-  FN Context::logical_device() -> Unique<vk::raii::Device>& {
+  auto Context::logical_device() -> Unique<vk::raii::Device>& {
     return logical_device_;
   }
 
-  FN Context::surface() -> Unique <vk::raii::SurfaceKHR>& {
+  auto Context::surface() -> Unique <vk::raii::SurfaceKHR>& {
     return surface_;
   }
 
-  FN Context::native() -> Unique<vk::raii::Context>& {
+  auto Context::native() -> Unique<vk::raii::Context>& {
     return context_;
   }
 
-  auto Context::create_instance() -> Unique<vk::raii::Instance> {
+  void Context::create_instance() {
     vk::ApplicationInfo app_info{
         .pApplicationName = "FOXY APP",
         .pEngineName = "FOXY FRAMEWORK",
         .apiVersion = VK_API_VERSION_1_3
     };
 
-    // Extensions
-    std::set<std::string> required_extensions{};
-    auto glfw_extensions = glfw::required_instance_extensions();
-    required_extensions.insert(glfw_extensions.begin(), glfw_extensions.end());
-    if (enable_validation_) {
-      required_extensions.insert(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
-    }
-    std::set<std::string> instance_extensions{};
-    std::list<std::function<std::set<std::string>()>> extension_pickers{};
-    instance_extensions.insert(required_extensions.begin(), required_extensions.end());
-    for (const auto& picker : extension_pickers) {
-      auto extensions = picker();
-      instance_extensions.insert(extensions.begin(), extensions.end());
-    }
-    std::vector<const char*> enabled_extensions;
-    for (const auto& extension : instance_extensions) {
-      enabled_extensions.push_back(extension.c_str());
-    }
-
     vk::InstanceCreateInfo instance_create_info{
         .pApplicationInfo = &app_info
     };
-    if (!enabled_extensions.empty()) {
-      instance_create_info.enabledExtensionCount = static_cast<u32>(enabled_extensions.size());
-      instance_create_info.ppEnabledExtensionNames = enabled_extensions.data();
+
+    if (enable_validation_ && !check_validation_layer_support()) {
+      FOXY_FATAL << "Validation layers requested, but none are available.";
+    }
+    enabled_extensions_ = get_enabled_extensions();
+    if (!enabled_extensions_.empty()) {
+      instance_create_info.enabledExtensionCount = static_cast<u32>(enabled_extensions_.size());
+      instance_create_info.ppEnabledExtensionNames = enabled_extensions_.data();
     }
 
-    std::vector<const char*> layers;
+    auto debug_create_info = vk::DebugUtilsMessengerCreateInfoEXT{
+      .messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eError | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning,
+      .messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation,
+      .pfnUserCallback = (PFN_vkDebugUtilsMessengerCallbackEXT)(vulkan_error_callback),
+    };
     if (enable_validation_) {
-      layers = filter_layers(validation_layer_names_);
-      instance_create_info.enabledLayerCount = static_cast<u32>(layers.size());
-      instance_create_info.ppEnabledLayerNames = layers.data();
+      instance_create_info.enabledLayerCount = static_cast<u32>(validation_layer_names_.size());
+      instance_create_info.ppEnabledLayerNames = validation_layer_names_.data();
+      instance_create_info.pNext = reinterpret_cast<VkDebugUtilsMessengerCreateInfoEXT*>(&debug_create_info);
+    } else {
+      instance_create_info.enabledLayerCount = 0;
     }
 
-    auto instance = std::make_unique<vk::raii::Instance>(*context_, instance_create_info);
-
-    if (enable_validation_) {
-      auto report_callback_create_info = vk::DebugReportCallbackCreateInfoEXT{
-          .flags = vk::DebugReportFlagBitsEXT::eError | vk::DebugReportFlagBitsEXT::eWarning,
-          .pfnCallback = (PFN_vkDebugReportCallbackEXT)(vulkan_error_callback),
-      };
+    try {
+      instance_ = std::make_unique<vk::raii::Instance>(*context_, instance_create_info);
+    } catch (const std::exception& e) {
+      FOXY_FATAL << e.what();
     }
-
-    return std::move(instance);
   }
 
-  FN Context::find_devices() -> std::pair<Unique<PhysicalDevice>, Unique<LogicalDevice>> {
+  void Context::find_devices() {
     vk::raii::PhysicalDevices physical_devices_{*instance_};
     FOXY_ASSERT(!physical_devices_.empty()) << "NO PHYSICAL VULKAN DEVICES FOUND";
     // this is a *move* (devices are not copyable)
-    auto physical_device = std::make_unique<vk::raii::PhysicalDevice>(physical_devices_[0]);
-    auto device_properties = std::make_unique<vk::PhysicalDeviceProperties>(physical_device->getProperties());
+    physical_device_ = std::make_unique<vk::raii::PhysicalDevice>(physical_devices_[0]);
+    auto device_properties = std::make_unique<vk::PhysicalDeviceProperties>(physical_device_->getProperties());
     std::string device_name = device_properties->deviceName;
     auto api_version = std::make_unique<Version>(device_properties->apiVersion);
     auto driver_version = std::make_unique<Version>(device_properties->driverVersion);
 
+    //vulkan::DeviceCreateInfo device_create_info2{};
+
     vk::DeviceCreateInfo device_create_info{};
-    auto logical_device = std::make_unique<vk::raii::Device>(physical_device->createDevice(device_create_info, nullptr));
+    logical_device_ = std::make_unique<vk::raii::Device>(physical_device_->createDevice(device_create_info, nullptr));
 
     FOXY_INFO << "Vulkan Device: " << device_name << " | Device driver version: " << driver_version->to_string()
         << " | Vulkan API version: " << api_version->to_string();
-
-    return std::make_pair(std::move(physical_device), std::move(logical_device));
   }
 
-  FN Context::create_surface(glfw::UniqueWindow& window) -> Unique<vk::raii::SurfaceKHR> {
+  void Context::create_surface(glfw::UniqueWindow& window) {
     VkSurfaceKHR raw_surface;
     auto result = static_cast<vk::Result>(
         glfwCreateWindowSurface(static_cast<VkInstance>(**instance_), window.get(), nullptr, &raw_surface)
     );
-    auto vk_surface = vk::createResultValueType(result, raw_surface);
-    auto unique_surface = std::make_unique<vk::raii::SurfaceKHR>(*instance_, vk_surface);
+    surface_ = std::make_unique<vk::raii::SurfaceKHR>(*instance_, vk::createResultValueType(result, raw_surface));
 
-    auto surface_formats = physical_device_->getSurfaceFormatsKHR(**unique_surface);
+    auto surface_formats = physical_device_->getSurfaceFormatsKHR(**surface_);
     if (surface_formats.size() == 1 && surface_formats[0].format == vk::Format::eUndefined) {
       color_format_ = std::make_unique<vk::Format>(vk::Format::eB8G8R8A8Unorm);
     } else {
       color_format_ = std::make_unique<vk::Format>(surface_formats[0].format);
     }
     color_space_ = std::make_unique<vk::ColorSpaceKHR>(surface_formats[0].colorSpace);
-    queue_mode_index_ = best_queue(vk::QueueFlagBits::eGraphics);
-
-    return std::move(unique_surface);
+    queue_mode_index_ = find_queue(vk::QueueFlagBits::eGraphics);
   }
 
-  FN Context::best_queue(const vk::QueueFlags& flags) const -> u32 {
+  auto Context::find_queue(const vk::QueueFlags& flags) const -> u32 {
     auto best_match = u32{ VK_QUEUE_FAMILY_IGNORED };
     auto best_match_extra_flags = vk::QueueFlags{ VK_QUEUE_FLAG_BITS_MAX_ENUM };
     auto queue_count = size_t{ queue_family_properties_.size() };
@@ -179,23 +176,85 @@ namespace foxy::vulkan {
     return best_match;
   }
 
-  auto Context::get_available_layers() -> std::set<std::string> {
-    std::set<std::string> result;
-    auto layers = vk::enumerateInstanceLayerProperties();
-    for (auto layer : layers) {
-      result.insert(layer.layerName);
-    }
-    return result;
-  }
-
-  auto Context::filter_layers(const std::list<std::string>& desiredLayers) -> std::vector<const char*> {
-    static std::set<std::string> validLayerNames = get_available_layers();
-    std::vector<const char*> result;
-    for (const auto& string : desiredLayers) {
-      if (validLayerNames.count(string) != 0) {
-        result.push_back(string.c_str());
+  auto Context::get_enabled_extensions() -> std::vector<const char*> {
+    std::set<const char*> required_instance_extensions{};
+    // GLFW
+    glfw_extensions_ = glfw::required_instance_extensions();
+    for (const auto& extension: glfw_extensions_) {
+      if (required_instance_extensions.count(extension) == 0) {
+        required_instance_extensions.insert(extension);
       }
     }
-    return result;
+    // Vulkan
+    auto extension_count = u32{ 0 };
+    vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr);
+    instance_extensions_ = std::vector<VkExtensionProperties>{ extension_count };
+    vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, instance_extensions_.data());
+    for (const auto& extension: instance_extensions_) {
+      if (required_instance_extensions.count(extension.extensionName) == 0) {
+        required_instance_extensions.insert(extension.extensionName);
+      }
+    }
+
+    if (enable_validation_ && required_instance_extensions.count(VK_EXT_DEBUG_REPORT_EXTENSION_NAME) == 0) {
+      required_instance_extensions.insert(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+    }
+
+    FOXY_DEBUG << "Vulkan Extension Count: " << required_instance_extensions.size();
+    std::stringstream exts;
+    for (const auto& extension: required_instance_extensions) {
+      exts << extension << " | ";
+    }
+    FOXY_DEBUG << "Vulkan Extensions: " << exts.str();
+
+    return {required_instance_extensions.begin(), required_instance_extensions.end()};
+  }
+
+  auto Context::check_validation_layer_support() -> bool {
+    auto layer_count = u32{ 0 };
+    vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
+    auto layer_properties = std::vector<VkLayerProperties>{ layer_count };
+    vkEnumerateInstanceLayerProperties(&layer_count, layer_properties.data());
+
+    FOXY_DEBUG << "Vulkan Layer Count: " << layer_properties.size();
+    std::stringstream lyrs;
+    for (const auto& layer: layer_properties) {
+      lyrs << layer.layerName << " | ";
+    }
+    FOXY_DEBUG << "Vulkan Layers: " << lyrs.str();
+
+    for (const auto& layer_name: validation_layer_names_) {
+      auto layer_found{ false };
+      for (const auto& layer: layer_properties) {
+        if (std::strcmp(layer_name, layer.layerName) == 0) {
+          layer_found = true;
+          break;
+        }
+      }
+
+      if (!layer_found) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  void Context::setup_debug_messenger() {
+    if (!enable_validation_) {
+      return;
+    }
+
+    auto callback_create_info = vk::DebugUtilsMessengerCreateInfoEXT{
+      .messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eError | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning,
+      .messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation,
+      .pfnUserCallback = (PFN_vkDebugUtilsMessengerCallbackEXT)(vulkan_error_callback),
+    };
+
+    try {
+      debug_messenger_ = std::make_unique<vk::raii::DebugUtilsMessengerEXT>(*instance_, callback_create_info);
+    } catch (const std::exception& e) {
+      FOXY_FATAL << "Failed to set up debug messenger.";
+    }
   }
 }

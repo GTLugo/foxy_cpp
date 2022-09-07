@@ -31,7 +31,6 @@
   #define FOXY_ASSERT(x) DCHECK(x)
 #endif
 
-#define FN auto
 #define MAKE_UNIQUE(x) std::make_unique<decltype(x)>(x)
 
 #define BIT(x) (1 << x)

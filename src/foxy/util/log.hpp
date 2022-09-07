@@ -6,6 +6,10 @@
 namespace foxy {
   class Log {
   public:
+    ~Log() {
+      FOXY_INFO << "Foxy shutdown: Otsukon deshita! Bye bye!";
+    }
+
     static void init() {
       std::filesystem::create_directories("./tmp/logs");
       el::Configurations conf("./res/foxy/log_config.conf");

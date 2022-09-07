@@ -11,7 +11,7 @@ auto main(int, char**) -> int {
         .run();
     return EXIT_SUCCESS;
   } catch (const std::exception& e) {
-    std::clog << e.what();
+    FOXY_FATAL << "APP EXCEPTION: " << e.what();
     return EXIT_FAILURE;
   }
 }

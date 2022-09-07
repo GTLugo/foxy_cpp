@@ -44,7 +44,14 @@ target_precompile_headers(${TARGET_NAME} PUBLIC "../include/foxy/internal/fxpch.
 # ===================================================
 
 # Boost
+# TODO: https://www.boost.org/doc/libs/1_80_0/tools/bcp/doc/html/index.html
+#target_include_directories(${TARGET_NAME}
+#    PUBLIC
+#    "../extern/boost"
+#    )
+set(Boost_USE_STATIC_LIBS    ON)
 set(Boost_USE_STATIC_RUNTIME ON)
+set(Boost_USE_MULTITHREADED  ON)
 find_package(Boost REQUIRED
     COMPONENTS
     container

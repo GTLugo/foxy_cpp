@@ -38,13 +38,13 @@ namespace foxy {
     void set_fullscreen(bool enabled);
     void set_hidden(bool hidden);
 
-    [[nodiscard]] FN title() const -> std::string { return state_.title; }
+    [[nodiscard]] auto title() const -> std::string { return state_.title; }
     [[nodiscard]] auto native() -> glfw::UniqueWindow&;
-    [[nodiscard]] FN bounds() const -> Rect { return state_.bounds; }
-    [[nodiscard]] FN vsync() const -> bool { return state_.vsync; }
-    [[nodiscard]] FN fullscreen() const -> bool { return state_.vsync; }
-    [[nodiscard]] FN hidden() const -> bool { return state_.hidden; }
-    [[nodiscard]] FN running() const -> bool;
+    [[nodiscard]] auto bounds() const -> Rect { return state_.bounds; }
+    [[nodiscard]] auto vsync() const -> bool { return state_.vsync; }
+    [[nodiscard]] auto fullscreen() const -> bool { return state_.vsync; }
+    [[nodiscard]] auto hidden() const -> bool { return state_.hidden; }
+    [[nodiscard]] auto running() const -> bool;
 
   private:
     struct State {

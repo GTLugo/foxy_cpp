@@ -8,6 +8,7 @@ namespace foxy {
   class Window;
   template<class... Args>
   class Event;
+  class Log;
 
   struct AppCreateInfo {
     std::string title{ "FOXY FRAMEWORK" };
@@ -43,6 +44,7 @@ namespace foxy {
   private:
     static inline bool instantiated_{ false };
     bool running_{ true };
+    Unique<Log> dummy_log_; // this just allows for logging upon full destruction of App
 
     Unique<Window> window_;
 

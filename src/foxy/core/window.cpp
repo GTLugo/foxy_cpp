@@ -57,6 +57,7 @@ namespace foxy {
 
   Window::~Window() {
     instantiated_ = false;
+    FOXY_TRACE << "Destroying Window";
   }
 
   void Window::poll_events() {
@@ -107,7 +108,7 @@ namespace foxy {
 
   auto Window::native() -> glfw::UniqueWindow& { return glfw_window_; }
 
-  FN Window::running() const -> bool {
+  auto Window::running() const -> bool {
     return !static_cast<bool>(glfwWindowShouldClose(glfw_window_.get()));
   }
 }

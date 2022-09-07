@@ -21,37 +21,40 @@ namespace foxy::vulkan {
     using DeviceFeatures = vk::PhysicalDeviceFeatures;
     using DeviceMemoryProperties = vk::PhysicalDeviceMemoryProperties;
     using QueueFlags = vk::Flags<vk::QueueFlagBits>;
+    using DevicePair = std::pair<Unique<PhysicalDevice>, Unique<LogicalDevice>>;
 
   public:
     Context(glfw::UniqueWindow& window);
     ~Context();
 
-    FN instance() -> Unique<Instance>&;
-    FN physical_device() -> Unique<PhysicalDevice>&;
-    FN logical_device() -> Unique<LogicalDevice>&;
-    FN surface() -> Unique<Surface>&;
-    FN native() -> Unique<VulkanContext>&;
+    [[nodiscard]] auto instance() -> Unique<Instance>&;
+    [[nodiscard]] auto physical_device() -> Unique<PhysicalDevice>&;
+    [[nodiscard]] auto logical_device() -> Unique<LogicalDevice>&;
+    [[nodiscard]] auto surface() -> Unique<Surface>&;
+    [[nodiscard]] auto native() -> Unique<VulkanContext>&;
 
-    FN best_queue(const QueueFlags& flags) const -> u32;
+    [[nodiscard]] auto find_queue(const QueueFlags& flags) const -> u32;
 
   private:
     Unique<VulkanContext> context_;
     Unique<Instance> instance_;
-    bool enable_validation_{
-    #ifdef FOXY_ENABLE_VALIDATION_LAYERS
-      true
-    #else
-      false
-    #endif
+    std::vector<const char*> glfw_extensions_;
+    std::vector<VkExtensionProperties> instance_extensions_;
+    std::vector<const char*> enabled_extensions_;
+    static inline const bool enable_validation_{
+      #ifdef NDEBUG
+        false
+      #else
+        true
+      #endif
     };
-    static inline std::list<std::string> validation_layer_names_ = {
-      // This is a meta layer that enables all of the standard
-      // validation layers in the correct order :
-      // threading, parameter_validation, device_limits, object_tracker, image, core_validation, swapchain, and unique_objects
-      "VK_LAYER_LUNARG_assistant_layer", "VK_LAYER_LUNARG_standard_validation"
+    static inline const std::vector<const char*> validation_layer_names_ = {
+        "VK_LAYER_KHRONOS_validation"
     };
+    Unique<vk::raii::DebugUtilsMessengerEXT> debug_messenger_;
 
     Unique<PhysicalDevice> physical_device_;
+    vk::PhysicalDeviceFeatures2 physical_device_features_2;
     Unique<LogicalDevice> logical_device_;
     std::vector<vk::QueueFamilyProperties> queue_family_properties_;
 
@@ -60,11 +63,12 @@ namespace foxy::vulkan {
     Unique<ColorSpace> color_space_;
     u32 queue_mode_index_{ UINT32_MAX };
 
-    auto create_instance() -> Unique<Instance>;
-    auto find_devices() -> std::pair<Unique<PhysicalDevice>, Unique<LogicalDevice>>;
-    auto create_surface(glfw::UniqueWindow& window) -> Unique<Surface>;
+    void create_instance();
+    void find_devices();
+    void create_surface(glfw::UniqueWindow& window);
 
-    static FN get_available_layers() -> std::set<std::string>;
-    static FN filter_layers(const std::list<std::string>& desiredLayers) -> std::vector<const char*>;
+    auto get_enabled_extensions() -> std::vector<const char*>;
+    auto check_validation_layer_support() -> bool;
+    void setup_debug_messenger();
   };
 }
