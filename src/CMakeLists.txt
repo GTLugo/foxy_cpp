@@ -17,6 +17,7 @@ set(SOURCE_FILES
     "foxy/ookami/vulkan/context.cpp"
     "foxy/ookami/vulkan/swapchain.cpp"
     "foxy/ookami/renderer.cpp"
+    "foxy/koyote/ecs.cpp"
 )
 
 # Add source to this project's executable.

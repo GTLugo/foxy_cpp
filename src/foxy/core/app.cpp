@@ -2,6 +2,7 @@
 
 #include "foxy/core/window.hpp"
 #include "foxy/core/event_system/event.hpp"
+#include "foxy/koyote/ecs.hpp"
 
 namespace foxy {
   App::App(const foxy::AppCreateInfo& properties) {
