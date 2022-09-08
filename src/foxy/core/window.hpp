@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "foxy/api/glfw/unique_window.hpp"
+#include "foxy/core/window/glfw/unique_window.hpp"
 
 namespace foxy::glfw {
   class Context;

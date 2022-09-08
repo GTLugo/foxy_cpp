@@ -2,10 +2,10 @@
 
 #include "foxy/core/event_system/event.hpp"
 #include "foxy/ookami/renderer.hpp"
-#include "foxy/api/glfw/context.hpp"
+#include "foxy/core/window/glfw/context.hpp"
 // this is here to expose vulkan functions to glfw
 #define FOXY_GLFW_INCLUDE_VULKAN
-#include "foxy/api/glfw/glfw.hpp"
+#include "foxy/core/window/glfw/glfw.hpp"
 
 namespace foxy {
   Window::State::State(const WindowCreateInfo& properties)

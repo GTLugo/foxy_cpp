@@ -1,7 +1,7 @@
 #pragma once
 
-#include "foxy/api/glfw/unique_window.hpp"
-#include "foxy/api/vulkan/vulkan.hpp"
+#include "foxy/core/window/glfw/unique_window.hpp"
+#include "vulkan.hpp"
 
 namespace foxy {
   class Version;

@@ -11,11 +11,11 @@ set(SOURCE_FILES
     "foxy/core/app.cpp"
     "foxy/core/window.cpp"
     "foxy/core/event_system/event.cpp"
-    "foxy/api/glfw/glfw.cpp"
-    "foxy/api/glfw/context.cpp"
-    "foxy/api/glfw/unique_window.cpp"
-    "foxy/api/vulkan/context.cpp"
-    "foxy/api/vulkan/swapchain.cpp"
+    "foxy/core/window/glfw/glfw.cpp"
+    "foxy/core/window/glfw/context.cpp"
+    "foxy/core/window/glfw/unique_window.cpp"
+    "foxy/ookami/vulkan/context.cpp"
+    "foxy/ookami/vulkan/swapchain.cpp"
     "foxy/ookami/renderer.cpp"
 )
 

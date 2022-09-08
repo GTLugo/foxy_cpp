@@ -1,8 +1,8 @@
 #include "context.hpp"
 
-#include "foxy/api/vulkan/version.hpp"
+#include "version.hpp"
 #define FOXY_GLFW_INCLUDE_VULKAN
-#include "foxy/api/glfw/glfw.hpp"
+#include "foxy/core/window/glfw/glfw.hpp"
 
 namespace foxy::vulkan {
   inline static VKAPI_ATTR auto vulkan_error_callback(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
@@ -97,12 +97,12 @@ namespace foxy::vulkan {
     auto layer_properties = std::vector<VkLayerProperties>{ layer_count };
     vkEnumerateInstanceLayerProperties(&layer_count, layer_properties.data());
 
-    FOXY_DEBUG << "Vulkan Layer Count: " << layer_properties.size();
     std::stringstream lyrs;
+    lyrs << '(' << layer_properties.size() << "):";
     for (const auto& layer: layer_properties) {
-      lyrs << layer.layerName << " | ";
+      lyrs << " | " << layer.layerName;
     }
-    FOXY_DEBUG << "Vulkan Layers: " << lyrs.str();
+    FOXY_DEBUG << "Available Vulkan Layers " << lyrs.str();
 
     for (const auto& layer_name: validation_layer_names_) {
       auto layer_found{ false };
@@ -145,7 +145,7 @@ namespace foxy::vulkan {
     // GLFW
     extension_data_.window_extensions = glfw::required_instance_extensions();
     for (const auto& extension: extension_data_.window_extensions) {
-      if (required_instance_extensions.count(extension) == 0) {
+      if (!required_instance_extensions.contains(extension)) {
         required_instance_extensions.insert(extension);
       }
     }
@@ -155,21 +155,21 @@ namespace foxy::vulkan {
     extension_data_.instance_extensions = std::vector<VkExtensionProperties>{ extension_count };
     vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, extension_data_.instance_extensions.data());
     for (const auto& extension: extension_data_.instance_extensions) {
-      if (required_instance_extensions.count(extension.extensionName) == 0) {
+      if (!required_instance_extensions.contains(extension.extensionName)) {
         required_instance_extensions.insert(extension.extensionName);
       }
     }
 
-    if (enable_validation_ && required_instance_extensions.count(VK_EXT_DEBUG_REPORT_EXTENSION_NAME) == 0) {
+    if (enable_validation_ && !required_instance_extensions.contains(VK_EXT_DEBUG_REPORT_EXTENSION_NAME)) {
       required_instance_extensions.insert(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
     }
 
-    FOXY_DEBUG << "Vulkan Extension Count: " << required_instance_extensions.size();
     std::stringstream exts;
+    exts << '(' << required_instance_extensions.size() << "):";
     for (const auto& extension: required_instance_extensions) {
-      exts << extension << " | ";
+      exts << " | " << extension;
     }
-    FOXY_DEBUG << "Vulkan Extensions: " << exts.str();
+    FOXY_DEBUG << "Enabled Vulkan Extensions " << exts.str();
 
     return {required_instance_extensions.begin(), required_instance_extensions.end()};
   }
@@ -241,12 +241,24 @@ namespace foxy::vulkan {
   }
 
   auto Context::check_device_extension_support(const PhysicalDevice& device) -> bool {
-    auto extensions{ device.enumerateDeviceExtensionProperties() };
-    std::set<std::string> required_instance_extensions{extension_data_.device_extensions.begin(), extension_data_.device_extensions.end()};
-    for (const auto& extension: extensions) {
-      required_instance_extensions.erase(extension.extensionName);
-    }
-    return required_instance_extensions.empty(); // this will be empty if all the ext.s were successfully matched and erased
+    std::set<std::string> required_instance_extensions{
+      extension_data_.device_extensions.begin(),
+      extension_data_.device_extensions.end()
+    };
+
+    // transform vector<Properties> to set<string>
+    std::set<std::string> available_extensions{};
+    std::ranges::transform(
+        device.enumerateDeviceExtensionProperties(),
+        std::inserter(available_extensions, available_extensions.end()),
+        [&](vk::ExtensionProperties& properties) {
+      return properties.extensionName;
+    });
+
+    // make sure none of the required extensions are missing from the available extensions
+    return !std::ranges::any_of(required_instance_extensions, [&](const std::string& extension) {
+      return !available_extensions.contains(extension);
+    });
   }
 
   auto Context::query_swapchain_support(const Context::PhysicalDevice& device) -> SwapchainSupportInfo {

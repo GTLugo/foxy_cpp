@@ -1,7 +1,7 @@
 #include "renderer.hpp"
 
-#include "foxy/api/vulkan/context.hpp"
-#include "foxy/api/vulkan/swapchain.hpp"
+#include "foxy/ookami/vulkan/context.hpp"
+#include "foxy/ookami/vulkan/swapchain.hpp"
 #include "foxy/core/window.hpp"
 
 namespace foxy::ookami {

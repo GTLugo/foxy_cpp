@@ -4,7 +4,7 @@
 
 #include "unique_window.hpp"
 
-#include "foxy/api/glfw/glfw.hpp"
+#include "glfw.hpp"
 
 namespace foxy {
   void glfw::WindowDestructor::operator()(GLFWwindow* ptr) {

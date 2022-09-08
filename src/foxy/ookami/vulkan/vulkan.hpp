@@ -29,4 +29,10 @@ namespace foxy::vulkan {
     std::vector<vk::SurfaceFormatKHR> formats;
     std::vector<vk::PresentModeKHR> present_modes;
   };
+
+  struct SwapchainInfo {
+    vk::SurfaceFormatKHR format;
+    vk::PresentModeKHR present_mode;
+    vk::Extent2D extent;
+  };
 }
