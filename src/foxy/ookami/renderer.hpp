@@ -8,6 +8,8 @@ namespace foxy {
   namespace vulkan {
     class Context;
     class Swapchain;
+    class Shader;
+    class Pipeline;
   }
 
   class Window;
@@ -22,5 +24,6 @@ namespace foxy::ookami {
   private:
     Shared<vulkan::Context> context_;
     Unique<vulkan::Swapchain> swapchain_;
+    Unique<vulkan::Pipeline> pipeline_;
   };
 }

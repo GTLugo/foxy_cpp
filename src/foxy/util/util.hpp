@@ -120,4 +120,9 @@ namespace foxy {
     NoCopyOrMove(NoCopyOrMove&& other) = delete;
     NoCopyOrMove& operator=(NoCopyOrMove&& other) = delete;
   };
+
+  class UUID: public uuid {
+  public:
+    UUID(): uuid{boost::uuids::random_generator()()} {}
+  };
 }

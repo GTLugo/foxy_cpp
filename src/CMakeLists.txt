@@ -16,6 +16,8 @@ set(SOURCE_FILES
     "foxy/core/window/glfw/unique_window.cpp"
     "foxy/ookami/vulkan/context.cpp"
     "foxy/ookami/vulkan/swapchain.cpp"
+    "foxy/ookami/vulkan/pipeline.cpp"
+    "foxy/ookami/vulkan/shader.cpp"
     "foxy/ookami/renderer.cpp"
     "foxy/koyote/ecs.cpp"
 )
