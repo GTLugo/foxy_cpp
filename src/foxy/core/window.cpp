@@ -32,6 +32,8 @@ namespace foxy {
     FOXY_ASSERT(!instantiated_) << "Attempted second instantiation of foxy::App";
     instantiated_ = true;
 
+    FOXY_TRACE << "Creating Window...";
+
     // Create GLFW window
     glfwWindowHint(GLFW_RESIZABLE, false);
     glfwWindowHint(GLFW_VISIBLE, false);
@@ -52,7 +54,9 @@ namespace foxy {
 
     renderer_ = std::make_unique<ookami::Renderer>(*this);
 
-    FOXY_TRACE << "Created Window";
+    set_hidden(false);
+
+    FOXY_TRACE << "Window ready.";
   }
 
   Window::~Window() {

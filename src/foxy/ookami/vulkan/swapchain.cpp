@@ -8,7 +8,7 @@ namespace foxy::vulkan {
       swapchain_{create_swapchain()},
       swap_images_{swapchain_->getImages()},
       swap_image_views_{create_image_views()} {
-
+    FOXY_TRACE << "Created Swapchain";
   }
 
   Swapchain::~Swapchain() {

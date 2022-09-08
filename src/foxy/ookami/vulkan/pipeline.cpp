@@ -14,6 +14,8 @@ namespace foxy::vulkan {
       "res/foxy/shaders/simple_shader_vertex.spv",
       "res/foxy/shaders/simple_shader_fragment.spv"
     );
+
+    FOXY_TRACE << "Created Graphics Pipeline";
   }
 
   Pipeline::~Pipeline() = default;

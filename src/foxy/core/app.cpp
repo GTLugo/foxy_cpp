@@ -36,8 +36,6 @@ namespace foxy {
         properties.borderless,
     });
 
-    window_->set_hidden(false);
-
     main_awake_event_ = std::make_unique<Event<>>();
     main_start_event_ = std::make_unique<Event<>>();
     main_poll_event_ = std::make_unique<Event<>>();

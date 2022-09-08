@@ -50,7 +50,7 @@ namespace foxy::vulkan {
       logical_device_{create_logical_device()},
       graphics_queue_{std::make_unique<vk::raii::Queue>(logical_device_->getQueue(queue_family_indices_.graphics.value(), 0))},
       present_queue_{std::make_unique<vk::raii::Queue>(logical_device_->getQueue(queue_family_indices_.present.value(), 0))} {
-
+    FOXY_TRACE << "Created Vulkan Context";
   }
 
   Context::~Context() = default;
