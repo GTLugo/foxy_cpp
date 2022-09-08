@@ -7,9 +7,9 @@
 namespace foxy {
   namespace vulkan {
     class Context;
+    class Swapchain;
   }
 
-  class Swapchain;
   class Window;
 }
 
@@ -21,6 +21,6 @@ namespace foxy::ookami {
     ~Renderer();
   private:
     Shared<vulkan::Context> context_;
-    Unique<Swapchain> swapchain_;
+    Unique<vulkan::Swapchain> swapchain_;
   };
 }

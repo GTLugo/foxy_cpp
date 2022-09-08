@@ -8,31 +8,25 @@
 #include <vulkan/vulkan_raii.hpp>
 
 namespace foxy::vulkan {
-  struct Surface {
-    using Format = vk::Format;
-    using ColorSpace = vk::ColorSpaceKHR;
-
-    vk::raii::SurfaceKHR native;
-    Format color_format;
-    ColorSpace color_space;
-  };
-
   struct ExtensionData {
     std::vector<const char*> window_extensions;
     std::vector<VkExtensionProperties> instance_extensions;
     std::vector<const char*> enabled_extensions;
+    std::vector<const char*> device_extensions;
   };
 
   struct QueueFamilyIndices {
-    enum QueueID {
-      GRAPHICS = 0,
-    };
-
     std::optional<u32> graphics;
-    float graphics_priority = 1.f;
+    std::optional<u32> present;
 
-    auto complete() const -> bool {
-      return graphics.has_value();
+    [[nodiscard]] auto complete() const -> bool {
+      return graphics.has_value() && present.has_value();
     }
+  };
+
+  struct SwapchainSupportInfo {
+    vk::SurfaceCapabilitiesKHR capabilities;
+    std::vector<vk::SurfaceFormatKHR> formats;
+    std::vector<vk::PresentModeKHR> present_modes;
   };
 }

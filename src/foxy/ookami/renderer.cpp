@@ -6,13 +6,13 @@
 
 namespace foxy::ookami {
   Renderer::Renderer(Window& window) {
-    context_ = std::make_shared<vulkan::Context>(
-        window.native()
-        #ifndef FOXY_DEBUG_MODE
-        ,false
-        #endif
-    );
-    //swapchain_ = std::make_unique<Swapchain>(context_, window.bounds());
+    #ifdef FOXY_DEBUG_MODE
+    context_ = std::make_shared<vulkan::Context>(window.native());
+    #else
+    context_ = std::make_shared<vulkan::Context>(window.native(), false);
+    #endif
+
+    swapchain_ = std::make_unique<vulkan::Swapchain>(context_);
   }
 
   Renderer::~Renderer() = default;
