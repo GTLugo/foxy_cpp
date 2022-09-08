@@ -60,6 +60,10 @@ namespace foxy {
     FOXY_TRACE << "Destroying Window";
   }
 
+  auto Window::operator*() -> glfw::UniqueWindow& {
+    return native();
+  }
+
   void Window::poll_events() {
     glfwPollEvents();
   }
@@ -67,10 +71,9 @@ namespace foxy {
   void Window::close() {
     FOXY_TRACE << "Window close requested";
     glfwSetWindowShouldClose(glfw_window_.get(), true);
-    //state_.running = false;
   }
 
-  void Window::set_icon(byte* image, i32 width, i32 height) {
+  void Window::set_icon(i8* image, i32 width, i32 height) {
 
   }
 

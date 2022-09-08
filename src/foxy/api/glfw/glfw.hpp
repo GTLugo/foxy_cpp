@@ -19,6 +19,5 @@
 
 namespace foxy::glfw {
   auto required_instance_extensions_strings() -> std::vector<std::string>;
-
   auto required_instance_extensions() -> std::vector<const char*>;
 }

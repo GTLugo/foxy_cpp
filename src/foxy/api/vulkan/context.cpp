@@ -55,6 +55,10 @@ namespace foxy::vulkan {
 
   Context::~Context() = default;
 
+  auto Context::operator*() -> Unique<VulkanContext>& {
+    return native();
+  }
+
   auto Context::window() -> glfw::UniqueWindow& {
     return window_;
   }

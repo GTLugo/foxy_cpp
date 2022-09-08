@@ -26,6 +26,8 @@ namespace foxy::vulkan {
     Context(glfw::UniqueWindow& window, bool enable_validation = true);
     ~Context();
 
+    auto operator*() -> Unique<VulkanContext>&;
+
     [[nodiscard]] auto window() -> glfw::UniqueWindow&;
     [[nodiscard]] auto native() -> Unique<VulkanContext>&;
     [[nodiscard]] auto instance() -> Unique<Instance>&;

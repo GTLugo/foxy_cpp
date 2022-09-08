@@ -32,10 +32,12 @@ namespace foxy {
     Window(const WindowCreateInfo& properties);
     ~Window();
 
+    auto operator*() -> glfw::UniqueWindow&;
+
     void poll_events();
     void close();
 
-    void set_icon(byte* image, i32 width, i32 height);
+    void set_icon(i8* image, i32 width, i32 height);
     void set_pos(ivec2 position);
     void set_vsync(bool enabled);
     void set_fullscreen(bool enabled);
