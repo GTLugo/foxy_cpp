@@ -37,6 +37,37 @@
       "displayName": "Release: x64-windows",
       "name": "x64_windows_release",
       "inherits": "windows-base"
+    },
+    {
+      "name": "linux-base",
+      "cacheVariables": {
+        "Boost_NO_WARN_NEW_VERSIONS": true
+      },
+      "generator": "Ninja",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "installDir": "${sourceDir}/out/install/${presetName}",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
+          "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}"
+        }
+      },
+      "hidden": true
+    },
+    {
+      "displayName": "Debug: linux",
+      "name": "linux_debug",
+      "inherits": "linux-base"
+    },
+    {
+      "displayName": "Release: linux",
+      "name": "linux_release",
+      "inherits": "linux-base"
     }
   ],
   "buildPresets": [
@@ -51,16 +82,18 @@
       "name": "x64_windows_release_build",
       "configurePreset": "x64_windows_release",
       "configuration": "Release"
-    }
-  ],
-  "testPresets": [
-    {
-      "name": "x64_windows_debug",
-      "configurePreset": "x64_windows_debug"
     },
     {
-      "name": "x64_windows_release",
-      "configurePreset": "x64_windows_release"
+      "displayName": "linux_debug",
+      "name": "linux_debug_build",
+      "configurePreset": "linux_debug",
+      "configuration": "Debug"
+    },
+    {
+      "displayName": "linux_release",
+      "name": "linux_release_build",
+      "configurePreset": "linux_release",
+      "configuration": "Release"
     }
   ]
 }

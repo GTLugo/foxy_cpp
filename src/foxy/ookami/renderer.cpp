@@ -8,7 +8,7 @@ namespace foxy::ookami {
   Renderer::Renderer(Window& window) {
     context_ = std::make_shared<vulkan::Context>(
         window.native()
-        #ifdef NDEBUG
+        #ifndef FOXY_DEBUG_MODE
         ,false
         #endif
     );

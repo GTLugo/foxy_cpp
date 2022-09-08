@@ -20,6 +20,11 @@ namespace foxy {
     FOXY_INFO << R"(||                             ||)";
     FOXY_INFO << R"([]=============================[])";
     FOXY_INFO << "Foxy startup: Kon kon kitsune! Hi, friends!";
+    #ifdef FOXY_DEBUG_MODE
+    FOXY_INFO << "Build mode: DEBUG";
+    #else
+    FOXY_INFO << "Build mode: RELEASE";
+    #endif
 
     window_ = std::make_unique<Window>(WindowCreateInfo{
         properties.title,
