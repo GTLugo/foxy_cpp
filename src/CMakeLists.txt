@@ -13,7 +13,7 @@ set(SOURCE_FILES
     "foxy/core/event_system/event.cpp"
     "foxy/core/window/glfw/glfw.cpp"
     "foxy/core/window/glfw/context.cpp"
-    "foxy/core/window/glfw/unique_window.cpp"
+    #"foxy/core/window/glfw/unique_window.cpp"
     "foxy/ookami/vulkan/context.cpp"
     "foxy/ookami/vulkan/swapchain.cpp"
     "foxy/ookami/vulkan/pipeline.cpp"

@@ -8,14 +8,14 @@
 #include "shader.hpp"
 
 namespace foxy::vulkan {
-  Pipeline::Pipeline(Shared<vulkan::Context> context)
+  Pipeline::Pipeline(Shared<Context> context)
     : context_{std::move(context)} {
     shader_ = std::make_shared<Shader>(
       "res/foxy/shaders/simple_shader_vertex.spv",
       "res/foxy/shaders/simple_shader_fragment.spv"
     );
 
-    FOXY_TRACE << "Created Graphics Pipeline";
+    FOXY_TRACE << "Created Vulkan pipeline.";
   }
 
   Pipeline::~Pipeline() = default;

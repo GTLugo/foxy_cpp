@@ -9,10 +9,10 @@
 
 namespace foxy::vulkan {
   struct ExtensionData {
-    std::vector<const char*> window_extensions;
-    std::vector<VkExtensionProperties> instance_extensions;
-    std::vector<const char*> enabled_extensions;
-    std::vector<const char*> device_extensions;
+    std::vector<const char*> window_extensions{};
+    std::vector<VkExtensionProperties> instance_extensions{};
+    std::vector<const char*> enabled_extensions{};
+    std::vector<const char*> device_extensions{};
   };
 
   struct QueueFamilyIndices {
@@ -26,8 +26,8 @@ namespace foxy::vulkan {
 
   struct SwapchainSupportInfo {
     vk::SurfaceCapabilitiesKHR capabilities;
-    std::vector<vk::SurfaceFormatKHR> formats;
-    std::vector<vk::PresentModeKHR> present_modes;
+    std::vector<vk::SurfaceFormatKHR> formats{};
+    std::vector<vk::PresentModeKHR> present_modes{};
   };
 
   struct SwapchainInfo {

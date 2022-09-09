@@ -12,10 +12,12 @@ namespace foxy::vulkan {
                  const std::optional<std::filesystem::path>& fragment_path) {
     if (vertex_path.has_value()) {
       shader_code_.insert({Type::VERTEX, read_file(vertex_path.value())});
+      FOXY_TRACE << "Read shader: " << vertex_path.value().filename();
     }
 
     if (fragment_path.has_value()) {
-      shader_code_.insert({Type::VERTEX, read_file(fragment_path.value())});
+      shader_code_.insert({Type::FRAGMENT, read_file(fragment_path.value())});
+      FOXY_TRACE << "Read shader: " << fragment_path.value().filename();
     }
   }
 
@@ -31,8 +33,12 @@ namespace foxy::vulkan {
     std::vector<char> buffer(file_size);
 
     file.seekg(0);
-    file.read(buffer.data(), file_size);
+    file.read(buffer.data(), static_cast<std::streamsize>(file_size));
 
     return buffer;
   }
+
+  auto Shader::module(Shader::Type type) const -> const vk::raii::ShaderModule& { return shader_modules_.at(type); }
+
+  auto Shader::bytecode(Shader::Type type) const -> const std::vector<char>& { return shader_code_.at(type); }
 }

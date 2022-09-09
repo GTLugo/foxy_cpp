@@ -4,21 +4,19 @@
 
 #pragma once
 
-namespace foxy {
-  namespace vulkan {
-    class Context;
-    class Swapchain;
-    class Shader;
-    class Pipeline;
-  }
+class GLFWwindow;
 
-  class Window;
+namespace foxy::vulkan {
+  class Context;
+  class Swapchain;
+  class Shader;
+  class Pipeline;
 }
 
 namespace foxy::ookami {
   class Renderer {
   public:
-    Renderer(Window& window);
+    Renderer(Unique<GLFWwindow, void(*)(GLFWwindow*)>& window);
 
     ~Renderer();
   private:

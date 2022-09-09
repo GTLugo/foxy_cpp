@@ -4,11 +4,7 @@
 
 #pragma once
 
-#include "foxy/core/window/glfw/unique_window.hpp"
-
-namespace foxy::glfw {
-  class Context;
-}
+class GLFWwindow;
 
 namespace foxy::ookami {
   class Renderer;
@@ -29,10 +25,10 @@ namespace foxy {
 
   class Window {
   public:
-    Window(const WindowCreateInfo& properties);
+    explicit Window(const WindowCreateInfo&& create_info);
     ~Window();
 
-    auto operator*() -> glfw::UniqueWindow&;
+    auto operator*() -> Unique<GLFWwindow, void(*)(GLFWwindow*)>&;
 
     void poll_events();
     void close();
@@ -43,48 +39,16 @@ namespace foxy {
     void set_fullscreen(bool enabled);
     void set_hidden(bool hidden);
 
-    [[nodiscard]] auto title() const -> std::string { return state_.title; }
-    [[nodiscard]] auto native() -> glfw::UniqueWindow&;
-    [[nodiscard]] auto bounds() const -> Rect { return state_.bounds; }
-    [[nodiscard]] auto vsync() const -> bool { return state_.vsync; }
-    [[nodiscard]] auto fullscreen() const -> bool { return state_.vsync; }
-    [[nodiscard]] auto hidden() const -> bool { return state_.hidden; }
+    [[nodiscard]] auto native() -> Unique<GLFWwindow, void(*)(GLFWwindow*)>&;
+    [[nodiscard]] auto title() const -> std::string;
+    [[nodiscard]] auto bounds() const -> Rect;
+    [[nodiscard]] auto vsync() const -> bool;
+    [[nodiscard]] auto fullscreen() const -> bool;
+    [[nodiscard]] auto hidden() const -> bool;
     [[nodiscard]] auto running() const -> bool;
 
   private:
-    struct State {
-      std::string title;
-      Rect bounds;
-      Rect bounds_before_fullscreen;
-      bool vsync;
-      bool fullscreen;
-      bool borderless;
-      bool hidden;
-      ivec2 cursor_pos{}, cursor_pos_prev{}, cursor_delta{};
-      bool running{true};
-
-      // Window events
-      Unique<Event<>> close_event;
-      // Input events
-      Unique<Event<>> key_event;
-      Unique<Event<>> modifier_event;
-      Unique<Event<>> mouse_event;
-      Unique<Event<>> cursor_event;
-      Unique<Event<>> scroll_event;
-
-      explicit State(const WindowCreateInfo& properties);
-    };
-
-    static inline bool instantiated_{ false };
-
-    // GLFW
-    Unique<glfw::Context> glfw_context_;
-    glfw::UniqueWindow glfw_window_;
-
-    // Foxy
-    State state_;
-    Unique<ookami::Renderer> renderer_;
-
-    void set_callbacks();
+    class Impl;
+    Unique<Impl> pImpl_;
   };
 }

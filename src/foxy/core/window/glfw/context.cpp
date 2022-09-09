@@ -5,8 +5,8 @@
 #include "context.hpp"
 
 // this is here to expose vulkan functions to glfw
-#include "foxy/ookami/vulkan/vulkan.hpp"
-#include "glfw.hpp"
+#define FOXY_GLFW_INCLUDE_VULKAN
+#include "foxy/core/window/glfw/glfw.hpp"
 
 namespace foxy::glfw {
   inline static void glfw_error_callback(int error, const char* message) {

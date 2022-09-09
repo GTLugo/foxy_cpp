@@ -5,7 +5,7 @@
 #pragma once
 
 namespace foxy::koyote {
-  class ecs {
+  class ECS {
 
   };
 } // foxy

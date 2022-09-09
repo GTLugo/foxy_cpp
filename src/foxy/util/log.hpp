@@ -6,6 +6,10 @@
 namespace foxy {
   class Log {
   public:
+    Log() {
+      Log::init();
+    }
+
     ~Log() {
       FOXY_INFO << "Foxy shutdown: Otsukon deshita! Bye bye!";
     }

@@ -4,17 +4,16 @@
 
 #pragma once
 
-#include "context.hpp"
-
 namespace foxy::vulkan {
   class Shader;
+  class Context;
 
   class Pipeline {
   public:
-    Pipeline(Shared<vulkan::Context> context);
+    Pipeline(Shared<Context> context);
     ~Pipeline();
   private:
-    Shared<vulkan::Context> context_;
+    Shared<Context> context_;
     Shared<Shader> shader_;
   };
 }  // foxy // vulkan

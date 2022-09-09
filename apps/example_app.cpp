@@ -3,7 +3,7 @@ REDIRECT_WINMAIN_TO_MAIN
 
 auto main(int, char**) -> int {
   try {
-    foxy::App{{
+    foxy::App{foxy::AppCreateInfo{
       .title = "Foxy Example App"
     }}.add_system_to_step()
         .add_global_data()
