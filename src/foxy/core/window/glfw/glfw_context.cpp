@@ -2,7 +2,7 @@
 // Created by galex on 9/3/2022.
 //
 
-#include "context.hpp"
+#include "glfw_context.hpp"
 
 // this is here to expose vulkan functions to glfw
 #define FOXY_GLFW_INCLUDE_VULKAN

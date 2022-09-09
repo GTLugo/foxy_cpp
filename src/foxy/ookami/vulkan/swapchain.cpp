@@ -1,7 +1,7 @@
 #include "swapchain.hpp"
 
-#include "foxy/ookami/vulkan/context.hpp"
-#include "foxy/core/window/glfw/context.hpp"
+#include "foxy/ookami/vulkan/vulkan_context.hpp"
+#include "foxy/core/window/glfw/glfw_context.hpp"
 #include "foxy/ookami/vulkan/vulkan.hpp"
 
 namespace foxy::vulkan {

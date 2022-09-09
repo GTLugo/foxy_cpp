@@ -12,7 +12,7 @@ namespace foxy::glfw {
 //      glfwDestroyWindow(ptr);
 //    }
 //  };
-  using UniqueWindow = Unique<GLFWwindow, void(*)(GLFWwindow*)>;
+  //using UniqueWindow = Unique<GLFWwindow, void(*)(GLFWwindow*)>;
 
   struct WindowCreateInfo {
     const std::string title{ "FOXY FRAMEWORK" };
@@ -20,8 +20,8 @@ namespace foxy::glfw {
     const int height{ 900 };
   };
 
-  [[nodiscard]] inline auto create_window(const glfw::WindowCreateInfo& create_info) -> UniqueWindow {
-    return UniqueWindow{
+  [[nodiscard]] inline auto create_window(const glfw::WindowCreateInfo& create_info) -> Unique<GLFWwindow, void(*)(GLFWwindow*)> {
+    return Unique<GLFWwindow, void(*)(GLFWwindow*)>{
       glfwCreateWindow(
         create_info.width,
         create_info.height,

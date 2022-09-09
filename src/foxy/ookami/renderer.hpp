@@ -6,22 +6,16 @@
 
 class GLFWwindow;
 
-namespace foxy::vulkan {
-  class Context;
-  class Swapchain;
-  class Shader;
-  class Pipeline;
-}
-
 namespace foxy::ookami {
   class Renderer {
-  public:
-    Renderer(Unique<GLFWwindow, void(*)(GLFWwindow*)>& window);
+    using UniqueWindow = Unique<GLFWwindow, void(*)(GLFWwindow*)>;
 
+  public:
+    explicit Renderer(UniqueWindow& window);
     ~Renderer();
+
   private:
-    Shared<vulkan::Context> context_;
-    Unique<vulkan::Swapchain> swapchain_;
-    Unique<vulkan::Pipeline> pipeline_;
+    class Impl;
+    Unique<Impl> pImpl_;
   };
 }

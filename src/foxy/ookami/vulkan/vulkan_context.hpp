@@ -23,14 +23,15 @@ namespace foxy::vulkan {
     using PhysicalDevice = vk::raii::PhysicalDevice;
     using LogicalDevice = vk::raii::Device;
     using Surface = vk::raii::SurfaceKHR;
+    using UniqueWindow = Unique<GLFWwindow, void(*)(GLFWwindow*)>;
 
   public:
-    explicit Context(Unique<GLFWwindow, void(*)(GLFWwindow*)>& window, bool enable_validation = true);
+    explicit Context(UniqueWindow& window, bool enable_validation = true);
     ~Context();
 
     auto operator*() -> VulkanContext&;
 
-    [[nodiscard]] auto window() -> Unique<GLFWwindow, void(*)(GLFWwindow*)>&;
+    [[nodiscard]] auto window() -> UniqueWindow&;
     [[nodiscard]] auto native() -> VulkanContext&;
     [[nodiscard]] auto instance() -> Instance&;
     [[nodiscard]] auto surface() -> Surface&;

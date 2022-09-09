@@ -2,6 +2,7 @@
 
 #include "foxy/core/window.hpp"
 #include "foxy/core/event_system/event.hpp"
+#include "foxy/ookami/renderer.hpp"
 #include "foxy/koyote/ecs.hpp"
 
 namespace foxy {
@@ -36,6 +37,10 @@ namespace foxy {
         create_info.fullscreen,
         create_info.borderless,
       });
+
+      renderer_ = std::make_unique<ookami::Renderer>(**window_);
+
+      window_->set_hidden(false);
     }
 
     ~Impl() {
@@ -64,6 +69,8 @@ namespace foxy {
     bool running_{ true };
     Log dummy_log_; // this just allows for logging upon full destruction of App
     Unique<Window> window_;
+
+    Unique<ookami::Renderer> renderer_;
 
     // Main Thread events
     Event<> main_awake_event_;

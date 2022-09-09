@@ -1,7 +1,7 @@
-#include "context.hpp"
+#include "vulkan_context.hpp"
 
 #include "foxy/ookami/vulkan/vulkan.hpp"
-#include "foxy/core/window/glfw/context.hpp"
+#include "foxy/core/window/glfw/glfw_context.hpp"
 #include "version.hpp"
 
 namespace foxy::vulkan {
@@ -10,18 +10,6 @@ namespace foxy::vulkan {
                                                       const vk::DebugUtilsMessengerCallbackDataEXT* callback_data,
                                                       void*) -> vk::Bool32 {
     std::stringstream msg{};
-//    switch (type) {
-//      case vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral:
-//        msg << "[GENR] ";
-//        break;
-//      case vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation:
-//        msg << "[VALD] ";
-//        break;
-//      case vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance:
-//        msg << "[PERF] ";
-//        break;
-//    }
-
     msg << callback_data->pMessage << " | code " << callback_data->messageIdNumber << ", " << callback_data->pMessageIdName;
     switch (severity) {
       case vk::DebugUtilsMessageSeverityFlagBitsEXT::eError:
@@ -40,7 +28,7 @@ namespace foxy::vulkan {
 
   class Context::Impl {
   public:
-    explicit Impl(glfw::UniqueWindow& window, bool enable_validation = true)
+    explicit Impl(UniqueWindow& window, bool enable_validation = true)
       : enable_validation_{enable_validation},
         window_{window},
         context_{vk::raii::Context{}},
@@ -64,7 +52,7 @@ namespace foxy::vulkan {
 
     }
 
-    [[nodiscard]] auto window() -> glfw::UniqueWindow& {
+    [[nodiscard]] auto window() -> UniqueWindow& {
       return window_;
     }
 
@@ -103,7 +91,7 @@ namespace foxy::vulkan {
 
     const bool enable_validation_;
 
-    glfw::UniqueWindow& window_;
+    UniqueWindow& window_;
 
     vk::raii::Context context_;
     ExtensionData extension_data_;
@@ -363,7 +351,7 @@ namespace foxy::vulkan {
       return { physical_device_.createDevice(device_create_info, nullptr) };
     }
 
-    [[nodiscard]] auto create_surface(glfw::UniqueWindow& window) -> Surface {
+    [[nodiscard]] auto create_surface(UniqueWindow& window) -> Surface {
       VkSurfaceKHR raw_surface;
 
       auto result = static_cast<vk::Result>(
@@ -378,7 +366,7 @@ namespace foxy::vulkan {
   //  Context
   //
 
-  Context::Context(glfw::UniqueWindow& window, bool enable_validation)
+  Context::Context(Unique<GLFWwindow, void(*)(GLFWwindow*)>& window, bool enable_validation)
     : pImpl_{std::make_unique<Impl>(window, enable_validation)} {}
 
   Context::~Context() = default;
@@ -387,7 +375,7 @@ namespace foxy::vulkan {
     return pImpl_->native();
   }
 
-  auto Context::window() -> glfw::UniqueWindow& {
+  auto Context::window() -> UniqueWindow& {
     return pImpl_->window();
   }
 

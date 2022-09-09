@@ -1,8 +1,7 @@
 #include "window.hpp"
 
 #include "foxy/core/event_system/event.hpp"
-#include "foxy/ookami/renderer.hpp"
-#include "foxy/core/window/glfw/context.hpp"
+#include "foxy/core/window/glfw/glfw_context.hpp"
 
 namespace foxy {
   class Window::Impl {
@@ -38,10 +37,6 @@ namespace foxy {
       set_vsync(create_info.vsync);
       set_fullscreen(create_info.fullscreen);
       set_callbacks();
-
-      renderer_ = std::make_unique<ookami::Renderer>(glfw_window_);
-
-      set_hidden(false);
 
       FOXY_TRACE << "Window ready.";
     }
@@ -86,7 +81,7 @@ namespace foxy {
     }
 
     [[nodiscard]] auto title() const -> std::string { return state_.title; }
-    [[nodiscard]] auto native() -> glfw::UniqueWindow& { return glfw_window_; }
+    [[nodiscard]] auto native() -> UniqueWindow& { return glfw_window_; }
     [[nodiscard]] auto bounds() const -> Rect { return state_.bounds; }
     [[nodiscard]] auto vsync() const -> bool { return state_.vsync; }
     [[nodiscard]] auto fullscreen() const -> bool { return state_.vsync; }
@@ -127,11 +122,10 @@ namespace foxy {
 
     // GLFW
     glfw::Context glfw_context_;
-    glfw::UniqueWindow glfw_window_{ nullptr, nullptr };
+    UniqueWindow glfw_window_{ nullptr, nullptr };
 
     // Foxy
     State state_;
-    Unique<ookami::Renderer> renderer_;
 
     void set_callbacks() {
       // Foxy
@@ -154,7 +148,7 @@ namespace foxy {
 
   Window::~Window() = default;
 
-  auto Window::operator*() -> glfw::UniqueWindow& {
+  auto Window::operator*() -> UniqueWindow& {
     return pImpl_->native();
   }
 
@@ -186,7 +180,7 @@ namespace foxy {
     pImpl_->set_hidden(hidden);
   }
 
-  auto Window::native() -> glfw::UniqueWindow& {
+  auto Window::native() -> UniqueWindow& {
     return pImpl_->native();
   }
 
