@@ -9,6 +9,8 @@ namespace foxy::ookami {
   class Renderer::Impl {
   public:
     explicit Impl(UniqueWindow& window) {
+      FOXY_ASSERT(!instantiated_) << "Attempted second instantiation of foxy::ookami::Renderer";
+      instantiated_ = true;
       FOXY_TRACE << "Starting Ookami Renderer...";
 
       #ifdef FOXY_DEBUG_MODE
@@ -23,8 +25,12 @@ namespace foxy::ookami {
       FOXY_TRACE << "Ookami Renderer ready.";
     }
 
-    ~Impl() = default;
+    ~Impl() {
+      instantiated_ = false;
+    }
   private:
+    static inline bool instantiated_{ false };
+
     Shared<vulkan::Context> context_;
     Unique<vulkan::Swapchain> swapchain_;
     Unique<vulkan::Pipeline> pipeline_;
