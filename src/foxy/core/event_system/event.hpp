@@ -1,19 +1,7 @@
-module;
-
-#include "foxy/internal/foxy_includes.hpp"
-
-#ifdef __INTELLISENSE__
-#include "util/util.ixx"
-#endif
-
-export module foxy_events;
-
-#ifndef __INTELLISENSE__
-export import foxy_util;
-#endif
+#pragma once
 
 namespace foxy {
-  export template<typename... Args>
+  template<typename... Args>
   class Event {
   public:
     template<typename Callback>

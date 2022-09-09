@@ -4,15 +4,19 @@
 
 #pragma once
 
-#include "foxy/log_macros.hpp"
+#include <iostream>
 
+#include "log_macros.hpp"
+
+#if not defined(FOXY_DEBUG_MODE) and not defined(_WIN32) and defined(SIGTRAP)
+#include <csignal>
+#endif
 #ifndef FOXY_DEBUG_MODE
   #define FOXY_DEBUG_BREAK
 #else
   #ifdef _WIN32 // Windows
     #define FOXY_DEBUG_BREAK __debugbreak()
   #else
-    #include <csignal>
     #ifdef SIGTRAP // POSIX
       #define FOXY_DEBUG_BREAK raise(SIGTRAP)
     #else // Other
@@ -22,11 +26,12 @@
 #endif
 
 #ifdef FOXY_ENABLE_ASSERTS
-  #define FOXY_ASSERT(x) if(!(x)) FOXY_FATAL << "FAILED ASSERT: "
+  #define FOXY_ASSERT(x) DCHECK(x) << "FAILED ASSERT: "
 #else
-  #include <iostream>
-  #define FOXY_ASSERT(x) if(false) std::clog
+  #define FOXY_ASSERT(x) DCHECK(x)
 #endif
+
+#define MAKE_UNIQUE(x) std::make_unique<decltype(x)>(x)
 
 #define BIT(x) (1 << x)
 #define FOXY_BIT_COMPARE_TO(x, y) (x & y) == y
@@ -36,19 +41,21 @@
 #define FOXY_LAMBDA(fn) FOXY_LAMBDA_INS(fn, this)
 
 #if defined(_WIN32) and not defined(FOXY_DEBUG_MODE)
-#define WINMAIN_DEFERRED_TO_MAIN \
+#define REDIRECT_WINMAIN_TO_MAIN \
+auto main(int, char**) -> int;\
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {\
   return main(__argc, __argv);\
 }
 #else
-#define WINMAIN_DEFERRED_TO_MAIN int fubuki_is_cute() { return 0; }
+#define REDIRECT_WINMAIN_TO_MAIN auto __fubuki_is_cute() -> int { return 0; }
 #endif
 
 #if defined(_WIN32) and not defined(FOXY_DEBUG_MODE)
-#define WINMAIN_DEFERRED_TO_FOXY_MAIN \
+#define REDIRECT_WINMAIN_TO_FOXY_MAIN \
+auto main(foxy::i32, foxy::i8**) -> foxy::i32;\
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {\
   return main(__argc, reinterpret_cast<std::int8_t**>(__argv));\
 }
 #else
-#define WINMAIN_DEFERRED_TO_FOXY_MAIN int fubuki_is_cute() { return 0; }
+#define REDIRECT_WINMAIN_TO_FOXY_MAIN auto __fubuki_is_cute() -> foxy::i32 { return 0; }
 #endif

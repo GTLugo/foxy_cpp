@@ -1,6 +1,6 @@
 #pragma once
 
-#include <easylogging++.h>
+#include "easylogging++.h"
 
 #define FOXY_TRACE LOG(TRACE)
 #define FOXY_DEBUG LOG(DEBUG)

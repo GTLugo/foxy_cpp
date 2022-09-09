@@ -1,43 +1,99 @@
 ﻿{
   "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 23,
+    "patch": 0
+  },
   "configurePresets": [
     {
       "name": "windows-base",
-      "hidden": true,
-      "generator": "Visual Studio 17 2022",
-      "binaryDir": "${sourceDir}/out/build/${presetName}",
-      "installDir": "${sourceDir}/out/install/${presetName}",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "cl.exe",
-        "CMAKE_CXX_COMPILER": "cl.exe",
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "CMAKE_C_COMPILER": "cl",
+        "CMAKE_CXX_COMPILER": "cl",
         "Boost_NO_WARN_NEW_VERSIONS": true
       },
+      "architecture": {
+        "value": "x64",
+        "strategy": "set"
+      },
+      "generator": "Visual Studio 17 2022",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "installDir": "${sourceDir}/out/install/${presetName}",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
-      }
-    },
-    {
-      "name": "x64-debug",
-      "displayName": "x64 Debug",
-      "inherits": "windows-base",
-      "architecture": {
-        "value": "x64",
-        "strategy": "external"
       },
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
+      "hidden": true
     },
     {
-      "name": "x64-release",
-      "displayName": "x64 Release",
-      "inherits": "x64-debug",
+      "displayName": "Debug: x64-windows",
+      "name": "x64_windows_debug",
+      "inherits": "windows-base"
+    },
+    {
+      "displayName": "Release: x64-windows",
+      "name": "x64_windows_release",
+      "inherits": "windows-base"
+    },
+    {
+      "name": "linux-base",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
+        "Boost_NO_WARN_NEW_VERSIONS": true
+      },
+      "generator": "Ninja",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "installDir": "${sourceDir}/out/install/${presetName}",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
+          "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}"
+        }
+      },
+      "hidden": true
+    },
+    {
+      "displayName": "Debug: linux",
+      "name": "linux_debug",
+      "inherits": "linux-base"
+    },
+    {
+      "displayName": "Release: linux",
+      "name": "linux_release",
+      "inherits": "linux-base"
+    }
+  ],
+  "buildPresets": [
+    {
+      "displayName": "x64_windows_debug",
+      "name": "x64_windows_debug_build",
+      "configurePreset": "x64_windows_debug",
+      "configuration": "Debug"
+    },
+    {
+      "displayName": "x64_windows_release",
+      "name": "x64_windows_release_build",
+      "configurePreset": "x64_windows_release",
+      "configuration": "Release"
+    },
+    {
+      "displayName": "linux_debug",
+      "name": "linux_debug_build",
+      "configurePreset": "linux_debug",
+      "configuration": "Debug"
+    },
+    {
+      "displayName": "linux_release",
+      "name": "linux_release_build",
+      "configurePreset": "linux_release",
+      "configuration": "Release"
     }
   ]
 }

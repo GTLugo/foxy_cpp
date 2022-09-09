@@ -1,6 +1,5 @@
 #pragma once
 
-#include "foxy/macros.hpp"
 
 /*----------------------
   VENDOR LIBRARIES
@@ -78,3 +77,10 @@
 #include <unordered_set>
 #include <map>
 #include <unordered_map>
+
+/*----------------------
+  FOXY LIBRARIES
+----------------------*/
+#include "foxy/core/macros.hpp"
+#include "foxy/util/util.hpp"
+#include "foxy/util/log.hpp"

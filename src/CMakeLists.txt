@@ -5,19 +5,27 @@ cmake_minimum_required(VERSION 3.23)
 set(TARGET_NAME "foxy")
 
 set(SOURCE_FILES
-    "icon.rc"
-    "app.ixx"
-    "util/util.ixx"
-    "util/log.ixx"
-    "core/window.ixx"
-    "core/event_system/event.ixx"
-    "api/context.ixx"
+    "foxy/icon.rc"
+    "foxy/util/util.cpp"
+    "foxy/util/log.cpp"
+    "foxy/core/app.cpp"
+    "foxy/core/window.cpp"
+    "foxy/core/event_system/event.cpp"
+    "foxy/core/window/glfw/glfw.cpp"
+    "foxy/core/window/glfw/glfw_context.cpp"
+    #"foxy/core/window/glfw/unique_window.cpp"
+    "foxy/ookami/vulkan/vulkan_context.cpp"
+    "foxy/ookami/vulkan/swapchain.cpp"
+    "foxy/ookami/vulkan/pipeline.cpp"
+    "foxy/ookami/vulkan/shader.cpp"
+    "foxy/ookami/renderer.cpp"
+    "foxy/koyote/ecs.cpp"
 )
 
 # Add source to this project's executable.
 add_library(${TARGET_NAME} STATIC ${SOURCE_FILES})
 target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
-target_compile_options(${TARGET_NAME} PUBLIC "/bigobj" "/experimental:module" )
+target_compile_options(${TARGET_NAME} PUBLIC "/bigobj" "/std:c++latest" "/experimental:module")
 target_compile_definitions(${TARGET_NAME}
     PRIVATE
     _CRT_SECURE_NO_WARNINGS=1
@@ -29,7 +37,7 @@ target_compile_definitions(${TARGET_NAME}
 
 target_include_directories(${TARGET_NAME} PUBLIC "../include" ".")
 
-#target_precompile_headers(${TARGET_NAME} PUBLIC "../include/foxy/internal/fxpch.hpp")
+target_precompile_headers(${TARGET_NAME} PUBLIC "../include/foxy/internal/fxpch.hpp")
 
 # TODO: Add tests and install targets if needed.
 
@@ -38,7 +46,14 @@ target_include_directories(${TARGET_NAME} PUBLIC "../include" ".")
 # ===================================================
 
 # Boost
+# TODO: https://www.boost.org/doc/libs/1_80_0/tools/bcp/doc/html/index.html
+#target_include_directories(${TARGET_NAME}
+#    PUBLIC
+#    "../extern/boost"
+#    )
+set(Boost_USE_STATIC_LIBS    ON)
 set(Boost_USE_STATIC_RUNTIME ON)
+set(Boost_USE_MULTITHREADED  ON)
 find_package(Boost REQUIRED
     COMPONENTS
     container
@@ -64,11 +79,11 @@ target_compile_definitions(${TARGET_NAME}
 # Vulkan
 find_package(Vulkan REQUIRED)
 target_include_directories(${TARGET_NAME}
-    PUBLIC
+    PRIVATE
     ${Vulkan_INCLUDE_DIRS}
     )
 target_link_libraries(${TARGET_NAME}
-    PUBLIC
+    PRIVATE
     ${Vulkan_LIBRARIES}
     )
 target_sources(${TARGET_NAME} PRIVATE ${VULKAN_FILES})
@@ -78,16 +93,22 @@ target_compile_definitions(${TARGET_NAME} PUBLIC FOXY_USE_VULKAN=1)
 # DEPENDENCIES - SUBMODULES
 # ===================================================
 
-# GLFWPP
+# GLFW
 target_sources(${TARGET_NAME} PRIVATE ${GLFW_FILES})
-target_compile_definitions(${TARGET_NAME} PUBLIC FOXY_USE_GLFW=1 GLFW_INCLUDE_NONE=1)
+target_compile_definitions(${TARGET_NAME} PUBLIC FOXY_USE_GLFW=1)
 target_include_directories(${TARGET_NAME}
-    PUBLIC
-    "../extern/glfwpp/include"
+    PRIVATE
+    "../extern/glfw/include"
     )
 target_link_libraries(${TARGET_NAME}
-    PUBLIC
-    GLFWPP
+    PRIVATE
+    glfw
+    )
+
+# VKFW
+target_include_directories(${TARGET_NAME}
+    PRIVATE
+    "../extern/vkfw/include"
     )
 
 # GLM
@@ -97,7 +118,7 @@ target_include_directories(${TARGET_NAME}
     "../extern/glm"
     )
 target_link_libraries(${TARGET_NAME}
-    PUBLIC
+    PRIVATE
     glm::glm
     )
 
