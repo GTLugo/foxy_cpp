@@ -13,7 +13,6 @@ set(SOURCE_FILES
     "foxy/core/event_system/event.cpp"
     "foxy/core/window/glfw/glfw.cpp"
     "foxy/core/window/glfw/glfw_context.cpp"
-    #"foxy/core/window/glfw/unique_window.cpp"
     "foxy/ookami/vulkan/vulkan_context.cpp"
     "foxy/ookami/vulkan/swapchain.cpp"
     "foxy/ookami/vulkan/pipeline.cpp"
@@ -44,37 +43,6 @@ target_precompile_headers(${TARGET_NAME} PUBLIC "../include/foxy/internal/fxpch.
 # ===================================================
 # DEPENDENCIES - VCPKG SUGGESTED
 # ===================================================
-
-# Boost
-# TODO: https://www.boost.org/doc/libs/1_80_0/tools/bcp/doc/html/index.html
-#target_include_directories(${TARGET_NAME}
-#    PUBLIC
-#    "../extern/boost"
-#    )
-set(Boost_USE_STATIC_LIBS    ON)
-set(Boost_USE_STATIC_RUNTIME ON)
-set(Boost_USE_MULTITHREADED  ON)
-find_package(Boost REQUIRED
-    COMPONENTS
-    container
-    coroutine
-    system
-    thread
-    random
-    )
-target_link_libraries(${TARGET_NAME}
-    PUBLIC
-    Boost::headers
-    Boost::container
-    Boost::coroutine
-    Boost::system
-    Boost::thread
-    Boost::random
-    )
-target_compile_definitions(${TARGET_NAME}
-    PRIVATE
-    BOOST_UUID_FORCE_AUTO_LINK=1
-    )
 
 # Vulkan
 find_package(Vulkan REQUIRED)

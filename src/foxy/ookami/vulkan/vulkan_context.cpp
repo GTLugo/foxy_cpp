@@ -366,7 +366,7 @@ namespace foxy::vulkan {
   //  Context
   //
 
-  Context::Context(Unique<GLFWwindow, void(*)(GLFWwindow*)>& window, bool enable_validation)
+  Context::Context(UniqueWindow& window, bool enable_validation)
     : pImpl_{std::make_unique<Impl>(window, enable_validation)} {}
 
   Context::~Context() = default;

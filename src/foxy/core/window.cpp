@@ -43,7 +43,7 @@ namespace foxy {
 
     ~Impl() {
       instantiated_ = false;
-      FOXY_TRACE << "Destroying Window";
+      FOXY_TRACE << "Destroying Window..";
     }
 
     void poll_events() {
@@ -51,7 +51,7 @@ namespace foxy {
     }
 
     void close() {
-      FOXY_TRACE << "Window close requested";
+      FOXY_TRACE << "Window close requested.";
       glfwSetWindowShouldClose(glfw_window_.get(), true);
     }
 

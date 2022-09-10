@@ -5,6 +5,10 @@
 #pragma once
 
 namespace foxy {
+  class PImpl {
+
+  };
+
   struct AppCreateInfo {
     std::string title{ "FOXY FRAMEWORK" };
     i32 width{ 800 };

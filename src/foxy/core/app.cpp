@@ -13,22 +13,6 @@ namespace foxy {
       FOXY_ASSERT(!instantiated_) << "Attempted second instantiation of foxy::App";
       instantiated_ = true;
 
-      FOXY_INFO << R"([]=============================[])";
-      FOXY_INFO << R"(||  ______ ______   ___     __ ||)";
-      FOXY_INFO << R"(|| |  ____/ __ \ \ / \ \   / / ||)";
-      FOXY_INFO << R"(|| | |__ | |  | \ V / \ \_/ /  ||)";
-      FOXY_INFO << R"(|| |  __|| |  | |> <   \   /   ||)";
-      FOXY_INFO << R"(|| | |   | |__| / . \   | |    ||)";
-      FOXY_INFO << R"(|| |_|    \____/_/ \_\  |_|    ||)";
-      FOXY_INFO << R"(||                             ||)";
-      FOXY_INFO << R"([]=============================[])";
-      FOXY_INFO << "Foxy startup: Kon kon kitsune! Hi, friends!";
-      #ifdef FOXY_DEBUG_MODE
-      FOXY_INFO << "Build mode: DEBUG";
-      #else
-      FOXY_INFO << "Build mode: RELEASE";
-      #endif
-
       window_ = std::make_unique<Window>(WindowCreateInfo{
         create_info.title,
         create_info.width,
@@ -67,7 +51,7 @@ namespace foxy {
     static inline bool instantiated_{ false };
 
     bool running_{ true };
-    Log dummy_log_; // this just allows for logging upon full destruction of App
+    Log dummy_log_; // this just allows for logging upon first creation and final destruction of App
     Unique<Window> window_;
 
     Unique<ookami::Renderer> renderer_;
