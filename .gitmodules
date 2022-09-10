@@ -10,3 +10,6 @@
 	ignore = dirty
 	path = extern/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "extern/shaderc"]
+	path = extern/shaderc
+	url = https://github.com/google/shaderc.git

@@ -55,4 +55,18 @@ namespace foxy {
     NoCopyOrMove(NoCopyOrMove&& other) = delete;
     NoCopyOrMove& operator=(NoCopyOrMove&& other) = delete;
   };
+
+  [[nodiscard]] inline auto read_file(const std::filesystem::path& file_path, std::ios::fmtflags flags = {}) -> std::optional<std::string> {
+    std::ifstream file{file_path, flags};
+
+    if (!file.is_open()) {
+      FOXY_ERROR << "File \"" << file_path << "\" does not exist.";
+      return std::nullopt;
+    }
+
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+
+    return buffer.str();
+  }
 }

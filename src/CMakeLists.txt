@@ -1,7 +1,7 @@
 ﻿# CMakeList.txt : CMake project for foxy_cpp/src, include source and define
 # project specific logic here.
 #
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.24)
 set(TARGET_NAME "foxy")
 
 set(SOURCE_FILES
@@ -13,11 +13,11 @@ set(SOURCE_FILES
     "foxy/core/event_system/event.cpp"
     "foxy/core/window/glfw/glfw.cpp"
     "foxy/core/window/glfw/glfw_context.cpp"
+    "foxy/ookami/renderer.cpp"
     "foxy/ookami/vulkan/vulkan_context.cpp"
     "foxy/ookami/vulkan/swapchain.cpp"
     "foxy/ookami/vulkan/pipeline.cpp"
     "foxy/ookami/vulkan/shader.cpp"
-    "foxy/ookami/renderer.cpp"
     "foxy/koyote/ecs.cpp"
 )
 
@@ -45,7 +45,10 @@ target_precompile_headers(${TARGET_NAME} PUBLIC "../include/foxy/internal/fxpch.
 # ===================================================
 
 # Vulkan
-find_package(Vulkan REQUIRED)
+find_package(Vulkan REQUIRED
+    COMPONENTS
+    shaderc_combined
+    )
 target_include_directories(${TARGET_NAME}
     PRIVATE
     ${Vulkan_INCLUDE_DIRS}
@@ -53,9 +56,11 @@ target_include_directories(${TARGET_NAME}
 target_link_libraries(${TARGET_NAME}
     PRIVATE
     ${Vulkan_LIBRARIES}
+    Vulkan::shaderc_combined
     )
 target_sources(${TARGET_NAME} PRIVATE ${VULKAN_FILES})
 target_compile_definitions(${TARGET_NAME} PUBLIC FOXY_USE_VULKAN=1)
+
 
 # ===================================================
 # DEPENDENCIES - SUBMODULES
@@ -71,12 +76,6 @@ target_include_directories(${TARGET_NAME}
 target_link_libraries(${TARGET_NAME}
     PRIVATE
     glfw
-    )
-
-# VKFW
-target_include_directories(${TARGET_NAME}
-    PRIVATE
-    "../extern/vkfw/include"
     )
 
 # GLM
@@ -99,21 +98,3 @@ target_sources(${TARGET_NAME}
     PRIVATE
     "../extern/easyloggingpp/src/easylogging++.cc"
     )
-
-## ImGUI
-#target_include_directories(${TARGET_NAME}
-#    PRIVATE
-#    "../extern/imgui"
-#    )
-#target_sources(${TARGET_NAME}
-#    PRIVATE
-#    "../extern/imgui/imgui_demo.cpp"
-#    "../extern/imgui/imgui_draw.cpp"
-#    "../extern/imgui/imgui_tables.cpp"
-#    "../extern/imgui/imgui_widgets.cpp"
-#    "../extern/imgui/imgui.cpp"
-#    )
-## IMGUI RENDER
-#target_sources(${TARGET_NAME} PRIVATE "../extern/imgui/backends/imgui_impl_vulkan.cpp")
-## IMGUI WINDOW
-#target_sources(${TARGET_NAME} PRIVATE "../extern/imgui/backends/imgui_impl_glfw.cpp")
