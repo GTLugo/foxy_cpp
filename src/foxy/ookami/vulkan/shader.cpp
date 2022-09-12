@@ -92,7 +92,7 @@ namespace foxy::vulkan {
       fs::path tmp_shader_dir{ "tmp/shader_cache"/ fs::relative(dir_path, {"res/foxy/shaders"}).parent_path() / dir_path.stem() };
       fs::path out_file_stem{ tmp_shader_dir / name_ };
 
-      for (u32 i{ 0 }; i < Kind::Max; ++i) {
+      for (u32 i{ 0 }; i <= Kind::Max; ++i) {
         Kind kind{ static_cast<Kind>(i) };
         fs::path shader_path{ (dir_path / dir_path.stem()).string() + in_file_endings_.at(kind) };
         if (shader_bits.test(kind)) {
@@ -136,7 +136,7 @@ namespace foxy::vulkan {
       
       if (fs::exists(tmp_shader_dir)) {
         fs::path out_file_stem{ tmp_shader_dir / name_ };
-        for (u32 i{ 0 }; i < Kind::Max; ++i) {
+        for (u32 i{ 0 }; i <= Kind::Max; ++i) {
           Kind kind{ static_cast<Kind>(i) };
           if (shader_bits.test(kind)) {
             FOXY_TRACE << "Looking for " << kind_names_.at(kind) << ": " << name_;
@@ -186,7 +186,7 @@ namespace foxy::vulkan {
 
       fs::path out_file_stem{ tmp_shader_dir / name_ };
 
-      for (u32 i{ 0 }; i < Kind::Max; ++i) {
+      for (u32 i{ 0 }; i <= Kind::Max; ++i) {
         Kind kind{ static_cast<Kind>(i) };
         if (code_map.contains(kind)) {
           if (!compile_shader_type(out_file_stem, code_map.at(kind), kind, optimize)) {
@@ -288,7 +288,7 @@ namespace foxy::vulkan {
     void create_shader_modules(const vk::raii::Device& device) {
       FOXY_TRACE << "Building shader modules: " << name_ << "...";
 
-      for (u32 i{ 0 }; i < Kind::Max; ++i) {
+      for (u32 i{ 0 }; i <= Kind::Max; ++i) {
         Kind kind{ static_cast<Kind>(i) };
         if (shader_modules_.contains(kind)) {
           vk::ShaderModuleCreateInfo create_info{

@@ -21,7 +21,7 @@ namespace foxy::vulkan {
       Max = Geometry,
     };
 
-    using BitFlags = std::bitset<Kind::Max>;
+    using BitFlags = std::bitset<Kind::Max + 1>;
 
     explicit Shader(const vk::raii::Device& device, const std::filesystem::path& file_path, BitFlags shader_bits, bool optimize = false);
     ~Shader();
