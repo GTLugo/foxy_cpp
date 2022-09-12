@@ -12,7 +12,12 @@ namespace foxy::vulkan {
   public:
     explicit Impl(Shared<Context> context)
       : context_{std::move(context)} {
-      simple_shader_ = std::make_shared<Shader>(context_->logical_device(), "res/foxy/shaders/simple.glsl");
+      simple_shader_ = std::make_shared<Shader>(
+        context_->logical_device(), 
+        "res/foxy/shaders/simple", 
+        Shader::BitFlags{}.set(Shader::Kind::Vertex).set(Shader::Kind::Fragment), 
+        true
+      );
 
       FOXY_TRACE << "Created Vulkan pipeline.";
     }

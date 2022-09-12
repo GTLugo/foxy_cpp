@@ -16,13 +16,19 @@ namespace vk::raii {
 
 namespace foxy::vulkan {
   class Shader {
+  public:
     enum Kind {
-      Vertex = 0,
+      Vertex   = 0,
       Fragment = 1,
+      Compute = 2,
+      Geometry = 3,
+
+      Max = Geometry,
     };
 
-  public:
-    explicit Shader(const vk::raii::Device& device, const std::filesystem::path& file_path, bool optimize = false);
+    using BitFlags = std::bitset<Kind::Max>;
+
+    explicit Shader(const vk::raii::Device& device, const std::filesystem::path& file_path, BitFlags shader_bits, bool optimize = false);
     ~Shader();
 
     [[nodiscard]] auto module(Kind kind) const -> const vk::raii::ShaderModule&;

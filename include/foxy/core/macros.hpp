@@ -34,7 +34,7 @@
 #define MAKE_UNIQUE(x) std::make_unique<decltype(x)>(x)
 
 #define BIT(x) (1 << x)
-#define FOXY_BIT_COMPARE_TO(x, y) (x & y) == y
+#define FOXY_BIT_CHECK(x, y) (x & y) == y
 #define FOXY_STRINGIFY_VAL(x) FOXY_STRINGIFY(x)
 #define FOXY_STRINGIFY(x) #x
 #define FOXY_LAMBDA_INS(fn, instance) [objPtr = instance](auto&&... args) { return objPtr->fn(std::forward<decltype(args)>(args)...); }
