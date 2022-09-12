@@ -20,7 +20,7 @@ namespace foxy::vulkan {
     enum Kind {
       Vertex   = 0,
       Fragment = 1,
-      Compute = 2,
+      Compute  = 2,
       Geometry = 3,
 
       Max = Geometry,

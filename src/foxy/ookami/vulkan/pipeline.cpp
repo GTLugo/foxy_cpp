@@ -15,7 +15,7 @@ namespace foxy::vulkan {
       simple_shader_ = std::make_shared<Shader>(
         context_->logical_device(), 
         "res/foxy/shaders/simple", 
-        Shader::BitFlags{}.set(Shader::Kind::Vertex).set(Shader::Kind::Fragment), 
+        Shader::BitFlags{}.set(Shader::Vertex).set(Shader::Fragment),
         true
       );
 
