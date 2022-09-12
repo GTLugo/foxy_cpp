@@ -14,7 +14,7 @@ namespace foxy::vulkan {
       : context_{std::move(context)} {
       simple_shader_ = std::make_shared<Shader>(
         context_->logical_device(), 
-        "res/foxy/shaders/example/simple", 
+        "res/foxy/shaders/simple", 
         Shader::BitFlags{}.set(Shader::Vertex).set(Shader::Fragment),
         true
       );
