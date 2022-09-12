@@ -32,31 +32,31 @@ namespace foxy::vulkan {
     static inline std::unordered_map<Kind, std::string> out_file_endings_{
         {Kind::Vertex  , ".vert.spv"},
         {Kind::Fragment, ".frag.spv"},
-        {Kind::Compute,  ".comp.spv"},
+        {Kind::Compute , ".comp.spv"},
         {Kind::Geometry, ".geom.spv"},
     };
     static inline std::unordered_map<Kind, std::string> in_file_endings_{
         {Kind::Vertex  , ".vert"},
         {Kind::Fragment, ".frag"},
-        {Kind::Compute,  ".comp"},
+        {Kind::Compute , ".comp"},
         {Kind::Geometry, ".geom"},
     };
     static inline std::unordered_map<std::string, Kind> kinds_{
         {"vertex"  , Kind::Vertex  },
         {"fragment", Kind::Fragment},
-        {"compute"  , Kind::Compute  },
+        {"compute" , Kind::Compute },
         {"geometry", Kind::Geometry},
     };
     static inline std::unordered_map<Kind, std::string> kind_names_{
         {Kind::Vertex  , "vertex"  },
         {Kind::Fragment, "fragment"},
-        {Kind::Compute  , "compute"  },
+        {Kind::Compute , "compute" },
         {Kind::Geometry, "geometry"},
     };
     static inline std::unordered_map<Kind, shaderc_shader_kind> kind_to_kind_{
-        {Kind::Vertex, shaderc_shader_kind::shaderc_glsl_vertex_shader},
+        {Kind::Vertex  , shaderc_shader_kind::shaderc_glsl_vertex_shader  },
         {Kind::Fragment, shaderc_shader_kind::shaderc_glsl_fragment_shader},
-        {Kind::Compute, shaderc_shader_kind::shaderc_glsl_compute_shader},
+        {Kind::Compute , shaderc_shader_kind::shaderc_glsl_compute_shader },
         {Kind::Geometry, shaderc_shader_kind::shaderc_glsl_geometry_shader},
     };
 
