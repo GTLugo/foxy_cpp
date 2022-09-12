@@ -89,7 +89,7 @@ namespace foxy::vulkan {
       "VK_LAYER_KHRONOS_validation"
     };
 
-    const bool enable_validation_;
+    bool enable_validation_;
 
     UniqueWindow& window_;
 
@@ -203,7 +203,8 @@ namespace foxy::vulkan {
       };
 
       if (enable_validation_ && !check_validation_layer_support()) {
-        FOXY_FATAL << "Validation layers requested, but none are available.";
+        FOXY_ERROR << "Validation layers requested, but none are available. Disabling validation.";
+        enable_validation_ = false;
       }
       extension_data_.enabled_extensions = get_enabled_extensions();
       if (!extension_data_.enabled_extensions.empty()) {
