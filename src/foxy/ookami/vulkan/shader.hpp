@@ -4,11 +4,6 @@
 
 #pragma once
 
-// TODO: Swap to not precompiling shaders
-// What will be done moving forward is shader chaching.
-// Compiled shaders will be stored in /tmp/shaders and will be checked for.
-// If failed to find cached shader, shader will be recompiled.
-
 namespace vk::raii {
   class ShaderModule;
   class Device;

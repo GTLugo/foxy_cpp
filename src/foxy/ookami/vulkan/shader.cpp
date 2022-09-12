@@ -89,25 +89,28 @@ namespace foxy::vulkan {
                        BitFlags shader_bits, 
                        bool optimize = false) -> bool {
       namespace fs = std::filesystem;
-      fs::path tmp_shader_dir{ "tmp" / dir_path.parent_path() / dir_path.stem() };
+      FOXY_DEBUG << dir_path;
+      fs::path tmp_shader_dir{ "tmp/shader_cache"/ fs::relative(dir_path, {"res/foxy/shaders"}).parent_path() / dir_path.stem() };
+      FOXY_DEBUG << fs::relative({"res/foxy/shaders"}, dir_path);
+      FOXY_DEBUG << tmp_shader_dir;
       fs::path out_file_stem{ tmp_shader_dir / name_ };
 
       for (u32 i{ 0 }; i < Kind::Max; ++i) {
         Kind kind{ static_cast<Kind>(i) };
-        fs::path file_path{ (dir_path / dir_path.stem()).string() + in_file_endings_.at(kind) };
+        fs::path shader_path{ (dir_path / dir_path.stem()).string() + in_file_endings_.at(kind) };
         if (shader_bits.test(kind)) {
           FOXY_TRACE << "Looking for " << kind_names_.at(kind) << ": " << name_;
           fs::path tmp_name{ out_file_stem.string() + out_file_endings_.at(kind) };
           if (fs::exists(tmp_name)) {
             FOXY_TRACE << "Found " << kind_names_.at(kind) << ": " << tmp_name;
-            auto code{ read_file(file_path, std::ios::binary) };
+            auto code{ read_file(shader_path, std::ios::binary) };
             if (!code.has_value()) {
               return false;
             }
             bytecode_[kind] = { code->begin(), code->end() };
           } else {
             FOXY_TRACE << "Didn't find " << kind_names_.at(kind) << " in cache: " << tmp_name;
-            auto code{ read_file(file_path) };
+            auto code{ read_file(shader_path) };
             if (!code.has_value()) {
               return false;
             }
@@ -132,7 +135,7 @@ namespace foxy::vulkan {
       namespace fs = std::filesystem;
       
       // example: res/shaders/simple.glsl -> tmp/res/shaders/simple/
-      fs::path tmp_shader_dir{ "tmp" / file_path.parent_path() / file_path.stem() };
+      fs::path tmp_shader_dir{ "tmp/shader_cache" / fs::relative(file_path, {"res/foxy/shaders"}).parent_path() / file_path.stem() };
       
       if (fs::exists(tmp_shader_dir)) {
         fs::path out_file_stem{ tmp_shader_dir / name_ };
@@ -157,6 +160,8 @@ namespace foxy::vulkan {
                 return false;
               }
             }
+          } else {
+            FOXY_TRACE << "Skipping " << kind_names_.at(kind);
           }
         }
       } else {
