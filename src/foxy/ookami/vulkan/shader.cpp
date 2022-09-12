@@ -14,10 +14,13 @@ namespace foxy::vulkan {
       : name_{ file_path.stem().string() } {
 
       if (load_shader_code(file_path, shader_bits, optimize)) {
+        FOXY_TRACE << "Loaded shader: " << name_;
         create_shader_modules(device);
+        FOXY_TRACE << "Shader \"" << name_ << "\" ready.";
+      } else {
+        FOXY_FATAL << "Shader \"" << name_ << "\" failed creation.";
       }
 
-      FOXY_TRACE << "Shader \"" << name_ << "\" ready.";
     }
 
     ~Impl() = default;
@@ -77,14 +80,8 @@ namespace foxy::vulkan {
       } else {
         FOXY_TRACE << "Loading shader from file: " << name_;
         found_shader = load_from_file(file_path, shader_bits);
-      }   
-
-      if (found_shader) {
-        FOXY_TRACE << "Loaded shader: " << name_;
-      } else {
-        // TODO: Make this a recoverable error
-        FOXY_FATAL << "Failed to load shader code.";
       }
+
       return found_shader;
     }
 
@@ -103,18 +100,26 @@ namespace foxy::vulkan {
           fs::path tmp_name{ out_file_stem.string() + out_file_endings_.at(kind) };
           if (fs::exists(tmp_name)) {
             FOXY_TRACE << "Found " << kind_names_.at(kind) << ": " << tmp_name;
-            auto code{ read_file(file_path, std::ios::binary).value() };
-            bytecode_[kind] = { code.begin(), code.end() };
+            auto code{ read_file(file_path, std::ios::binary) };
+            if (!code.has_value()) {
+              return false;
+            }
+            bytecode_[kind] = { code->begin(), code->end() };
           } else {
             FOXY_TRACE << "Didn't find " << kind_names_.at(kind) << " in cache: " << tmp_name;
-            auto code_str{ read_file(file_path) };
+            auto code{ read_file(file_path) };
+            if (!code.has_value()) {
+              return false;
+            }
             if (!fs::exists(tmp_shader_dir)) {
               fs::create_directories(tmp_shader_dir);
             }
-            compile_shader_type(out_file_stem, *code_str, kind, optimize);
+            if (!compile_shader_type(out_file_stem, *code, kind, optimize)) {
+              return false;
+            }
           }
         } else {
-            FOXY_TRACE << "Skipping " << kind_names_.at(kind);
+          FOXY_TRACE << "Skipping " << kind_names_.at(kind);
         }
       }
 
@@ -138,14 +143,19 @@ namespace foxy::vulkan {
             fs::path tmp_name{ out_file_stem.string() + out_file_endings_.at(kind) };
             if (fs::exists(tmp_name)) {
               FOXY_TRACE << "Found " << kind_names_.at(kind) << ": " << tmp_name;
-              auto code{ read_file(tmp_name, std::ios::binary).value() };
-              bytecode_[kind] = { code.begin(), code.end() };
+              auto code{ read_file(tmp_name, std::ios::binary) };
+              if (!code.has_value()) {
+                return false;
+              }
+              bytecode_[kind] = { code->begin(), code->end() };
             } else {
               FOXY_TRACE << "Didn't find " << kind_names_.at(kind) << " in cache: " << tmp_name;
               if (!fs::exists(tmp_shader_dir)) {
                 fs::create_directories(tmp_shader_dir);
               }
-              compile_combo_file(tmp_shader_dir, file_path, optimize);
+              if (!compile_combo_file(tmp_shader_dir, file_path, optimize)) {
+                return false;
+              }
             }
           }
         }
@@ -153,20 +163,23 @@ namespace foxy::vulkan {
         if (!fs::exists(tmp_shader_dir)) {
           fs::create_directories(tmp_shader_dir);
         }
-        compile_combo_file(tmp_shader_dir, file_path, optimize);
+        if (!compile_combo_file(tmp_shader_dir, file_path, optimize)) {
+          return false;
+        }
       } 
 
       return true;   
     }
 
-    void compile_combo_file(const std::filesystem::path& tmp_shader_dir,
-                              const std::filesystem::path& file_path, 
-                              bool optimize = false) {
+    auto compile_combo_file(const std::filesystem::path& tmp_shader_dir,
+                            const std::filesystem::path& file_path, 
+                            bool optimize = false) -> bool {
       namespace fs = std::filesystem;
 
       auto code_map = parse_file(file_path);
       if (code_map.empty()) {
-        FOXY_FATAL << "Attempted to parse empty/non-existant shader: " << file_path.filename();
+        FOXY_ERROR << "Attempted to parse empty/non-existant shader: " << file_path.filename();
+        return false;
       }
 
       fs::path out_file_stem{ tmp_shader_dir / name_ };
@@ -174,9 +187,13 @@ namespace foxy::vulkan {
       for (u32 i{ 0 }; i < Kind::Max; ++i) {
         Kind kind{ static_cast<Kind>(i) };
         if (code_map.contains(kind)) {
-          compile_shader_type(out_file_stem, code_map.at(kind), kind, optimize);
+          if (!compile_shader_type(out_file_stem, code_map.at(kind), kind, optimize)) {
+            return false;
+          }
         }
       }
+
+      return true;
     }
 
     std::unordered_map<Kind, std::string> parse_file(const std::filesystem::path& file_path) {
@@ -218,10 +235,10 @@ namespace foxy::vulkan {
       return srcs;
     }
 
-    [[nodiscard]] void compile_shader_type(const std::filesystem::path& out_file_stem, 
+    [[nodiscard]] auto compile_shader_type(const std::filesystem::path& out_file_stem, 
                                            const std::string& code_str, 
                                            Kind kind, 
-                                           bool optimize = false) {
+                                           bool optimize = false) -> bool {
       namespace fs = std::filesystem;
       fs::path out_file{ out_file_stem.string() + out_file_endings_.at(kind) };
       FOXY_TRACE << "Compiling " << kind_names_.at(kind) << ": " << name_ << "...";
@@ -242,7 +259,7 @@ namespace foxy::vulkan {
 
       if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
         FOXY_ERROR << "Shaderc Compile: " << result.GetErrorMessage();
-        return; 
+        return false; 
       }
 
       std::string assembly{ result.begin(), result.end() };
@@ -250,6 +267,7 @@ namespace foxy::vulkan {
       spv_file << assembly;
 
       bytecode_[kind] = { assembly.begin(), assembly.end() };
+      return true;
     }
 
     [[nodiscard]] auto preprocess(const std::string& code_str, Kind kind) -> std::string {
