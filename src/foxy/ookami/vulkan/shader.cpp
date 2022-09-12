@@ -18,7 +18,7 @@ namespace foxy::vulkan {
         create_shader_modules(device);
         FOXY_TRACE << "Shader \"" << name_ << "\" ready.";
       } else {
-        FOXY_FATAL << "Shader \"" << name_ << "\" failed creation.";
+        FOXY_ERROR << "Shader \"" << name_ << "\" failed creation.";
       }
 
     }
