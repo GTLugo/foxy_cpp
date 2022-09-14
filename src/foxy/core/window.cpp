@@ -1,6 +1,6 @@
 #include "window.hpp"
 
-#include "foxy/core/event_system/event.hpp"
+#include "foxy/core/events/event.hpp"
 #include "foxy/core/window/glfw/glfw_context.hpp"
 
 namespace foxy {

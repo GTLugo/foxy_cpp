@@ -10,6 +10,6 @@
 	ignore = dirty
 	path = extern/glfw
 	url = https://github.com/glfw/glfw.git
-[submodule "extern/shaderc"]
-	path = extern/shaderc
-	url = https://github.com/google/shaderc.git
+[submodule "extern/bs_thread_pool"]
+	path = extern/bs_thread_pool
+	url = https://github.com/bshoshany/thread-pool.git

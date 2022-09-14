@@ -1,9 +1,11 @@
 #include "app.hpp"
 
+#include "foxy/util/time.hpp"
 #include "foxy/core/window.hpp"
-#include "foxy/core/event_system/event.hpp"
+#include "foxy/core/events/event.hpp"
 #include "foxy/ookami/renderer.hpp"
-#include "foxy/koyote/ecs.hpp"
+#include <BS_thread_pool.hpp>
+//#include "foxy/koyote/ecs.hpp"
 
 namespace foxy {
   class App::Impl {
@@ -12,6 +14,8 @@ namespace foxy {
       : dummy_log_{} {
       FOXY_ASSERT(!instantiated_) << "Attempted second instantiation of foxy::App";
       instantiated_ = true;
+
+      Time::__foxy_internal_init(1);
 
       window_ = std::make_unique<Window>(WindowCreateInfo{
         create_info.title,
@@ -25,6 +29,8 @@ namespace foxy {
       renderer_ = std::make_unique<ookami::Renderer>(**window_);
 
       window_->set_hidden(false);
+      
+      set_callbacks();
     }
 
     ~Impl() {
@@ -44,7 +50,9 @@ namespace foxy {
     }
 
     void run() {
-      game_loop();
+      thread_pool_.push_task(FOXY_LAMBDA(game_loop));
+      main_loop();
+      thread_pool_.wait_for_tasks();
     }
 
   private:
@@ -55,6 +63,8 @@ namespace foxy {
     Unique<Window> window_;
 
     Unique<ookami::Renderer> renderer_;
+
+    BS::thread_pool thread_pool_{ std::thread::hardware_concurrency() - 1 };
 
     // Main Thread events
     Event<> main_awake_event_;
@@ -69,10 +79,33 @@ namespace foxy {
     Event<> game_update_event_;
     Event<> game_stop_event_;
 
-    void game_loop() {
+    void main_loop() {
       while (window_->running()) {
-        window_->poll_events();
+        main_poll_event_();
       }
+    }
+
+    void game_loop() {
+      el::Helpers::setThreadName("game");
+      FOXY_TRACE << "Starting game thread...";
+      try {
+        while (window_->running()) {
+          double frame_time{ Time::delta<MilliSeconds>() };
+          while (Time::__foxy_internal_should_do_tick()) {
+            FOXY_DEBUG << "ft: " << std::setprecision(5) << frame_time << std::setprecision(5) << " fps: " << 1. / frame_time;
+            Time::__foxy_internal_tick();
+          }
+          Time::__foxy_internal_update();
+        }
+      } catch (const std::exception& e) {
+        FOXY_ERROR << e.what();
+      }
+      FOXY_TRACE << "Joining game thread...";
+    }
+
+    void set_callbacks() {
+      // Foxy
+      main_poll_event_.set_callback(FOXY_LAMBDA(window_->poll_events));
     }
   };
 

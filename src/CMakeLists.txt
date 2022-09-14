@@ -10,7 +10,8 @@ set(SOURCE_FILES
     "foxy/util/log.cpp"
     "foxy/core/app.cpp"
     "foxy/core/window.cpp"
-    "foxy/core/event_system/event.cpp"
+    "foxy/core/events/event.cpp"
+    "foxy/core/threading/job_system.cpp"
     "foxy/core/window/glfw/glfw.cpp"
     "foxy/core/window/glfw/glfw_context.cpp"
     "foxy/ookami/renderer.cpp"
@@ -18,7 +19,7 @@ set(SOURCE_FILES
     "foxy/ookami/vulkan/swapchain.cpp"
     "foxy/ookami/vulkan/pipeline.cpp"
     "foxy/ookami/vulkan/shader.cpp"
-    "foxy/koyote/ecs.cpp"
+    #"foxy/koyote/ecs.cpp"
 )
 
 # Add source to this project's executable.
@@ -28,7 +29,7 @@ target_compile_options(${TARGET_NAME} PUBLIC "/bigobj" "/std:c++latest" "/experi
 target_compile_definitions(${TARGET_NAME}
     PRIVATE
     _CRT_SECURE_NO_WARNINGS=1
-    #WIN32_LEAN_AND_MEAN=1
+    WIN32_LEAN_AND_MEAN=1
     PUBLIC
     $<$<CONFIG:debug>:FOXY_ENABLE_ASSERTS=1;FOXY_DEBUG_MODE=1>
     $<$<CONFIG:relwithdebinfo>:FOXY_ENABLE_ASSERTS=1;FOXY_DEBUG_MODE=1>
@@ -97,4 +98,10 @@ target_include_directories(${TARGET_NAME}
 target_sources(${TARGET_NAME}
     PRIVATE
     "../extern/easyloggingpp/src/easylogging++.cc"
+    )
+
+# BS Thread Pool
+target_include_directories(${TARGET_NAME}
+    PRIVATE
+    "../extern/bs_thread_pool"
     )

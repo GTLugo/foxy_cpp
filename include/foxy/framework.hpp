@@ -15,4 +15,4 @@
 #include "foxy/core/macros.hpp"
 #include "foxy/core/app.hpp"
 #include "foxy/ookami/renderer.hpp"
-#include "foxy/core/event_system/event.hpp"
+#include "foxy/core/events/event.hpp"

@@ -8,6 +8,7 @@
  - GLFW
  - GLM
  - EasyLogging++
+ - BS Thread Pool
  - Vulkan: ***"Batteries not included!"*** Separate install required.
 
 ## - Credits -
