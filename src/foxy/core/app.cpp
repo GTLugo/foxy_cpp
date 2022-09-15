@@ -17,7 +17,7 @@ namespace foxy {
       FOXY_ASSERT(!instantiated_) << "Attempted second instantiation of foxy::App";
       instantiated_ = true;
 
-      Time::__foxy_internal_init(1);
+      Time::__foxy_internal_init(128);
 
       window_ = std::make_unique<Window>(Window::CreateInfo{
         create_info.title,

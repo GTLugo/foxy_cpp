@@ -1,40 +1,34 @@
 #include <foxy/framework.hpp>
 REDIRECT_WINMAIN_TO_MAIN
 
-struct AppData {
-  std::string waifu;
-  int hololive_members;
-};
+struct ExampleApp {
+  std::string waifu{ "Fubuki" };
+  int hololive_members{ 71 };
 
-void update(foxy::App& app) {
-  std::shared_ptr<AppData> data = std::static_pointer_cast<AppData>(app.user_data());
-  FOXY_DEBUG << "My favorite out of all " << data->hololive_members << " hololive members is " << data->waifu;
-}
+  void start(foxy::App& app) {
+    FOXY_DEBUG << "My favorite out of all " << hololive_members << " hololive members is " << waifu;
+  }
 
-auto main(int, char**) -> int {
-  using namespace foxy;
+  void update(foxy::App& app) {
+    
+  }
 
-  try {
-    Shared<AppData> app_data{
-      std::make_shared<AppData>(
-        AppData{
-          .waifu = "Fubuki",
-          .hololive_members = 71,
-        }
-      )
-    };
-
-    App{App::CreateInfo{
+  void run() {
+    foxy::App{foxy::App::CreateInfo{
       .title = "Foxy Example App"
-    }}.set_user_data(app_data)
-      .add_function_to_stage(foxy::App::Stage::Tick, [](foxy::App& data){ update(data); })
+    }}.add_function_to_stage(foxy::App::Stage::Start, FOXY_LAMBDA(start))
+      .add_function_to_stage(foxy::App::Stage::EarlyUpdate, FOXY_LAMBDA(update))
       .add_stage_before()
       .run();
+  }
+};
 
+auto main(int, char**) -> int {
+  try {
+    ExampleApp{}.run();
     return EXIT_SUCCESS;
   } catch (const std::exception& e) {
     FOXY_FATAL << "APP EXCEPTION: " << e.what();
-
     return EXIT_FAILURE;
   }
 }
