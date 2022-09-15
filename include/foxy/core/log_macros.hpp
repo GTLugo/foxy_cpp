@@ -2,6 +2,7 @@
 
 #include "easylogging++.h"
 
+
 #define FOXY_TRACE LOG(TRACE)
 #define FOXY_DEBUG LOG(DEBUG)
 #define FOXY_INFO  LOG(INFO)

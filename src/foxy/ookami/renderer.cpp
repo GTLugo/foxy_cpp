@@ -8,7 +8,9 @@
 namespace foxy::ookami {
   class Renderer::Impl {
   public:
-    explicit Impl(UniqueWindow& window) {
+    explicit Impl(Shared<GLFWwindow> window) {
+      FOXY_ASSERT(!instantiated_) << "Attempted second instantiation of foxy::ookami::Renderer";
+      instantiated_ = true;
       FOXY_TRACE << "Starting Ookami Renderer...";
 
       #ifdef FOXY_DEBUG_MODE
@@ -17,14 +19,19 @@ namespace foxy::ookami {
       context_ = std::make_shared<vulkan::Context>(window, false);
       #endif
 
-      swapchain_ = std::make_unique<vulkan::Swapchain>(context_);
+      swapchain_ = std::make_unique<vulkan::Swapchain>(window, context_);
       pipeline_ = std::make_unique<vulkan::Pipeline>(context_);
 
       FOXY_TRACE << "Ookami Renderer ready.";
     }
 
-    ~Impl() = default;
+    ~Impl() {
+      instantiated_ = false;
+      FOXY_TRACE << "Stopping Ookami Renderer...";
+    }
   private:
+    static inline bool instantiated_{ false };
+
     Shared<vulkan::Context> context_;
     Unique<vulkan::Swapchain> swapchain_;
     Unique<vulkan::Pipeline> pipeline_;
@@ -34,7 +41,7 @@ namespace foxy::ookami {
   //  Renderer
   //
 
-  Renderer::Renderer(UniqueWindow& window)
+  Renderer::Renderer(Shared<GLFWwindow> window)
     : pImpl_{std::make_unique<Impl>(window)} {}
 
   Renderer::~Renderer() = default;

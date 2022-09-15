@@ -28,7 +28,7 @@ namespace foxy::vulkan {
 
   class Context::Impl {
   public:
-    explicit Impl(UniqueWindow& window, bool enable_validation = true)
+    explicit Impl(Shared<GLFWwindow> window, bool enable_validation = true)
       : enable_validation_{enable_validation},
         window_{window},
         context_{vk::raii::Context{}},
@@ -49,10 +49,10 @@ namespace foxy::vulkan {
     }
 
     ~Impl() {
-
+      FOXY_TRACE << "Destroying Vulkan context...";
     }
 
-    [[nodiscard]] auto window() -> UniqueWindow& {
+    [[nodiscard]] auto window() -> Shared<GLFWwindow> {
       return window_;
     }
 
@@ -89,9 +89,9 @@ namespace foxy::vulkan {
       "VK_LAYER_KHRONOS_validation"
     };
 
-    const bool enable_validation_;
+    bool enable_validation_;
 
-    UniqueWindow& window_;
+    Shared<GLFWwindow> window_;
 
     vk::raii::Context context_;
     ExtensionData extension_data_;
@@ -203,7 +203,8 @@ namespace foxy::vulkan {
       };
 
       if (enable_validation_ && !check_validation_layer_support()) {
-        FOXY_FATAL << "Validation layers requested, but none are available.";
+        FOXY_ERROR << "Validation layers requested, but none are available. Disabling validation.";
+        enable_validation_ = false;
       }
       extension_data_.enabled_extensions = get_enabled_extensions();
       if (!extension_data_.enabled_extensions.empty()) {
@@ -351,7 +352,7 @@ namespace foxy::vulkan {
       return { physical_device_.createDevice(device_create_info, nullptr) };
     }
 
-    [[nodiscard]] auto create_surface(UniqueWindow& window) -> Surface {
+    [[nodiscard]] auto create_surface(Shared<GLFWwindow>& window) -> Surface {
       VkSurfaceKHR raw_surface;
 
       auto result = static_cast<vk::Result>(
@@ -366,17 +367,13 @@ namespace foxy::vulkan {
   //  Context
   //
 
-  Context::Context(Unique<GLFWwindow, void(*)(GLFWwindow*)>& window, bool enable_validation)
+  Context::Context(Shared<GLFWwindow> window, bool enable_validation)
     : pImpl_{std::make_unique<Impl>(window, enable_validation)} {}
 
   Context::~Context() = default;
 
   auto Context::operator*() -> VulkanContext& {
     return pImpl_->native();
-  }
-
-  auto Context::window() -> UniqueWindow& {
-    return pImpl_->window();
   }
 
   auto Context::native() -> vk::raii::Context& {

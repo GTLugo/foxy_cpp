@@ -1,12 +1,12 @@
 #include "window.hpp"
 
-#include "foxy/core/event_system/event.hpp"
+#include "foxy/core/events/event.hpp"
 #include "foxy/core/window/glfw/glfw_context.hpp"
 
 namespace foxy {
   class Window::Impl {
   public:
-    explicit Impl(const WindowCreateInfo& create_info)
+    explicit Impl(const CreateInfo& create_info)
       : glfw_context_{},
         state_{State{
           .title = create_info.title,
@@ -43,7 +43,7 @@ namespace foxy {
 
     ~Impl() {
       instantiated_ = false;
-      FOXY_TRACE << "Destroying Window";
+      FOXY_TRACE << "Destroying Window...";
     }
 
     void poll_events() {
@@ -51,12 +51,23 @@ namespace foxy {
     }
 
     void close() {
-      FOXY_TRACE << "Window close requested";
+      FOXY_TRACE << "Window close requested.";
       glfwSetWindowShouldClose(glfw_window_.get(), true);
     }
 
     void set_icon(i8* image, i32 width, i32 height) {
 
+    }
+
+    void set_title(const std::string& title) {
+      glfwSetWindowTitle(glfw_window_.get(), title.c_str());
+      state_.title = title;
+    }
+
+    void set_subtitle(const std::string& title) {
+      std::stringstream t;
+      t << state_.title << " | " << title;
+      glfwSetWindowTitle(glfw_window_.get(), t.str().c_str());
     }
 
     void set_pos(ivec2 position) {
@@ -81,7 +92,7 @@ namespace foxy {
     }
 
     [[nodiscard]] auto title() const -> std::string { return state_.title; }
-    [[nodiscard]] auto native() -> UniqueWindow& { return glfw_window_; }
+    [[nodiscard]] auto native() -> Shared<GLFWwindow>& { return glfw_window_; }
     [[nodiscard]] auto bounds() const -> Rect { return state_.bounds; }
     [[nodiscard]] auto vsync() const -> bool { return state_.vsync; }
     [[nodiscard]] auto fullscreen() const -> bool { return state_.vsync; }
@@ -122,14 +133,15 @@ namespace foxy {
 
     // GLFW
     glfw::Context glfw_context_;
-    UniqueWindow glfw_window_{ nullptr, nullptr };
+    Shared<GLFWwindow> glfw_window_{ nullptr };
 
     // Foxy
     State state_;
 
     void set_callbacks() {
       // Foxy
-      state_.close_event.set_callback(FOXY_LAMBDA(close));
+      Shared<GLFWwindow> x;
+      state_.close_event.add_callback(FOXY_LAMBDA(close));
 
       // GLFW
       glfwSetWindowCloseCallback(glfw_window_.get(), [](GLFWwindow* window) {
@@ -143,12 +155,12 @@ namespace foxy {
   //  Window
   //
 
-  Window::Window(const foxy::WindowCreateInfo&& properties)
+  Window::Window(const Window::CreateInfo&& properties)
       : pImpl_{std::make_unique<Impl>(properties)} {}
 
   Window::~Window() = default;
 
-  auto Window::operator*() -> UniqueWindow& {
+  auto Window::operator*() -> Shared<GLFWwindow>& {
     return pImpl_->native();
   }
 
@@ -162,6 +174,14 @@ namespace foxy {
 
   void Window::set_icon(i8* image, i32 width, i32 height) {
     pImpl_->set_icon(image, width, height);
+  }
+
+  void Window::set_title(const std::string& title) {
+    pImpl_->set_title(title);
+  }
+
+  void Window::set_subtitle(const std::string& title) {
+    pImpl_->set_subtitle(title);
   }
 
   void Window::set_pos(ivec2 position) {
@@ -180,7 +200,7 @@ namespace foxy {
     pImpl_->set_hidden(hidden);
   }
 
-  auto Window::native() -> UniqueWindow& {
+  auto Window::native() -> Shared<GLFWwindow>& {
     return pImpl_->native();
   }
 

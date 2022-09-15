@@ -4,31 +4,9 @@
 /*----------------------
   VENDOR LIBRARIES
 ----------------------*/
-// use #define USE_ASIO in cpp files
 #ifdef _WIN32
-// fix "WinSock.h has already been included" error
-#ifdef USE_ASIO
-// Set the proper SDK version before including boost/Asio
-#include <SDKDDKVer.h>
-// Note boost/ASIO includes Windows.h.
-#include <boost/asio.hpp>
-#else //  USE_ASIO
 #include <windows.h>
-#endif //  USE_ASIO
-#else // _WIN32
-#ifdef USE_ASIO
-#include <boost/asio.hpp>
-#endif // USE_ASIO
 #endif // _WIN32
-
-#include "glm/glm.hpp"
-#include "glm/gtc/type_ptr.hpp"
-#include "glm/gtx/string_cast.hpp"
-
-#include <boost/functional/hash.hpp>
-#include <boost/algorithm/clamp.hpp>
-#include <boost/random.hpp>
-#include <boost/nondet_random.hpp>
 
 /*----------------------
   STD LIBRARY

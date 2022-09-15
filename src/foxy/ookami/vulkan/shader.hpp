@@ -6,26 +6,29 @@
 
 namespace vk::raii {
   class ShaderModule;
+  class Device;
 }
 
 namespace foxy::vulkan {
   class Shader {
-    enum Type {
-      VERTEX = 0,
-      FRAGMENT = 1,
+  public:
+    enum Kind {
+      Vertex   = 0,
+      Fragment = 1,
+      Compute  = 2,
+      Geometry = 3,
+
+      Max = Geometry,
     };
 
-  public:
-    Shader(const std::optional<std::filesystem::path>& vertex_path,
-           const std::optional<std::filesystem::path>& fragment_path);
+    using BitFlags = std::bitset<Kind::Max + 1>;
+
+    explicit Shader(const vk::raii::Device& device, const std::filesystem::path& file_path, BitFlags shader_bits, bool optimize = false);
     ~Shader();
 
-    [[nodiscard]] auto bytecode(Type type) const -> const std::vector<char>&;
-    [[nodiscard]] auto module(Type type) const -> const vk::raii::ShaderModule&;
+    [[nodiscard]] auto module(Kind kind) const -> const vk::raii::ShaderModule&;
   private:
-    std::unordered_map<Type, std::vector<char>> shader_code_;
-    std::unordered_map<Type, vk::raii::ShaderModule> shader_modules_;
-
-    [[nodiscard]] static auto read_file(const std::filesystem::path& file_path) -> std::vector<char>;
+    class Impl;
+    Unique<Impl> pImpl_;
   };
 }

@@ -1,7 +1,7 @@
 ﻿# CMakeList.txt : CMake project for foxy_cpp/src, include source and define
 # project specific logic here.
 #
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.24)
 set(TARGET_NAME "foxy")
 
 set(SOURCE_FILES
@@ -10,17 +10,19 @@ set(SOURCE_FILES
     "foxy/util/log.cpp"
     "foxy/core/app.cpp"
     "foxy/core/window.cpp"
-    "foxy/core/event_system/event.cpp"
+    "foxy/core/events/event.cpp"
+    "foxy/core/threading/job_system.cpp"
     "foxy/core/window/glfw/glfw.cpp"
     "foxy/core/window/glfw/glfw_context.cpp"
-    #"foxy/core/window/glfw/unique_window.cpp"
+    "foxy/ookami/renderer.cpp"
     "foxy/ookami/vulkan/vulkan_context.cpp"
     "foxy/ookami/vulkan/swapchain.cpp"
     "foxy/ookami/vulkan/pipeline.cpp"
     "foxy/ookami/vulkan/shader.cpp"
-    "foxy/ookami/renderer.cpp"
-    "foxy/koyote/ecs.cpp"
+    #"foxy/koyote/ecs.cpp"
 )
+
+option(FOXY_PERF_TITLE "Performance stats displayed in title" ON)
 
 # Add source to this project's executable.
 add_library(${TARGET_NAME} STATIC ${SOURCE_FILES})
@@ -35,9 +37,16 @@ target_compile_definitions(${TARGET_NAME}
     $<$<CONFIG:relwithdebinfo>:FOXY_ENABLE_ASSERTS=1;FOXY_DEBUG_MODE=1>
 )
 
+if(FOXY_PERF_TITLE)
+target_compile_definitions(${TARGET_NAME}
+    PRIVATE
+    FOXY_PERF_TITLE=1
+)
+endif()
+
 target_include_directories(${TARGET_NAME} PUBLIC "../include" ".")
 
-target_precompile_headers(${TARGET_NAME} PUBLIC "../include/foxy/internal/fxpch.hpp")
+target_precompile_headers(${TARGET_NAME} PUBLIC "../include/foxy/internal/foxy_pch.hpp")
 
 # TODO: Add tests and install targets if needed.
 
@@ -45,39 +54,11 @@ target_precompile_headers(${TARGET_NAME} PUBLIC "../include/foxy/internal/fxpch.
 # DEPENDENCIES - VCPKG SUGGESTED
 # ===================================================
 
-# Boost
-# TODO: https://www.boost.org/doc/libs/1_80_0/tools/bcp/doc/html/index.html
-#target_include_directories(${TARGET_NAME}
-#    PUBLIC
-#    "../extern/boost"
-#    )
-set(Boost_USE_STATIC_LIBS    ON)
-set(Boost_USE_STATIC_RUNTIME ON)
-set(Boost_USE_MULTITHREADED  ON)
-find_package(Boost REQUIRED
-    COMPONENTS
-    container
-    coroutine
-    system
-    thread
-    random
-    )
-target_link_libraries(${TARGET_NAME}
-    PUBLIC
-    Boost::headers
-    Boost::container
-    Boost::coroutine
-    Boost::system
-    Boost::thread
-    Boost::random
-    )
-target_compile_definitions(${TARGET_NAME}
-    PRIVATE
-    BOOST_UUID_FORCE_AUTO_LINK=1
-    )
-
 # Vulkan
-find_package(Vulkan REQUIRED)
+find_package(Vulkan REQUIRED
+    COMPONENTS
+    shaderc_combined
+    )
 target_include_directories(${TARGET_NAME}
     PRIVATE
     ${Vulkan_INCLUDE_DIRS}
@@ -85,9 +66,11 @@ target_include_directories(${TARGET_NAME}
 target_link_libraries(${TARGET_NAME}
     PRIVATE
     ${Vulkan_LIBRARIES}
+    Vulkan::shaderc_combined
     )
 target_sources(${TARGET_NAME} PRIVATE ${VULKAN_FILES})
 target_compile_definitions(${TARGET_NAME} PUBLIC FOXY_USE_VULKAN=1)
+
 
 # ===================================================
 # DEPENDENCIES - SUBMODULES
@@ -103,12 +86,6 @@ target_include_directories(${TARGET_NAME}
 target_link_libraries(${TARGET_NAME}
     PRIVATE
     glfw
-    )
-
-# VKFW
-target_include_directories(${TARGET_NAME}
-    PRIVATE
-    "../extern/vkfw/include"
     )
 
 # GLM
@@ -132,20 +109,8 @@ target_sources(${TARGET_NAME}
     "../extern/easyloggingpp/src/easylogging++.cc"
     )
 
-## ImGUI
-#target_include_directories(${TARGET_NAME}
-#    PRIVATE
-#    "../extern/imgui"
-#    )
-#target_sources(${TARGET_NAME}
-#    PRIVATE
-#    "../extern/imgui/imgui_demo.cpp"
-#    "../extern/imgui/imgui_draw.cpp"
-#    "../extern/imgui/imgui_tables.cpp"
-#    "../extern/imgui/imgui_widgets.cpp"
-#    "../extern/imgui/imgui.cpp"
-#    )
-## IMGUI RENDER
-#target_sources(${TARGET_NAME} PRIVATE "../extern/imgui/backends/imgui_impl_vulkan.cpp")
-## IMGUI WINDOW
-#target_sources(${TARGET_NAME} PRIVATE "../extern/imgui/backends/imgui_impl_glfw.cpp")
+# BS Thread Pool
+target_include_directories(${TARGET_NAME}
+    PRIVATE
+    "../extern/bs_thread_pool"
+    )

@@ -8,6 +8,22 @@ namespace foxy {
   public:
     Log() {
       Log::init();
+
+      FOXY_INFO << R"([]=============================[])";
+      FOXY_INFO << R"(||  ______ ______   ___     __ ||)";
+      FOXY_INFO << R"(|| |  ____/ __ \ \ / \ \   / / ||)";
+      FOXY_INFO << R"(|| | |__ | |  | \ V / \ \_/ /  ||)";
+      FOXY_INFO << R"(|| |  __|| |  | |> <   \   /   ||)";
+      FOXY_INFO << R"(|| | |   | |__| / . \   | |    ||)";
+      FOXY_INFO << R"(|| |_|    \____/_/ \_\  |_|    ||)";
+      FOXY_INFO << R"(||                             ||)";
+      FOXY_INFO << R"([]=============================[])";
+      FOXY_INFO << "Foxy startup: Kon kon kitsune! Hi, friends!";
+      #ifdef FOXY_DEBUG_MODE
+      FOXY_INFO << "Build mode: DEBUG";
+      #else
+      FOXY_INFO << "Build mode: RELEASE";
+      #endif
     }
 
     ~Log() {
