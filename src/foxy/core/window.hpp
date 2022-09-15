@@ -14,18 +14,20 @@ namespace foxy {
   template<class... Args>
   class Event;
 
-  struct WindowCreateInfo {
-    const std::string title{ "FOXY FRAMEWORK" };
-    const int width{ 1600 };
-    const int height{ 900 };
-    const bool vsync{ true };
-    const bool fullscreen{ false };
-    const bool borderless{ false };
-  };
+  
 
   class Window {
   public:
-    explicit Window(const WindowCreateInfo&& create_info);
+    struct CreateInfo {
+      const std::string title{ "FOXY FRAMEWORK" };
+      const int width{ 1600 };
+      const int height{ 900 };
+      const bool vsync{ true };
+      const bool fullscreen{ false };
+      const bool borderless{ false };
+    };
+
+    explicit Window(const CreateInfo&& create_info);
     ~Window();
 
     auto operator*() -> Shared<GLFWwindow>&;
@@ -34,6 +36,8 @@ namespace foxy {
     void close();
 
     void set_icon(i8* image, i32 width, i32 height);
+    void set_title(const std::string& title);
+    void set_subtitle(const std::string& title);
     void set_pos(ivec2 position);
     void set_vsync(bool enabled);
     void set_fullscreen(bool enabled);

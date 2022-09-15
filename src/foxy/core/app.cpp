@@ -9,15 +9,17 @@
 
 namespace foxy {
   class App::Impl {
+    friend class App;
   public:
-    explicit Impl(const foxy::AppCreateInfo& create_info)
-      : dummy_log_{} {
+    explicit Impl(App& app, const CreateInfo& create_info)
+      : dummy_log_{},
+        app_{app} {
       FOXY_ASSERT(!instantiated_) << "Attempted second instantiation of foxy::App";
       instantiated_ = true;
 
-      Time::__foxy_internal_init(128);
+      Time::__foxy_internal_init(1);
 
-      window_ = std::make_unique<Window>(WindowCreateInfo{
+      window_ = std::make_unique<Window>(Window::CreateInfo{
         create_info.title,
         create_info.width,
         create_info.height,
@@ -37,16 +39,39 @@ namespace foxy {
       instantiated_ = false;
     }
 
-    void add_global_data() {
-
+    void set_user_data(Shared<void> data) {
+      user_data_ = data;
     }
 
-    void add_step_before() {
+    void add_stage_before() {
 
     }
+    
+    void add_function_to_stage(Stage stage, StageCallback&& callback) {
+      switch (stage) {
+        case Stage::Awake:
+          awake_event_.add_callback(std::forward<StageCallback>(callback));
+          break;
+        case Stage::Start:
+          start_event_.add_callback(std::forward<StageCallback>(callback));
+          break;
+        case Stage::EarlyUpdate:
+          early_update_event_.add_callback(std::forward<StageCallback>(callback));
+          break;
+        case Stage::Tick:
+          tick_event_.add_callback(std::forward<StageCallback>(callback));
+          break;
+        case Stage::LateUpdate:
+          late_update_event_.add_callback(std::forward<StageCallback>(callback));
+          break;
+        case Stage::Stop:
+          stop_event_.add_callback(std::forward<StageCallback>(callback));
+          break;
+      }
+    }
 
-    void add_system_to_step() {
-
+    [[nodiscard]] auto user_data() -> Shared<void> {
+      return user_data_;
     }
 
     void run() {
@@ -57,12 +82,15 @@ namespace foxy {
 
   private:
     static inline bool instantiated_{ false };
-    const double frame_time_goal_{ 1. / 250. };
-
-    bool running_{ true };
     Log dummy_log_; // this just allows for logging upon first creation and final destruction of App
-    Unique<Window> window_;
 
+    const double frame_time_goal_{ 1. / 250. };
+    bool running_{ true };
+
+    Shared<void> user_data_;
+    App& app_;
+
+    Unique<Window> window_;
     Unique<ookami::Renderer> renderer_;
 
     BS::thread_pool thread_pool_{ std::thread::hardware_concurrency() - 1 };
@@ -74,12 +102,12 @@ namespace foxy {
     Event<> main_update_event_;
     Event<> main_stop_event_;
     // Game Thread events
-    Event<> awake_event_;
-    Event<> start_event_;
-    Event<double> early_update_event_;
-    Event<double> tick_event_;
-    Event<double> late_update_event_;
-    Event<> stop_event_;
+    Event<App&> awake_event_;
+    Event<App&> start_event_;
+    Event<App&> early_update_event_;
+    Event<App&> tick_event_;
+    Event<App&> late_update_event_;
+    Event<App&> stop_event_;
 
     void main_loop() {
       while (window_->running()) {
@@ -90,21 +118,19 @@ namespace foxy {
     void game_loop() {
       el::Helpers::setThreadName("game");
       FOXY_TRACE << "Starting game thread...";
-
       try {
-        awake_event_();
-        start_event_();
+        awake_event_(app_);
+        start_event_(app_);
         while (window_->running()) {
-          double frame_time{ Time::delta<Seconds>() };
-          early_update_event_(frame_time);
+          early_update_event_(app_);
           while (Time::__foxy_internal_should_do_tick()) {
-            tick_event_(frame_time);
+            tick_event_(app_);
             Time::__foxy_internal_tick();
           }
-          late_update_event_(frame_time);
+          late_update_event_(app_);
           Time::__foxy_internal_update();
         }
-        stop_event_();
+        stop_event_(app_);
       } catch (const std::exception& e) {
         FOXY_ERROR << e.what();
       }
@@ -112,29 +138,29 @@ namespace foxy {
       FOXY_TRACE << "Joining game thread...";
     }
 
-    void awake() {
-
+    void awake(App& app) {
+      
     }
 
-    void start() {
+    void start(App& app) {
       //FOXY_DEBUG << "Start";
     }
 
-    void early_update(double frame_time) {
+    void early_update(App& app) {
       //FOXY_DEBUG << "Early";
     }
 
-    void tick(double frame_time) {
-      LOG_EVERY_N(static_cast<u32>(Time::tick_rate()), DEBUG) << "PERF STATS | frame time: " 
-        << std::fixed << std::setfill(' ') << std::setw(12) << std::setprecision(9) << frame_time << "s | % of cap: " 
-        << std::defaultfloat << std::setfill(' ') << std::setw(9) << std::setprecision(4) << (frame_time / frame_time_goal_) * 100. << '%';
+    void tick(App& app) {
+      #if defined(FOXY_DEBUG_MODE) and defined(FOXY_PERF_TITLE)
+      show_perf_stats();
+      #endif
     }
 
-    void late_update(double frame_time) {
+    void late_update(App& app) {
       //FOXY_DEBUG << "Late";
     }
 
-    void stop() {
+    void stop(App& app) {
       //FOXY_DEBUG << "Stop";
     }
 
@@ -148,14 +174,32 @@ namespace foxy {
       late_update_event_.add_callback(FOXY_LAMBDA(late_update));
       stop_event_.add_callback(FOXY_LAMBDA(stop));
     }
+
+    void show_perf_stats() {
+      static u32 counter{ 0 };
+      double frame_time{ Time::delta<Seconds>() };
+      if (counter >= static_cast<u32>(Time::tick_rate())) {
+        std::stringstream perf_stats;
+
+        perf_stats << "frametime: " 
+          << std::fixed << std::setfill(' ') << std::setw(12) << std::setprecision(9) << frame_time << "s | % of target frametime ceiling: " 
+          << std::defaultfloat << std::setfill(' ') << std::setw(9) << std::setprecision(4) << (frame_time / frame_time_goal_) * 100. << '%';
+
+        //FOXY_DEBUG << "PERF STATS | " << perf_stats.str();
+        window_->set_subtitle(perf_stats.str());
+        counter = 0;
+      } else {
+        ++counter;
+      }
+    }
   };
 
   //
   //  App
   //
 
-  App::App(const foxy::AppCreateInfo&& create_info)
-    : pImpl_{std::make_unique<Impl>(create_info)} {}
+  App::App(App::CreateInfo&& create_info)
+    : pImpl_{std::make_unique<Impl>(*this, create_info)} {}
 
   App::~App() = default;
 
@@ -163,18 +207,22 @@ namespace foxy {
     pImpl_->run();
   }
 
-  auto App::add_global_data() -> App& {
-    pImpl_->add_global_data();
+  auto App::set_user_data(Shared<void> data) -> App& {
+    pImpl_->set_user_data(data);
     return *this;
   }
 
-  auto App::add_step_before() -> App& {
-    pImpl_->add_step_before();
+  auto App::add_stage_before() -> App& {
+    pImpl_->add_stage_before();
     return *this;
   }
 
-  auto App::add_system_to_step() -> App& {
-    pImpl_->add_system_to_step();
+  auto App::add_function_to_stage(Stage stage, StageCallback&& callback) -> App& {
+    pImpl_->add_function_to_stage(stage, std::forward<StageCallback>(callback));
     return *this;
+  }
+
+  auto App::user_data() -> Shared<void> {
+    return pImpl_->user_data();
   }
 }

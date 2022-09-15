@@ -6,7 +6,7 @@
 namespace foxy {
   class Window::Impl {
   public:
-    explicit Impl(const WindowCreateInfo& create_info)
+    explicit Impl(const CreateInfo& create_info)
       : glfw_context_{},
         state_{State{
           .title = create_info.title,
@@ -57,6 +57,17 @@ namespace foxy {
 
     void set_icon(i8* image, i32 width, i32 height) {
 
+    }
+
+    void set_title(const std::string& title) {
+      glfwSetWindowTitle(glfw_window_.get(), title.c_str());
+      state_.title = title;
+    }
+
+    void set_subtitle(const std::string& title) {
+      std::stringstream t;
+      t << state_.title << " | " << title;
+      glfwSetWindowTitle(glfw_window_.get(), t.str().c_str());
     }
 
     void set_pos(ivec2 position) {
@@ -144,7 +155,7 @@ namespace foxy {
   //  Window
   //
 
-  Window::Window(const foxy::WindowCreateInfo&& properties)
+  Window::Window(const Window::CreateInfo&& properties)
       : pImpl_{std::make_unique<Impl>(properties)} {}
 
   Window::~Window() = default;
@@ -163,6 +174,14 @@ namespace foxy {
 
   void Window::set_icon(i8* image, i32 width, i32 height) {
     pImpl_->set_icon(image, width, height);
+  }
+
+  void Window::set_title(const std::string& title) {
+    pImpl_->set_title(title);
+  }
+
+  void Window::set_subtitle(const std::string& title) {
+    pImpl_->set_subtitle(title);
   }
 
   void Window::set_pos(ivec2 position) {

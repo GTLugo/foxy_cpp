@@ -22,6 +22,8 @@ set(SOURCE_FILES
     #"foxy/koyote/ecs.cpp"
 )
 
+option(FOXY_PERF_TITLE "Performance stats displayed in title" ON)
+
 # Add source to this project's executable.
 add_library(${TARGET_NAME} STATIC ${SOURCE_FILES})
 target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
@@ -34,6 +36,13 @@ target_compile_definitions(${TARGET_NAME}
     $<$<CONFIG:debug>:FOXY_ENABLE_ASSERTS=1;FOXY_DEBUG_MODE=1>
     $<$<CONFIG:relwithdebinfo>:FOXY_ENABLE_ASSERTS=1;FOXY_DEBUG_MODE=1>
 )
+
+if(FOXY_PERF_TITLE)
+target_compile_definitions(${TARGET_NAME}
+    PRIVATE
+    FOXY_PERF_TITLE=1
+)
+endif()
 
 target_include_directories(${TARGET_NAME} PUBLIC "../include" ".")
 
