@@ -89,7 +89,7 @@ namespace foxy::vulkan {
                        BitFlags shader_bits, 
                        bool optimize = false) -> bool {
       namespace fs = std::filesystem;
-      fs::path tmp_shader_dir{ "tmp/shader_cache"/ fs::relative(dir_path, {"res/foxy/shaders"}).parent_path() / dir_path.stem() };
+      fs::path tmp_shader_dir{ fs::path{ "tmp" } / fs::path{ "shader_cache" } / fs::relative(dir_path, {"res/foxy/shaders"}).parent_path() / dir_path.stem() };
       fs::path out_file_stem{ tmp_shader_dir / name_ };
 
       for (u32 i{ 0 }; i <= Kind::Max; ++i) {
@@ -132,7 +132,7 @@ namespace foxy::vulkan {
       namespace fs = std::filesystem;
       
       // example: res/shaders/simple.glsl -> tmp/res/shaders/simple/
-      fs::path tmp_shader_dir{ "tmp/shader_cache" / fs::relative(file_path, {"res/foxy/shaders"}).parent_path() / file_path.stem() };
+      fs::path tmp_shader_dir{ fs::path{ "tmp" } / fs::path{ "shader_cache" } / fs::relative(file_path, {"res/foxy/shaders"}).parent_path() / file_path.stem() };
       
       if (fs::exists(tmp_shader_dir)) {
         fs::path out_file_stem{ tmp_shader_dir / name_ };

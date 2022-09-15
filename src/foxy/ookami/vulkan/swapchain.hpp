@@ -1,5 +1,7 @@
 #pragma once
 
+class GLFWwindow;
+
 namespace foxy::vulkan {
   class Context;
 }
@@ -7,7 +9,7 @@ namespace foxy::vulkan {
 namespace foxy::vulkan {
   class Swapchain {
   public:
-    explicit Swapchain(Shared<Context> context);
+    explicit Swapchain(Shared<GLFWwindow> window, Shared<Context> context);
     ~Swapchain();
   private:
     class Impl;

@@ -24,13 +24,11 @@ namespace foxy {
   };
 
   class Window {
-    using UniqueWindow = Unique<GLFWwindow, void(*)(GLFWwindow*)>;
-
   public:
     explicit Window(const WindowCreateInfo&& create_info);
     ~Window();
 
-    auto operator*() -> UniqueWindow&;
+    auto operator*() -> Shared<GLFWwindow>&;
 
     void poll_events();
     void close();
@@ -41,7 +39,7 @@ namespace foxy {
     void set_fullscreen(bool enabled);
     void set_hidden(bool hidden);
 
-    [[nodiscard]] auto native() -> UniqueWindow&;
+    [[nodiscard]] auto native() -> Shared<GLFWwindow>&;
     [[nodiscard]] auto title() const -> std::string;
     [[nodiscard]] auto bounds() const -> Rect;
     [[nodiscard]] auto vsync() const -> bool;

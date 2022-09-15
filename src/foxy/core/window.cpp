@@ -43,7 +43,7 @@ namespace foxy {
 
     ~Impl() {
       instantiated_ = false;
-      FOXY_TRACE << "Destroying Window..";
+      FOXY_TRACE << "Destroying Window...";
     }
 
     void poll_events() {
@@ -81,7 +81,7 @@ namespace foxy {
     }
 
     [[nodiscard]] auto title() const -> std::string { return state_.title; }
-    [[nodiscard]] auto native() -> UniqueWindow& { return glfw_window_; }
+    [[nodiscard]] auto native() -> Shared<GLFWwindow>& { return glfw_window_; }
     [[nodiscard]] auto bounds() const -> Rect { return state_.bounds; }
     [[nodiscard]] auto vsync() const -> bool { return state_.vsync; }
     [[nodiscard]] auto fullscreen() const -> bool { return state_.vsync; }
@@ -122,14 +122,15 @@ namespace foxy {
 
     // GLFW
     glfw::Context glfw_context_;
-    UniqueWindow glfw_window_{ nullptr, nullptr };
+    Shared<GLFWwindow> glfw_window_{ nullptr };
 
     // Foxy
     State state_;
 
     void set_callbacks() {
       // Foxy
-      state_.close_event.set_callback(FOXY_LAMBDA(close));
+      Shared<GLFWwindow> x;
+      state_.close_event.add_callback(FOXY_LAMBDA(close));
 
       // GLFW
       glfwSetWindowCloseCallback(glfw_window_.get(), [](GLFWwindow* window) {
@@ -148,7 +149,7 @@ namespace foxy {
 
   Window::~Window() = default;
 
-  auto Window::operator*() -> UniqueWindow& {
+  auto Window::operator*() -> Shared<GLFWwindow>& {
     return pImpl_->native();
   }
 
@@ -180,7 +181,7 @@ namespace foxy {
     pImpl_->set_hidden(hidden);
   }
 
-  auto Window::native() -> UniqueWindow& {
+  auto Window::native() -> Shared<GLFWwindow>& {
     return pImpl_->native();
   }
 

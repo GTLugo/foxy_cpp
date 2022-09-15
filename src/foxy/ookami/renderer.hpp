@@ -8,10 +8,8 @@ class GLFWwindow;
 
 namespace foxy::ookami {
   class Renderer {
-    using UniqueWindow = Unique<GLFWwindow, void(*)(GLFWwindow*)>;
-
   public:
-    explicit Renderer(UniqueWindow& window);
+    explicit Renderer(Shared<GLFWwindow> window);
     ~Renderer();
 
   private:

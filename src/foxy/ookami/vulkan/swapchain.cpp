@@ -7,8 +7,9 @@
 namespace foxy::vulkan {
   class Swapchain::Impl {
   public:
-    explicit Impl(Shared<Context> context)
-      : context_{std::move(context)},
+    explicit Impl(Shared<GLFWwindow> window, Shared<Context> context)
+      : window_{window},
+        context_{context},
         swapchain_image_format_{vk::Format::eB8G8R8A8Unorm},
         swapchain_{create_swapchain()},
         swap_images_{swapchain_.getImages()},
@@ -18,7 +19,7 @@ namespace foxy::vulkan {
 
     ~Impl() = default;
   private:
-
+    Shared<GLFWwindow> window_;
     Shared<Context> context_;
 
     vk::Format swapchain_image_format_;
@@ -60,7 +61,7 @@ namespace foxy::vulkan {
         return capabilities.currentExtent;
       } else {
         ivec2 size{};
-        glfwGetFramebufferSize(context_->window().get(), &size.x, &size.y);
+        glfwGetFramebufferSize(window_.get(), &size.x, &size.y);
 
         vk::Extent2D true_extent{
           std::clamp(static_cast<u32>(size.x), capabilities.minImageExtent.width, capabilities.maxImageExtent.width),
@@ -160,8 +161,8 @@ namespace foxy::vulkan {
   //  Swapchain
   //
 
-  Swapchain::Swapchain(Shared<vulkan::Context> context)
-    : pImpl_{std::make_unique<Impl>(std::move(context))} {}
+  Swapchain::Swapchain(Shared<GLFWwindow> window, Shared<vulkan::Context> context)
+    : pImpl_{std::make_unique<Impl>(window, context)} {}
 
   Swapchain::~Swapchain() = default;
 }

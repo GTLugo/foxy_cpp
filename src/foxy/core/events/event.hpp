@@ -5,16 +5,16 @@ namespace foxy {
   class Event {
   public:
     template<typename Callback>
-    void set_callback(Callback&& callback_) {
-      handler_function_ = std::forward<Callback>(callback_);
+    void add_callback(Callback&& callback_) {
+      handler_functions_.push_back(std::forward<Callback>(callback_));
     }
 
     void operator()(Args... args_) {
-      if (handler_function_) {
-        handler_function_(args_...);
+      for (auto&& function: handler_functions_) {
+        function(args_...);
       }
     }
   private:
-    std::function<void(Args...)> handler_function_;
+    std::vector<std::function<void(Args...)>> handler_functions_;
   };
 }

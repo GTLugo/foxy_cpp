@@ -37,7 +37,7 @@ target_compile_definitions(${TARGET_NAME}
 
 target_include_directories(${TARGET_NAME} PUBLIC "../include" ".")
 
-target_precompile_headers(${TARGET_NAME} PUBLIC "../include/foxy/internal/fxpch.hpp")
+target_precompile_headers(${TARGET_NAME} PUBLIC "../include/foxy/internal/foxy_pch.hpp")
 
 # TODO: Add tests and install targets if needed.
 
