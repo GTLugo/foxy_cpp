@@ -1,7 +1,7 @@
 #include "app.hpp"
 
 #include "foxy/util/time.hpp"
-#include "foxy/core/window.hpp"
+#include "foxy/core/window/window.hpp"
 #include "foxy/core/events/event.hpp"
 #include "foxy/ookami/renderer.hpp"
 #include <BS_thread_pool.hpp>
