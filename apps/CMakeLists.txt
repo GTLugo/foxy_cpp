@@ -1,7 +1,7 @@
 # CMakeList.txt : CMake project for foxy_cpp/apps, include source and define
 # project specific logic here.
 #
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.24)
 set(TARGET_NAME "example_app")
 
 set(SOURCE_FILES "example_app.cpp")
