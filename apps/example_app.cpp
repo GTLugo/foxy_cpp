@@ -18,7 +18,6 @@ struct ExampleApp {
       .title = "Foxy Example App"
     }}.add_function_to_stage(foxy::App::Stage::Start, FOXY_LAMBDA(start))
       .add_function_to_stage(foxy::App::Stage::EarlyUpdate, FOXY_LAMBDA(update))
-      .add_stage_before()
       .run();
   }
 };
