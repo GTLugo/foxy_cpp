@@ -13,3 +13,6 @@
 [submodule "extern/bs_thread_pool"]
 	path = extern/bs_thread_pool
 	url = https://github.com/bshoshany/thread-pool.git
+[submodule "extern/uuid_v4"]
+	path = extern/uuid_v4
+	url = https://github.com/crashoz/uuid_v4.git

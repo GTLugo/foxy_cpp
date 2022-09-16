@@ -5,14 +5,14 @@
 #pragma once
 
 /*----------------------
-  STD LIBRARY
+  FOXY LIBRARIES
 ----------------------*/
-#include <iostream>
+#include "koyote.hpp"
+#include "ookami.hpp"
+#include "neko.hpp"
+#include "inferno.hpp"
 
 /*----------------------
-  FOXY LIBRARY
+  FOXY FRAMEWORK
 ----------------------*/
-#include "foxy/core/macros.hpp"
-#include "foxy/core/app.hpp"
-#include "foxy/ookami/renderer.hpp"
-#include "foxy/core/events/event.hpp"
+#include "foxy/app.hpp"
