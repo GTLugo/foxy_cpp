@@ -7,9 +7,11 @@
 	path = extern/glfw
 	url = https://github.com/glfw/glfw.git
 [submodule "extern/bs_thread_pool"]
+	ignore = dirty
 	path = extern/bs_thread_pool
 	url = https://github.com/bshoshany/thread-pool.git
 [submodule "extern/uuid_v4"]
+	ignore = dirty
 	path = extern/uuid_v4
 	url = https://github.com/crashoz/uuid_v4.git
 [submodule "extern/spdlog"]
