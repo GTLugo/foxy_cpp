@@ -11,6 +11,12 @@ struct ExampleApp {
 
   void update(foxy::App& app) {
     double delta_time{ koyote::Time::delta<koyote::secs>() };
+
+    static double timer{ 0 };
+    if (1. <= (timer += delta_time)) {
+      koyote::Log::info("uwu");
+      timer = 0;
+    }
   }
 
   void run(int argc, char** argv) {
