@@ -2,6 +2,7 @@
 # and include sub-projects here.
 # Based on structure of: https://gitlab.com/CLIUtils/modern-cmake/-/tree/master/examples/extended-project
 cmake_minimum_required(VERSION 3.24)
+#set(CMAKE_CXX_STANDARD 23)
 project("foxy")
 message(STATUS "Configuring: ${PROJECT_NAME}")
 
@@ -24,8 +25,12 @@ set(FOXY_EXTERN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/extern)
 add_subdirectory(extern/glfw)
 # GLM
 add_subdirectory(extern/glm)
-# EasyLogging++
-add_subdirectory(extern/easyloggingpp)
+# SPDLOG
+set(SPDLOG_ENABLE_PCH ON)
+set(SPDLOG_USE_STD_FORMAT ON)
+set(SPDLOG_WCHAR_SUPPORT ON)
+set(SPDLOG_WCHAR_TO_UTF8_SUPPORT ON)
+add_subdirectory(extern/spdlog)
 
 # ===================================================
 # SUBDIRECTORIES

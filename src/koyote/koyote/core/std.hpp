@@ -1,9 +1,9 @@
 #pragma once
 
-#include "log.hpp"
+#include "koyote/internal/includes.hpp"
 #include <uuid_v4.h>
 
-namespace kyt {
+namespace koyote {
   using byte = std::uint8_t;
   using i8 = std::int8_t;
   using u8 = std::uint8_t;
@@ -61,17 +61,6 @@ namespace kyt {
     NoCopyOrMove& operator=(NoCopyOrMove&& other) = delete;
   };
 
-  [[nodiscard]] inline auto read_file(const std::filesystem::path& file_path, std::ios::fmtflags flags = {}) -> std::optional<std::string> {
-    std::ifstream file{file_path, flags};
-
-    if (!file.is_open()) {
-      LOG(ERROR) << "File \"" << file_path << "\" does not exist.";
-      return std::nullopt;
-    }
-
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-
-    return buffer.str();
-  }
+  [[nodiscard]] auto read_file(const std::filesystem::path& file_path, 
+                               std::ios::fmtflags flags = {}) -> std::optional<std::string> const;
 }

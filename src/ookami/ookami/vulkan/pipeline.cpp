@@ -10,29 +10,32 @@
 namespace ookami {
   class Pipeline::Impl {
   public:
-    explicit Impl(kyt::shared<Context> context)
+    explicit Impl(koyote::shared<Context> context)
       : context_{std::move(context)} {
+      
+      koyote::Log::info("Please wait while loading shaders...");
       simple_shader_ = std::make_shared<Shader>(
         context_->logical_device(), 
         "res/foxy/shaders/simple", 
         Shader::BitFlags{BIT(Shader::Vertex) + BIT(Shader::Fragment)},
         true
       );
+      koyote::Log::info("Shader loading complete!");
 
-      LOG(TRACE) << "Created Vulkan pipeline.";
+      koyote::Log::trace("Created Vulkan pipeline.");
     }
 
     ~Impl() = default;
   private:
-    kyt::shared<Context> context_;
-    kyt::shared<Shader> simple_shader_;
+    koyote::shared<Context> context_;
+    koyote::shared<Shader> simple_shader_;
   };
 
   //
   //  Pipeline
   //
 
-  Pipeline::Pipeline(kyt::shared<Context> context)
+  Pipeline::Pipeline(koyote::shared<Context> context)
     : pImpl_{ std::make_unique<Impl>(context) } {}
 
   Pipeline::~Pipeline() = default;

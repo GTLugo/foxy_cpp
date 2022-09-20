@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 set(TARGET_NAME "ookami")
+#set(CMAKE_CXX_STANDARD 23)
 message(STATUS "Configuring ${PROJECT_NAME} sub-project: ${TARGET_NAME}")
 
 # ===================================================
@@ -31,6 +32,7 @@ target_include_directories(${TARGET_NAME} PUBLIC ".")
 target_include_directories(${TARGET_NAME} PUBLIC "../koyote")
 target_link_libraries(${TARGET_NAME} PUBLIC koyote)
 # Vulkan
+set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS "/ignore:4099")
 find_package(Vulkan REQUIRED COMPONENTS shaderc_combined)
 target_include_directories(${TARGET_NAME} PRIVATE ${Vulkan_INCLUDE_DIRS})
 target_link_libraries(${TARGET_NAME} PRIVATE ${Vulkan_LIBRARIES} Vulkan::shaderc_combined)

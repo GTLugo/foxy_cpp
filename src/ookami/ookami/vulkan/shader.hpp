@@ -32,6 +32,6 @@ namespace ookami {
     [[nodiscard]] auto module(Kind kind) const -> const vk::raii::ShaderModule&;
   private:
     class Impl;
-    kyt::unique<Impl> pImpl_;
+    koyote::unique<Impl> pImpl_;
   };
 }

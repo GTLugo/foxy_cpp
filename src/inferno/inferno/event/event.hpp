@@ -1,6 +1,6 @@
 #pragma once
 
-namespace ifr {
+namespace inferno {
   template<typename... Args>
   class Event {
   public:

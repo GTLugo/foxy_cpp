@@ -6,18 +6,19 @@
 #include "inu/job_system.hpp"
 #include "neko/ecs.hpp"
 
-namespace fox {
+namespace foxy {
   class App::Impl {
     friend class App;
   public:
     explicit Impl(App& app, const CreateInfo& create_info)
-      : dummy_log_{},
-        app_{app} {
-      DCHECK(!instantiated_) << "Attempted second instantiation of foxy::App";
+      : app_{app} {
+      if (instantiated_) {
+        koyote::Log::fatal("Attempted second instantiation of foxy::App");
+      }
       instantiated_ = true;
-      kyt::time::i__engine_internal_init(128);
+      koyote::Time::i__engine_internal_init(128, 1024U);
 
-      window_ = std::make_unique<ifr::Window>(ifr::Window::CreateInfo{
+      window_ = std::make_unique<inferno::Window>(inferno::Window::CreateInfo{
         create_info.title,
         create_info.width,
         create_info.height,
@@ -42,7 +43,7 @@ namespace fox {
       instantiated_ = false;
     }
 
-    void set_user_data(kyt::shared<void> data) {
+    void set_user_data(koyote::shared<void> data) {
       user_data_ = data;
     }
 
@@ -73,7 +74,7 @@ namespace fox {
       }
     }
 
-    [[nodiscard]] auto user_data() -> kyt::shared<void> {
+    [[nodiscard]] auto user_data() -> koyote::shared<void> {
       return user_data_;
     }
 
@@ -85,32 +86,31 @@ namespace fox {
 
   private:
     static inline bool instantiated_{ false };
-    kyt::Log dummy_log_; // this just allows for logging upon first creation and final destruction of App
 
     const double frame_time_goal_{ 1. / 250. };
     bool running_{ true };
 
-    kyt::shared<void> user_data_;
+    koyote::shared<void> user_data_;
     App& app_;
 
-    kyt::unique<ifr::Window> window_;
-    kyt::unique<ookami::RenderEngine> renderer_;
+    koyote::unique<inferno::Window> window_;
+    koyote::unique<ookami::RenderEngine> renderer_;
 
     BS::thread_pool thread_pool_{ std::thread::hardware_concurrency() - 1 };
 
     // Main Thread events
-    ifr::Event<> main_awake_event_;
-    ifr::Event<> main_start_event_;
-    ifr::Event<> main_poll_event_;
-    ifr::Event<> main_update_event_;
-    ifr::Event<> main_stop_event_;
+    inferno::Event<> main_awake_event_;
+    inferno::Event<> main_start_event_;
+    inferno::Event<> main_poll_event_;
+    inferno::Event<> main_update_event_;
+    inferno::Event<> main_stop_event_;
     // Game Thread events
-    ifr::Event<App&> awake_event_;
-    ifr::Event<App&> start_event_;
-    ifr::Event<App&> early_update_event_;
-    ifr::Event<App&> tick_event_;
-    ifr::Event<App&> late_update_event_;
-    ifr::Event<App&> stop_event_;
+    inferno::Event<App&> awake_event_;
+    inferno::Event<App&> start_event_;
+    inferno::Event<App&> early_update_event_;
+    inferno::Event<App&> tick_event_;
+    inferno::Event<App&> late_update_event_;
+    inferno::Event<App&> stop_event_;
 
     void main_loop() {
       while (window_->running()) {
@@ -119,26 +119,27 @@ namespace fox {
     }
 
     void game_loop() {
-      el::Helpers::setThreadName("game");
-      LOG(TRACE) << "Starting game thread...";
+      koyote::Log::set_thread_name("game");
+
+      koyote::Log::trace("Starting game thread...");
       try {
         awake_event_(app_);
         start_event_(app_);
         while (window_->running()) {
           early_update_event_(app_);
-          while (kyt::time::i__engine_internal_should_do_tick()) {
+          while (koyote::Time::i__engine_internal_should_do_tick()) {
             tick_event_(app_);
-            kyt::time::i__engine_internal_tick();
+            koyote::Time::i__engine_internal_tick();
           }
           late_update_event_(app_);
-          kyt::time::i__engine_internal_update();
+          koyote::Time::i__engine_internal_update();
         }
         stop_event_(app_);
       } catch (const std::exception& e) {
-        LOG(ERROR) << e.what();
+        koyote::Log::error("{}", e.what());
       }
 
-      LOG(TRACE) << "Joining game thread...";
+      koyote::Log::trace("Joining game thread...");
     }
 
     void awake(App& app) {
@@ -179,9 +180,9 @@ namespace fox {
     }
 
     void show_perf_stats() {
-      static kyt::u32 counter{ 0 };
-      double frame_time{ kyt::time::delta<kyt::secs>() };
-      if (counter >= static_cast<kyt::u32>(kyt::time::tick_rate())) {
+      static koyote::u32 counter{ 0 };
+      double frame_time{ koyote::Time::delta<koyote::secs>() };
+      if (counter >= static_cast<koyote::u32>(koyote::Time::tick_rate())) {
         std::stringstream perf_stats;
 
         perf_stats << "frametime: " 
@@ -210,7 +211,7 @@ namespace fox {
     pImpl_->run();
   }
 
-  auto App::set_user_data_ptr(kyt::shared<void> data) -> App& {
+  auto App::set_user_data_ptr(koyote::shared<void> data) -> App& {
     pImpl_->set_user_data(data);
     return *this;
   }
@@ -225,7 +226,7 @@ namespace fox {
     return *this;
   }
 
-  auto App::user_data_ptr() -> kyt::shared<void> {
+  auto App::user_data_ptr() -> koyote::shared<void> {
     return pImpl_->user_data();
   }
 }

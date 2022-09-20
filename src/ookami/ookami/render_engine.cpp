@@ -8,10 +8,12 @@
 namespace ookami {
   class RenderEngine::Impl {
   public:
-    explicit Impl(kyt::shared<GLFWwindow> window) {
-      DCHECK(!instantiated_) << "Attempted second instantiation of foxy::ookami::Renderer";
+    explicit Impl(koyote::shared<GLFWwindow> window) {
+      if (instantiated_) {
+        koyote::Log::fatal("Attempted second instantiation of ookami::RenderEngine");
+      }
       instantiated_ = true;
-      LOG(TRACE) << "Starting Ookami Renderer...";
+      koyote::Log::trace("Starting Ookami Render Engine...");
 
       #ifdef FOXY_DEBUG_MODE
       context_ = std::make_shared<Context>(window);
@@ -22,26 +24,26 @@ namespace ookami {
       swapchain_ = std::make_unique<Swapchain>(window, context_);
       pipeline_ = std::make_unique<Pipeline>(context_);
 
-      LOG(TRACE) << "Ookami Renderer ready.";
+      koyote::Log::trace("Ookami Render Engine ready.");
     }
 
     ~Impl() {
       instantiated_ = false;
-      LOG(TRACE) << "Stopping Ookami Renderer...";
+      koyote::Log::trace("Stopping Ookami Engine...");
     }
   private:
     static inline bool instantiated_{ false };
 
-    kyt::shared<Context> context_;
-    kyt::unique<Swapchain> swapchain_;
-    kyt::unique<Pipeline> pipeline_;
+    koyote::shared<Context> context_;
+    koyote::unique<Swapchain> swapchain_;
+    koyote::unique<Pipeline> pipeline_;
   };
 
   //
   //  Renderer
   //
 
-  RenderEngine::RenderEngine(kyt::shared<GLFWwindow> window)
+  RenderEngine::RenderEngine(koyote::shared<GLFWwindow> window)
     : pImpl_{std::make_unique<Impl>(window)} {}
 
   RenderEngine::~RenderEngine() = default;

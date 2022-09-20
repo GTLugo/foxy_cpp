@@ -5,29 +5,32 @@ struct ExampleApp {
   std::string waifu{ "Fubuki" };
   int hololive_members{ 71 };
 
-  void start(fox::App& app) {
-    LOG(DEBUG) << "My favorite out of all " << hololive_members << " hololive members is " << waifu;
+  void start(foxy::App& app) {
+    koyote::Log::info("My favorite out of all {} hololive members is {}", hololive_members, waifu);
   }
 
-  void update(fox::App& app) {
-    double delta_time{ kyt::time::delta<kyt::secs>() };
+  void update(foxy::App& app) {
+    double delta_time{ koyote::Time::delta<koyote::secs>() };
   }
 
-  void run() {
-    fox::App{fox::App::CreateInfo{
+  void run(int argc, char** argv) {
+    foxy::App{foxy::App::CreateInfo{
+      .argc = argc,
+      .argv = argv,
       .title = "Foxy Example App"
-    }}.add_function_to_stage(fox::App::Stage::Start, FOXY_LAMBDA(start))
-      .add_function_to_stage(fox::App::Stage::EarlyUpdate, FOXY_LAMBDA(update))
+    }}.add_function_to_stage(foxy::App::Stage::Start, FOXY_LAMBDA(start))
+      .add_function_to_stage(foxy::App::Stage::EarlyUpdate, FOXY_LAMBDA(update))
       .run();
   }
 };
 
-auto main(int, char**) -> int {
+auto main(int argc, char** argv) -> int {
   try {
-    ExampleApp{}.run();
+    koyote::Log::enable_backtrace(32);
+    ExampleApp{}.run(argc, argv);
     return EXIT_SUCCESS;
   } catch (const std::exception& e) {
-    LOG(FATAL) << "APP EXCEPTION: " << e.what();
+    koyote::Log::fatal("{}", e.what());
     return EXIT_FAILURE;
   }
 }

@@ -5,10 +5,10 @@
 // Flugel Framework: https://github.com/GTLugo/flugel_framework
 //
 
-#include "std.hpp"
-#include "log.hpp"
+#include "koyote/core/std.hpp"
+#include "koyote/core/log.hpp"
 
-namespace kyt {
+namespace koyote {
   // duration types
   using nanosecs = std::chrono::duration<double, std::nano>;
   using microsecs = std::chrono::duration<double, std::micro>;
@@ -54,7 +54,7 @@ namespace kyt {
     time_point start_{};
   };
 
-  class time {
+  class Time {
   public:
 
     static void i__engine_internal_init(double tick_rate = 128., u32 bail_count = 1024U) {
@@ -62,7 +62,7 @@ namespace kyt {
       // from reinitializing Time, which would cause the engine, the app, life,
       // the universe, and all catgirls to die.
       if (!virgin_) return;
-      LOG(TRACE) << "Initializing Time...";
+      koyote::Log::trace("Initializing Time...");
 
       tick_rate_ = tick_rate;
       bail_count_ = bail_count;
@@ -134,7 +134,7 @@ namespace kyt {
 
     [[nodiscard]] static bool i__engine_internal_should_do_tick() {
       if (step_count_ >= bail_count_) {
-        LOG(WARNING) << "Struggling to catch up with physics rate.";
+        koyote::Log::warn("Struggling to catch up with physics rate.");
       }
 
       return lag_.count() >= fixed_time_step_.count() && step_count_ < bail_count_;

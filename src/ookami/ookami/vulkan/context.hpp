@@ -30,7 +30,7 @@ namespace ookami {
     using Surface = vk::raii::SurfaceKHR;
 
   public:
-    explicit Context(kyt::shared<GLFWwindow> window, bool enable_validation = true);
+    explicit Context(koyote::shared<GLFWwindow> window, bool enable_validation = true);
     ~Context();
 
     auto operator*() -> VulkanContext&;
