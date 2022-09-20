@@ -13,7 +13,7 @@ namespace ookami {
     explicit Impl(koyote::shared<Context> context)
       : context_{std::move(context)} {
       
-      koyote::Log::info("Please wait while loading shaders...");
+      koyote::Log::info("Please wait while shaders load...");
       simple_shader_ = std::make_shared<Shader>(
         context_->logical_device(), 
         "res/foxy/shaders/simple", 
