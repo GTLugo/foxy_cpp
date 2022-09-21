@@ -12,15 +12,17 @@ namespace ookami {
   public:
     explicit Impl(koyote::shared<Context> context)
       : context_{std::move(context)} {
+      koyote::Log::trace("Creating Vulkan pipeline...");
       
       koyote::Log::info("Please wait while shaders load...");
+      auto sw{ koyote::Stopwatch() };
       simple_shader_ = std::make_shared<Shader>(
         context_->logical_device(), 
         "res/foxy/shaders/simple", 
         Shader::BitFlags{BIT(Shader::Vertex) + BIT(Shader::Fragment)},
         true
       );
-      koyote::Log::info("Shader loading complete!");
+      koyote::Log::info("Shader loading complete! ({} s)", sw.get_time_elapsed<koyote::secs>());
 
       koyote::Log::trace("Created Vulkan pipeline.");
     }

@@ -42,7 +42,7 @@ auto main(int argc, char** argv) -> int {
     ExampleApp{}.run(argc, argv);
     return EXIT_SUCCESS;
   } catch (const std::exception& e) {
-    koyote::Log::fatal("{}", e.what());
+    koyote::Log::fatal(e.what());
     return EXIT_FAILURE;
   }
 }

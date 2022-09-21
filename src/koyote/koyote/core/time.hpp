@@ -25,13 +25,13 @@ namespace koyote {
   using time_point_a = clock_accurate::time_point;
   using time_point_s = clock_system::time_point;
 
-  class stop_watch {
+  class Stopwatch {
   public:
-    stop_watch() {
+    Stopwatch() {
       start();
     }
 
-    explicit stop_watch(time_point time_point) {
+    explicit Stopwatch(time_point time_point) {
       start(time_point);
     }
 
@@ -154,8 +154,8 @@ namespace koyote {
     static inline secs lag_{secs::zero()}; // how far behind the game is from real world
     static inline u32 step_count_{0U};
 
-    static const stop_watch& stopwatch() {
-      static const stop_watch sw{clock_steady::now()};
+    static const Stopwatch& stopwatch() {
+      static const Stopwatch sw{clock_steady::now()};
       return sw;
     };
   };

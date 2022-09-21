@@ -119,7 +119,7 @@ namespace foxy {
     }
 
     void game_loop() {
-      koyote::Log::set_thread_name("  game  ");
+      koyote::Log::set_thread_name("game");
 
       koyote::Log::trace("Starting game thread...");
       try {
@@ -136,7 +136,7 @@ namespace foxy {
         }
         stop_event_(app_);
       } catch (const std::exception& e) {
-        koyote::Log::error("{}", e.what());
+        koyote::Log::error(e.what());
       }
 
       koyote::Log::trace("Joining game thread...");
@@ -182,7 +182,7 @@ namespace foxy {
     void show_perf_stats() {
       static koyote::u32 counter{ 0 };
       double frame_time{ koyote::Time::delta<koyote::secs>() };
-      if (counter >= static_cast<koyote::u32>(koyote::Time::tick_rate())) {
+      if (counter >= static_cast<koyote::u32>(koyote::Time::tick_rate()) / 2.) {
         std::stringstream perf_stats;
 
         perf_stats << "frametime: " 
