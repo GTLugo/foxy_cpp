@@ -19,6 +19,10 @@ struct ExampleApp {
     }
   }
 
+  void stop(foxy::App& app) {
+    // koyote::Log::fatal("Crash test!");
+  }
+
   void run(int argc, char** argv) {
     foxy::App{foxy::App::CreateInfo{
       .argc = argc,
@@ -26,6 +30,7 @@ struct ExampleApp {
       .title = "Foxy Example App"
     }}.add_function_to_stage(foxy::App::Stage::Start, FOXY_LAMBDA(start))
       .add_function_to_stage(foxy::App::Stage::EarlyUpdate, FOXY_LAMBDA(update))
+      .add_function_to_stage(foxy::App::Stage::Stop, FOXY_LAMBDA(stop))
       .run();
   }
 };

@@ -119,7 +119,7 @@ namespace foxy {
     }
 
     void game_loop() {
-      koyote::Log::set_thread_name("game");
+      koyote::Log::set_thread_name("  game  ");
 
       koyote::Log::trace("Starting game thread...");
       try {

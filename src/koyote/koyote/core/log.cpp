@@ -6,31 +6,43 @@
 #include <spdlog/pattern_formatter.h>
 
 namespace koyote {
-  // class my_formatter_flag : public spdlog::custom_flag_formatter {
-  // public:
-  //   void format(const spdlog::details::log_msg&, const std::tm&, spdlog::memory_buf_t& dest) override {
-  //     std::string some_txt = "custom-flag";
-  //     dest.append(some_txt.data(), some_txt.data() + some_txt.size());
-  //   }
-
-  //   std::unique_ptr<custom_flag_formatter> clone() const override {
-  //     return spdlog::details::make_unique<my_formatter_flag>();
-  //   }
-  // };
-
   class Log::Impl {
   public:
+    class thread_name_flag : public spdlog::custom_flag_formatter {
+    public:
+      void format(const spdlog::details::log_msg&, const std::tm&, spdlog::memory_buf_t& dest) override {
+        auto thread_id{ std::this_thread::get_id() };
+        std::stringstream thread_name{};
+        if (names_.contains(thread_id)) {
+          thread_name << names_.at(thread_id);
+        } else {
+          thread_name << thread_id;
+        }
+        std::string thread_name_str{ thread_name.str() };
+        dest.append(thread_name_str.data(), thread_name_str.data() + thread_name_str.size());
+      }
+
+      std::unique_ptr<custom_flag_formatter> clone() const override {
+        return spdlog::details::make_unique<thread_name_flag>();
+      }
+    };
+    
     Impl(const std::string& name, const std::filesystem::path& log_file) {
-      auto console_sink{ std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>() };
+      auto console_formatter = std::make_unique<spdlog::pattern_formatter>();
+      console_formatter->add_flag<thread_name_flag>('~').set_pattern("[%^%4!L%$|%T.%f] %=8~ | %v");
+      auto console_sink{ std::make_shared<spdlog::sinks::stdout_color_sink_mt>() };
       console_sink->set_level(spdlog::level::trace);
-      console_sink->set_pattern("[%^%4!L%$|%T.%f] %=8t | %v");
+      console_sink->set_formatter(std::move(console_formatter));
       
+      auto file_formatter = std::make_unique<spdlog::pattern_formatter>();
+      file_formatter->add_flag<thread_name_flag>('~').set_pattern("[%^%4!L%$] [%m-%d %T.%f] %=8~ | %v");
       auto file_sink{ std::make_shared<spdlog::sinks::rotating_file_sink_mt>(log_file.string(), 2097152, 5, false) };
       file_sink->set_level(spdlog::level::trace);
-      file_sink->set_pattern("[%^%4!L%$] [%m-%d %T.%f] %=8t | %v");
+      file_sink->set_formatter(std::move(file_formatter));
 
       logger() = spdlog::logger{name, {console_sink, file_sink}};
       logger().set_level(spdlog::level::info);
+      koyote::Log::set_thread_name("  main  ");
 
       Log::info(R"([]=============================[])");
       Log::info(R"(||  ______ ______   ___     __ ||)");
@@ -79,8 +91,8 @@ namespace koyote {
       std::terminate();
     }
 
-    static void set_thread_name(std::string_view name) {
-      
+    static void set_thread_name(const std::string& name) {
+      names_.insert_or_assign(std::this_thread::get_id(), name);
     }
 
     static void enable_backtrace(koyote::u32 count) {
@@ -92,6 +104,8 @@ namespace koyote {
     }
 
   private:
+    static inline std::unordered_map<std::thread::id, std::string> names_{};
+    
     static inline auto logger() -> spdlog::logger& {
       static spdlog::logger lg{""};
       return lg;
@@ -128,7 +142,7 @@ namespace koyote {
     pImpl_->fatal(msg);
   }
   
-  void Log::set_thread_name(std::string_view name) {
+  void Log::set_thread_name(const std::string& name) {
     pImpl_->set_thread_name(name);
   }
 

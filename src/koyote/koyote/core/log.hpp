@@ -57,7 +57,7 @@ namespace koyote {
     LOGGING_FUNC_TEMPLATE_IMPL(info)
     LOGGING_FUNC_TEMPLATE_IMPL(warn)
 
-    static void set_thread_name(std::string_view name);
+    static void set_thread_name(const std::string& name);
     static void enable_backtrace(koyote::u32 count);
     static void dump_backtrace();
   private:
