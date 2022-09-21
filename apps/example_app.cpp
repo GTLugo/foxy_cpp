@@ -13,8 +13,9 @@ struct ExampleApp {
     double delta_time{ koyote::Time::delta<koyote::secs>() };
 
     static double timer{ 0 };
+    static koyote::u64 counter{ 0 };
     if (1. <= (timer += delta_time)) {
-      koyote::Log::info("uwu");
+      koyote::Log::info("uwu {} - {}", counter++, timer);
       timer = 0;
     }
   }
