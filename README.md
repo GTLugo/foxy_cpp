@@ -31,10 +31,10 @@ copies of the Software, and to permit persons to whom the Software is
 furnished to do so, according to the following restrictions:
 
 1. There must be an acknowledgement of of the Software as originating from the 
-   authors. Anyone using the software may not under any circumstance claim they 
-   wrote any substantial sections of the Software which have been used for their 
-   own purposes. Correct, honest, up-to-date attributions should be made in an 
-   easily visible location.
+   original authors of the Software. Anyone using the software may not under any 
+   circumstance claim they wrote any substantial sections of the Software which 
+   have been used for their own purposes. Correct, honest, up-to-date attributions 
+   should be made in an easily visible location.
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
