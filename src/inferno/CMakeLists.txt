@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 set(TARGET_NAME "inferno")
+#set(CMAKE_CXX_STANDARD 23)
 message(STATUS "Configuring ${PROJECT_NAME} sub-project: ${TARGET_NAME}")
 
 # ===================================================

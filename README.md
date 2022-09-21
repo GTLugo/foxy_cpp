@@ -7,7 +7,7 @@
 ## - Dependencies -
  - GLFW
  - GLM
- - EasyLogging++
+ - spdlog
  - BS Thread Pool
  - Vulkan: ***"Batteries not included!"*** Separate install required.
 

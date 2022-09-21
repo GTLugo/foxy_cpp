@@ -14,11 +14,11 @@ namespace ookami {
       : name_{ file_path.stem().string() } {
 
       if (load_shader_code(file_path, shader_bits, optimize)) {
-        LOG(TRACE) << "Loaded shader: " << name_;
+        koyote::Log::trace("Loaded shader: {}", name_);
         create_shader_modules(device);
-        LOG(TRACE) << "Shader \"" << name_ << "\" ready.";
+        koyote::Log::trace("Shader \"{}\" ready.", name_);
       } else {
-        LOG(ERROR) << "Shader \"" << name_ << "\" failed creation.";
+        koyote::Log::error("Shader \"{}\" failed creation.", name_);
       }
 
     }
@@ -70,15 +70,15 @@ namespace ookami {
       bool found_shader{ false };
 
       if (!fs::exists(file_path)) {
-        LOG(ERROR) << "File or directory " << file_path << " does not exist";
+        koyote::Log::error("File or directory {} does not exist", file_path.string());
         found_shader = false;
       }
 
       if (fs::is_directory(file_path)) {
-        LOG(TRACE) << "Loading shader from dir: " << name_;
+        koyote::Log::trace("Loading shader from dir: {}", name_);
         found_shader = load_from_dir(file_path, shader_bits);
       } else {
-        LOG(TRACE) << "Loading shader from file: " << name_;
+        koyote::Log::trace("Loading shader from file: {}", name_);
         found_shader = load_from_file(file_path, shader_bits);
       }
 
@@ -92,22 +92,22 @@ namespace ookami {
       fs::path tmp_shader_dir{ fs::path{ "tmp" } / fs::path{ "shader_cache" } / fs::relative(dir_path, {"res/foxy/shaders"}).parent_path() / dir_path.stem() };
       fs::path out_file_stem{ tmp_shader_dir / name_ };
 
-      for (kyt::u32 i{ 0 }; i <= Kind::Max; ++i) {
+      for (koyote::u32 i{ 0 }; i <= Kind::Max; ++i) {
         Kind kind{ static_cast<Kind>(i) };
         fs::path shader_path{ (dir_path / dir_path.stem()).string() + in_file_endings_.at(kind) };
         if (shader_bits.test(kind)) {
-          LOG(TRACE) << "Looking for " << kind_names_.at(kind) << ": " << name_;
+          koyote::Log::trace("Looking for {}: {}", kind_names_.at(kind), name_);
           fs::path tmp_name{ out_file_stem.string() + out_file_endings_.at(kind) };
           if (fs::exists(tmp_name)) {
-            LOG(TRACE) << "Found " << kind_names_.at(kind) << ": " << tmp_name;
-            auto code{ kyt::read_file(shader_path, std::ios::binary) };
+            koyote::Log::trace("Found {}: {}", kind_names_.at(kind), tmp_name.string());
+            auto code{ koyote::read_file(shader_path, std::ios::binary) };
             if (!code.has_value()) {
               return false;
             }
             bytecode_[kind] = { code->begin(), code->end() };
           } else {
-            LOG(TRACE) << "Didn't find " << kind_names_.at(kind) << " in cache: " << tmp_name;
-            auto code{ kyt::read_file(shader_path) };
+            koyote::Log::trace("Didn't find {} in cache: {}", kind_names_.at(kind), tmp_name.string());
+            auto code{ koyote::read_file(shader_path) };
             if (!code.has_value()) {
               return false;
             }
@@ -119,7 +119,7 @@ namespace ookami {
             }
           }
         } else {
-          LOG(TRACE) << "Skipping " << kind_names_.at(kind);
+          koyote::Log::trace("Skipping {}", kind_names_.at(kind));
         }
       }
 
@@ -136,20 +136,20 @@ namespace ookami {
       
       if (fs::exists(tmp_shader_dir)) {
         fs::path out_file_stem{ tmp_shader_dir / name_ };
-        for (kyt::u32 i{ 0 }; i <= Kind::Max; ++i) {
+        for (koyote::u32 i{ 0 }; i <= Kind::Max; ++i) {
           Kind kind{ static_cast<Kind>(i) };
           if (shader_bits.test(kind)) {
-            LOG(TRACE) << "Looking for " << kind_names_.at(kind) << ": " << name_;
+            koyote::Log::trace("Looking for {}: {}", kind_names_.at(kind), name_);
             fs::path tmp_name{ out_file_stem.string() + out_file_endings_.at(kind) };
             if (fs::exists(tmp_name)) {
-              LOG(TRACE) << "Found " << kind_names_.at(kind) << ": " << tmp_name;
-              auto code{ kyt::read_file(tmp_name, std::ios::binary) };
+              koyote::Log::trace("Found {}: {}", kind_names_.at(kind), tmp_name.string());
+              auto code{ koyote::read_file(tmp_name, std::ios::binary) };
               if (!code.has_value()) {
                 return false;
               }
               bytecode_[kind] = { code->begin(), code->end() };
             } else {
-              LOG(TRACE) << "Didn't find " << kind_names_.at(kind) << " in cache: " << tmp_name;
+              koyote::Log::trace("Didn't find {} in cache: {}", kind_names_.at(kind), tmp_name.string());
               if (!fs::exists(tmp_shader_dir)) {
                 fs::create_directories(tmp_shader_dir);
               }
@@ -158,7 +158,7 @@ namespace ookami {
               }
             }
           } else {
-            LOG(TRACE) << "Skipping " << kind_names_.at(kind);
+            koyote::Log::trace("Skipping {}", kind_names_.at(kind));
           }
         }
       } else {
@@ -180,13 +180,13 @@ namespace ookami {
 
       auto code_map = parse_file(file_path);
       if (code_map.empty()) {
-        LOG(ERROR) << "Attempted to parse empty/non-existant shader: " << file_path.filename();
+        koyote::Log::error("Attempted to parse empty/non-existant shader: {}", file_path.filename().string());
         return false;
       }
 
       fs::path out_file_stem{ tmp_shader_dir / name_ };
 
-      for (kyt::u32 i{ 0 }; i <= Kind::Max; ++i) {
+      for (koyote::u32 i{ 0 }; i <= Kind::Max; ++i) {
         Kind kind{ static_cast<Kind>(i) };
         if (code_map.contains(kind)) {
           if (!compile_shader_type(out_file_stem, code_map.at(kind), kind, optimize)) {
@@ -199,13 +199,13 @@ namespace ookami {
     }
 
     std::unordered_map<Kind, std::string> parse_file(const std::filesystem::path& file_path) {
-      LOG(TRACE) << "Parsing shader: " << name_ << "...";
+      koyote::Log::trace("Parsing shader: {}...", name_);
 
       std::unordered_map<Kind, std::string> srcs;
 
       std::ifstream file{ file_path };
       if (!file.is_open()) {
-        LOG(ERROR) << "File " << file_path << " does not exist.";
+        koyote::Log::error("File {} does not exist.", file_path.string());
         return srcs;
       }
 
@@ -218,7 +218,9 @@ namespace ookami {
           // Grab type of shader
           std::string kind;
           file >> kind;
-          DCHECK(kinds_.find(kind) != kinds_.end()) << "Shader type " << kind << " is not supported.";
+          if (kinds_.find(kind) == kinds_.end()) {
+            koyote::Log::fatal("Shader type {} is not supported.", kind);
+          }
 
           // Loop through shader section body
           file >> nextWord;
@@ -243,7 +245,7 @@ namespace ookami {
                                            bool optimize = false) -> bool {
       namespace fs = std::filesystem;
       fs::path out_file{ out_file_stem.string() + out_file_endings_.at(kind) };
-      LOG(TRACE) << "Compiling " << kind_names_.at(kind) << ": " << name_ << "...";
+      koyote::Log::trace("Compiling {}: {}...", kind_names_.at(kind), name_);
 
       shaderc::Compiler compiler{};
       shaderc::CompileOptions options{};
@@ -260,7 +262,7 @@ namespace ookami {
       };
 
       if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
-        LOG(ERROR) << "Shaderc Compile: " << result.GetErrorMessage();
+        koyote::Log::error("Shaderc Compile: {}", result.GetErrorMessage());
         return false; 
       }
 
@@ -278,7 +280,7 @@ namespace ookami {
 
       auto result{ compiler.PreprocessGlsl(code_str, kind_to_kind_.at(kind), name_.c_str(), options) };
       if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
-        LOG(ERROR) << "Shaderc Preprocess: " << result.GetErrorMessage();
+        koyote::Log::error("Shaderc Preprocess: {}", result.GetErrorMessage());
         return ""; 
       }
 
@@ -286,25 +288,25 @@ namespace ookami {
     }
 
     void create_shader_modules(const vk::raii::Device& device) {
-      LOG(TRACE) << "Building shader modules: " << name_ << "...";
+      koyote::Log::trace("Building shader modules: {}...", name_);
 
-      for (kyt::u32 i{ 0 }; i <= Kind::Max; ++i) {
+      for (koyote::u32 i{ 0 }; i <= Kind::Max; ++i) {
         Kind kind{ static_cast<Kind>(i) };
         if (shader_modules_.contains(kind)) {
           vk::ShaderModuleCreateInfo create_info{
             .codeSize = bytecode_.at(kind).size(),
-            .pCode = reinterpret_cast<const kyt::u32*>(bytecode_.at(kind).data())
+            .pCode = reinterpret_cast<const koyote::u32*>(bytecode_.at(kind).data())
           };
 
           try {
             shader_modules_.insert(std::make_pair(kind, device.createShaderModule(create_info)));
           } catch (const std::exception& e) {
-            LOG(ERROR) << e.what();
+            koyote::Log::error(e.what());
           }
         }
       }
 
-      LOG(TRACE) << "Created shader modules: " << name_;
+      koyote::Log::trace("Created shader modules: {}", name_);
     }
   };
 

@@ -9,7 +9,7 @@ class GLFWwindow;
 namespace ookami {
   class RenderEngine {
   public:
-    explicit RenderEngine(kyt::shared<GLFWwindow> window);
+    explicit RenderEngine(koyote::shared<GLFWwindow> window);
     ~RenderEngine();
 
   private:

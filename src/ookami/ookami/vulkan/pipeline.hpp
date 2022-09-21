@@ -11,11 +11,11 @@ namespace ookami {
 namespace ookami {
   class Pipeline {
   public:
-    explicit Pipeline(kyt::shared<Context> context);
+    explicit Pipeline(koyote::shared<Context> context);
     ~Pipeline();
 
   private:
     class Impl;
-    kyt::unique<Impl> pImpl_;
+    koyote::unique<Impl> pImpl_;
   };
 }  // foxy // vulkan

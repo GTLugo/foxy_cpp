@@ -3,7 +3,7 @@
 #include "event/event.hpp"
 #include "glfw/context.hpp"
 
-namespace ifr {
+namespace inferno {
   class Window::Impl {
   public:
     explicit Impl(const CreateInfo& create_info)
@@ -17,10 +17,12 @@ namespace ifr {
           .borderless = create_info.borderless,
           .hidden = true,
         }} {
-      DCHECK(!instantiated_) << "Attempted second instantiation of foxy::App";
+      if (instantiated_) {
+        koyote::Log::fatal("Attempted second instantiation of foxy::Window");
+      }
       instantiated_ = true;
 
-      LOG(TRACE) << "Creating Window...";
+      koyote::Log::trace("Creating Window...");
 
       // Create GLFW window
       glfwWindowHint(GLFW_RESIZABLE, false);
@@ -38,12 +40,12 @@ namespace ifr {
       set_fullscreen(create_info.fullscreen);
       set_callbacks();
 
-      LOG(TRACE) << "Window ready.";
+      koyote::Log::trace("Window ready.");
     }
 
     ~Impl() {
       instantiated_ = false;
-      LOG(TRACE) << "Destroying Window...";
+      koyote::Log::trace("Destroying Window...");
     }
 
     void poll_events() {
@@ -51,11 +53,11 @@ namespace ifr {
     }
 
     void close() {
-      LOG(TRACE) << "Window close requested.";
+      koyote::Log::trace("Window close requested.");
       glfwSetWindowShouldClose(glfw_window_.get(), true);
     }
 
-    void set_icon(kyt::i8* image, kyt::i32 width, kyt::i32 height) {
+    void set_icon(koyote::i8* image, koyote::i32 width, koyote::i32 height) {
 
     }
 
@@ -70,7 +72,7 @@ namespace ifr {
       glfwSetWindowTitle(glfw_window_.get(), t.str().c_str());
     }
 
-    void set_pos(kyt::ivec2 position) {
+    void set_pos(koyote::ivec2 position) {
 
     }
 
@@ -92,8 +94,8 @@ namespace ifr {
     }
 
     [[nodiscard]] auto title() const -> std::string { return state_.title; }
-    [[nodiscard]] auto native() -> kyt::shared<GLFWwindow>& { return glfw_window_; }
-    [[nodiscard]] auto bounds() const -> kyt::rect { return state_.bounds; }
+    [[nodiscard]] auto native() -> koyote::shared<GLFWwindow>& { return glfw_window_; }
+    [[nodiscard]] auto bounds() const -> koyote::rect { return state_.bounds; }
     [[nodiscard]] auto vsync() const -> bool { return state_.vsync; }
     [[nodiscard]] auto fullscreen() const -> bool { return state_.vsync; }
     [[nodiscard]] auto hidden() const -> bool { return state_.hidden; }
@@ -101,13 +103,13 @@ namespace ifr {
   private:
     struct State {
       std::string title;
-      kyt::rect bounds;
-      kyt::rect bounds_before_fullscreen;
+      koyote::rect bounds;
+      koyote::rect bounds_before_fullscreen;
       bool vsync;
       bool fullscreen;
       bool borderless;
       bool hidden;
-      kyt::ivec2 cursor_pos{}, cursor_pos_prev{}, cursor_delta{};
+      koyote::ivec2 cursor_pos{}, cursor_pos_prev{}, cursor_delta{};
       bool running{true};
 
       // Window events
@@ -133,14 +135,14 @@ namespace ifr {
 
     // GLFW
     Context glfw_context_;
-    kyt::shared<GLFWwindow> glfw_window_{ nullptr };
+    koyote::shared<GLFWwindow> glfw_window_{ nullptr };
 
     // Foxy
     State state_;
 
     void set_callbacks() {
       // Foxy
-      kyt::shared<GLFWwindow> x;
+      koyote::shared<GLFWwindow> x;
       state_.close_event.add_callback(FOXY_LAMBDA(close));
 
       // GLFW
@@ -160,7 +162,7 @@ namespace ifr {
 
   Window::~Window() = default;
 
-  auto Window::operator*() -> kyt::shared<GLFWwindow>& {
+  auto Window::operator*() -> koyote::shared<GLFWwindow>& {
     return pImpl_->native();
   }
 
@@ -172,7 +174,7 @@ namespace ifr {
     pImpl_->close();
   }
 
-  void Window::set_icon(kyt::i8* image, kyt::i32 width, kyt::i32 height) {
+  void Window::set_icon(koyote::i8* image, koyote::i32 width, koyote::i32 height) {
     pImpl_->set_icon(image, width, height);
   }
 
@@ -184,7 +186,7 @@ namespace ifr {
     pImpl_->set_subtitle(title);
   }
 
-  void Window::set_pos(kyt::ivec2 position) {
+  void Window::set_pos(koyote::ivec2 position) {
     pImpl_->set_pos(position);
   }
 
@@ -200,7 +202,7 @@ namespace ifr {
     pImpl_->set_hidden(hidden);
   }
 
-  auto Window::native() -> kyt::shared<GLFWwindow>& {
+  auto Window::native() -> koyote::shared<GLFWwindow>& {
     return pImpl_->native();
   }
 
@@ -208,7 +210,7 @@ namespace ifr {
     return pImpl_->title();
   }
 
-  auto Window::bounds() const -> kyt::rect {
+  auto Window::bounds() const -> koyote::rect {
     return pImpl_->bounds();
   }
 

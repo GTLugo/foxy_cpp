@@ -7,20 +7,20 @@
 namespace ookami {
   class Swapchain::Impl {
   public:
-    explicit Impl(kyt::shared<GLFWwindow> window, kyt::shared<Context> context)
+    explicit Impl(koyote::shared<GLFWwindow> window, koyote::shared<Context> context)
       : window_{window},
         context_{context},
         swapchain_image_format_{vk::Format::eB8G8R8A8Unorm},
         swapchain_{create_swapchain()},
         swap_images_{swapchain_.getImages()},
         swap_image_views_{create_image_views()} {
-      LOG(TRACE) << "Created Vulkan swapchain.";
+      koyote::Log::trace("Created Vulkan swapchain.");
     }
 
     ~Impl() = default;
   private:
-    kyt::shared<GLFWwindow> window_;
-    kyt::shared<Context> context_;
+    koyote::shared<GLFWwindow> window_;
+    koyote::shared<Context> context_;
 
     vk::Format swapchain_image_format_;
     vk::Extent2D swapchain_extent_;
@@ -57,15 +57,15 @@ namespace ookami {
     }
 
     [[nodiscard]] auto pick_swap_extent(const vk::SurfaceCapabilitiesKHR& capabilities) -> vk::Extent2D {
-      if (capabilities.currentExtent.width != std::numeric_limits<kyt::u32>::max()) {
+      if (capabilities.currentExtent.width != std::numeric_limits<koyote::u32>::max()) {
         return capabilities.currentExtent;
       } else {
-        kyt::ivec2 size{};
+        koyote::ivec2 size{};
         glfwGetFramebufferSize(window_.get(), &size.x, &size.y);
 
         vk::Extent2D true_extent{
-          std::clamp(static_cast<kyt::u32>(size.x), capabilities.minImageExtent.width, capabilities.maxImageExtent.width),
-          std::clamp(static_cast<kyt::u32>(size.y), capabilities.minImageExtent.height, capabilities.maxImageExtent.height),
+          std::clamp(static_cast<koyote::u32>(size.x), capabilities.minImageExtent.width, capabilities.maxImageExtent.width),
+          std::clamp(static_cast<koyote::u32>(size.y), capabilities.minImageExtent.height, capabilities.maxImageExtent.height),
         };
 
         return true_extent;
@@ -81,14 +81,14 @@ namespace ookami {
       };
       swapchain_image_format_ = swapchain_info.format.format;
 
-      kyt::u32 image_count{ std::clamp(
+      koyote::u32 image_count{ std::clamp(
         swapchain_support_info.capabilities.minImageCount + 1,
         swapchain_support_info.capabilities.minImageCount,
         swapchain_support_info.capabilities.maxImageCount
       ) };
 
       const QueueFamilyIndices& indices{ context_->queue_families() };
-      std::vector<kyt::u32> queue_family_indices{
+      std::vector<koyote::u32> queue_family_indices{
         indices.graphics.value(),
         indices.present.value(),
       };
@@ -121,7 +121,7 @@ namespace ookami {
       try {
         return { context_->logical_device().createSwapchainKHR(swapchain_create_info) };
       } catch (const std::exception& e) {
-        LOG(FATAL) << "Failed to create swapchain.";
+        koyote::Log::fatal("Failed to create swapchain.");
         return nullptr;
       }
     }
@@ -161,7 +161,7 @@ namespace ookami {
   //  Swapchain
   //
 
-  Swapchain::Swapchain(kyt::shared<GLFWwindow> window, kyt::shared<Context> context)
+  Swapchain::Swapchain(koyote::shared<GLFWwindow> window, koyote::shared<Context> context)
     : pImpl_{std::make_unique<Impl>(window, context)} {}
 
   Swapchain::~Swapchain() = default;

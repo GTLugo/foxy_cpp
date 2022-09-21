@@ -17,24 +17,24 @@ namespace ookami {
         : vulkan_major(0),
           vulkan_minor(0),
           vulkan_patch(0) {}
-    Version(kyt::u32 version)
+    Version(koyote::u32 version)
         : Version() {
       *this = version;
     }
 
-    Version& operator=(kyt::u32 version) {
-      memcpy(this, &version, sizeof(kyt::u32));
+    Version& operator=(koyote::u32 version) {
+      memcpy(this, &version, sizeof(koyote::u32));
       return *this;
     }
 
-    operator kyt::u32() const {
-      kyt::u32 result;
-      memcpy(&result, this, sizeof(kyt::u32));
+    operator koyote::u32() const {
+      koyote::u32 result;
+      memcpy(&result, this, sizeof(koyote::u32));
       return result;
     }
 
     bool operator>=(const Version& other) const {
-      return (operator kyt::u32()) >= (other.operator kyt::u32());
+      return (operator koyote::u32()) >= (other.operator koyote::u32());
     }
 
     [[nodiscard]] std::string to_string() const {
@@ -43,8 +43,8 @@ namespace ookami {
       return buffer.str();
     }
 
-    const kyt::u32 vulkan_patch: 12;
-    const kyt::u32 vulkan_minor: 10;
-    const kyt::u32 vulkan_major: 10;
+    const koyote::u32 vulkan_patch: 12;
+    const koyote::u32 vulkan_minor: 10;
+    const koyote::u32 vulkan_major: 10;
   };
 }

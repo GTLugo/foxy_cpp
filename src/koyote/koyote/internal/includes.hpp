@@ -1,10 +1,5 @@
 #pragma once
 
-/*----------------------
-  FOXY LIBRARIES
-----------------------*/
-#include "koyote/utilities.hpp"
-
 // /*----------------------
 //   VENDOR LIBRARIES
 // ----------------------*/
@@ -39,6 +34,7 @@
 #include <typeinfo>
 #include <format>
 #include <string_view>
+#include <source_location>
 // Threading
 #include <thread>
 #include <mutex>

@@ -16,8 +16,8 @@ namespace ookami {
   };
 
   struct QueueFamilyIndices {
-    std::optional<kyt::u32> graphics;
-    std::optional<kyt::u32> present;
+    std::optional<koyote::u32> graphics;
+    std::optional<koyote::u32> present;
 
     [[nodiscard]] auto complete() const -> bool {
       return graphics.has_value() && present.has_value();
