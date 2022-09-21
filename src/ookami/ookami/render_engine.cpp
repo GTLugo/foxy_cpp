@@ -18,7 +18,7 @@ namespace ookami {
       #ifdef FOXY_DEBUG_MODE
       context_ = std::make_shared<Context>(window);
       #else
-      context_ = std::make_shared<vulkan::Context>(window, false);
+      context_ = std::make_shared<Context>(window, false);
       #endif
 
       swapchain_ = std::make_unique<Swapchain>(window, context_);

@@ -17,6 +17,14 @@ namespace koyote {
 
       FormatLocation(std::string_view fmt_str_, const std::source_location& location_ = std::source_location::current())
         : fmt_str{fmt_str_}, location{location_} {}
+        
+      template<typename Arg>
+      FormatLocation(Arg&& obj_, const std::source_location& location_ = std::source_location::current())
+        : location{location_} {
+          std::stringstream ss;
+          ss << obj_;
+          fmt_str = ss.str();
+        }
 
       [[nodiscard]] inline auto file_name() -> std::string {
         return std::filesystem::path{ location.file_name() }.filename().string();

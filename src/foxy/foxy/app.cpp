@@ -136,7 +136,7 @@ namespace foxy {
         }
         stop_event_(app_);
       } catch (const std::exception& e) {
-        koyote::Log::error("{}", e.what());
+        koyote::Log::error(e.what());
       }
 
       koyote::Log::trace("Joining game thread...");
