@@ -61,6 +61,20 @@ namespace koyote {
     NoCopyOrMove& operator=(NoCopyOrMove&& other) = delete;
   };
 
+  template<typename T>
+  class pimpl {
+  public:
+    pimpl();
+    template<typename... Args>
+    pimpl(Args&&...);
+    ~pimpl();
+    T* operator->();
+    T& operator*();
+
+  private:
+    koyote::unique<T> ptr_;
+  };
+
   [[nodiscard]] auto read_file(const std::filesystem::path& file_path, 
                                std::ios::fmtflags flags = {}) -> std::optional<std::string> const;
 }

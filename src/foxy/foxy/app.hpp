@@ -27,19 +27,20 @@ namespace foxy {
       Stop,
     };
 
-    using stage_callback = std::function<void(App&)>;
+    using StageCallback = std::function<void(App&)>;
 
-    explicit App(CreateInfo&& properties);
+    explicit App(CreateInfo&& create_info);
     ~App();
 
     void run();
 
     auto set_user_data_ptr(koyote::shared<void> data) -> App&;
     auto add_stage_before() -> App&;
-    auto add_function_to_stage(Stage stage, stage_callback&& callback) -> App&;
+    auto add_function_to_stage(Stage stage, StageCallback&& callback) -> App&;
 
     [[nodiscard]] auto user_data_ptr() -> koyote::shared<void>;
   private:
-    PIMPL(Impl) pImpl_;
+    class Impl;
+    koyote::pimpl<Impl> p_impl_;
   };
 }

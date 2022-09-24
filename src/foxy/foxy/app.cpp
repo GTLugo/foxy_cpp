@@ -1,5 +1,6 @@
 #include "app.hpp"
 
+#include "koyote/pimpl_impl.hpp"
 #include "inferno/window.hpp"
 #include "ookami/render_engine.hpp"
 #include "inu/job_system.hpp"
@@ -50,25 +51,25 @@ namespace foxy {
 
     }
     
-    void add_function_to_stage(Stage stage, stage_callback&& callback) {
+    void add_function_to_stage(const Stage stage, StageCallback&& callback) {
       switch (stage) {
         case Stage::Awake:
-          awake_event_.add_callback(std::forward<stage_callback>(callback));
+          awake_event_.add_callback(std::forward<StageCallback>(callback));
           break;
         case Stage::Start:
-          start_event_.add_callback(std::forward<stage_callback>(callback));
+          start_event_.add_callback(std::forward<StageCallback>(callback));
           break;
         case Stage::Tick:
-          tick_event_.add_callback(std::forward<stage_callback>(callback));
+          tick_event_.add_callback(std::forward<StageCallback>(callback));
           break;
         case Stage::EarlyUpdate:
-          early_update_event_.add_callback(std::forward<stage_callback>(callback));
+          early_update_event_.add_callback(std::forward<StageCallback>(callback));
           break;
         case Stage::LateUpdate:
-          late_update_event_.add_callback(std::forward<stage_callback>(callback));
+          late_update_event_.add_callback(std::forward<StageCallback>(callback));
           break;
         case Stage::Stop:
-          stop_event_.add_callback(std::forward<stage_callback>(callback));
+          stop_event_.add_callback(std::forward<StageCallback>(callback));
           break;
       }
     }
@@ -203,30 +204,30 @@ namespace foxy {
   //
 
   App::App(App::CreateInfo&& create_info)
-    : pImpl_{std::make_unique<Impl>(*this, create_info)} {}
+    : p_impl_{*this, create_info} {}
 
   App::~App() = default;
 
   void App::run() {
-    pImpl_->run();
+    p_impl_->run();
   }
 
   auto App::set_user_data_ptr(koyote::shared<void> data) -> App& {
-    pImpl_->set_user_data(data);
+    p_impl_->set_user_data(data);
     return *this;
   }
 
   auto App::add_stage_before() -> App& {
-    pImpl_->add_stage_before();
+    p_impl_->add_stage_before();
     return *this;
   }
 
-  auto App::add_function_to_stage(Stage stage, stage_callback&& callback) -> App& {
-    pImpl_->add_function_to_stage(stage, std::forward<stage_callback>(callback));
+  auto App::add_function_to_stage(const Stage stage, StageCallback&& callback) -> App& {
+    p_impl_->add_function_to_stage(stage, std::forward<StageCallback>(callback));
     return *this;
   }
 
   auto App::user_data_ptr() -> koyote::shared<void> {
-    return pImpl_->user_data();
+    return p_impl_->user_data();
   }
 }

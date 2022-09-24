@@ -5,13 +5,13 @@ namespace koyote {
   class Event {
   public:
     template<typename Callback>
-    void add_callback(Callback&& callback_) {
-      handler_functions_.push_back(std::forward<Callback>(callback_));
+    void add_callback(Callback&& callback) {
+      handler_functions_.push_back(std::forward<Callback>(callback));
     }
 
-    void operator()(Args... args_) {
+    void operator()(Args... args) {
       for (auto&& function: handler_functions_) {
-        function(args_...);
+        function(args...);
       }
     }
   private:
