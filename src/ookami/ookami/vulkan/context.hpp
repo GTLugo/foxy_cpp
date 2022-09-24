@@ -30,7 +30,7 @@ namespace ookami {
     using Surface = vk::raii::SurfaceKHR;
 
   public:
-    explicit Context(koyote::shared<GLFWwindow> window, bool enable_validation = true);
+    explicit Context(const koyote::shared<GLFWwindow>& window, bool enable_validation = true);
     ~Context();
 
     auto operator*() -> VulkanContext&;
@@ -38,12 +38,13 @@ namespace ookami {
     [[nodiscard]] auto native() -> VulkanContext&;
     [[nodiscard]] auto instance() -> Instance&;
     [[nodiscard]] auto surface() -> Surface&;
-    [[nodiscard]] auto query_swapchain_support() -> SwapchainSupportInfo;
-    [[nodiscard]] auto queue_families() -> const QueueFamilyIndices&;
+    [[nodiscard]] auto query_swapchain_support() const -> SwapchainSupportInfo;
+    [[nodiscard]] auto queue_families() const -> const QueueFamilyIndices&;
     [[nodiscard]] auto physical_device() -> PhysicalDevice&;
     [[nodiscard]] auto logical_device() -> LogicalDevice&;
 
   private:
-    PIMPL(Impl) pImpl_;
+    class Impl;
+    koyote::unique<Impl> p_impl_;
   };
 }

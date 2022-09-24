@@ -29,10 +29,6 @@ target_include_directories(${TARGET_NAME} PUBLIC ".")
 # Koyote
 target_include_directories(${TARGET_NAME} PUBLIC "../koyote")
 target_link_libraries(${TARGET_NAME} PUBLIC koyote)
-# Vulkan
-find_package(Vulkan REQUIRED)
-target_include_directories(${TARGET_NAME} PRIVATE ${Vulkan_INCLUDE_DIRS})
-target_link_libraries(${TARGET_NAME} PRIVATE ${Vulkan_LIBRARIES})
 # GLFW
 target_include_directories(${TARGET_NAME} PRIVATE "${FOXY_EXTERN_DIR}/glfw/include")
 target_link_libraries(${TARGET_NAME} PRIVATE glfw)

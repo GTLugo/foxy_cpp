@@ -29,7 +29,7 @@ namespace ookami {
     std::vector<VkImage> swap_images_;
     std::vector<vk::raii::ImageView> swap_image_views_;
 
-    [[nodiscard]] auto pick_swap_surface_format(const std::vector<vk::SurfaceFormatKHR>& formats) -> vk::SurfaceFormatKHR {
+    [[nodiscard]] static auto pick_swap_surface_format(const std::vector<vk::SurfaceFormatKHR>& formats) -> vk::SurfaceFormatKHR {
       for (auto& format : formats) {
         if (format.format == vk::Format::eB8G8R8A8Srgb && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
           return format;
@@ -39,8 +39,8 @@ namespace ookami {
       return formats[0];
     }
 
-    [[nodiscard]] auto pick_swap_present_mode(const std::vector<vk::PresentModeKHR>& modes) -> vk::PresentModeKHR {
-      for (const std::vector<vk::PresentModeKHR> ordered_preferences{
+    [[nodiscard]] static auto pick_swap_present_mode(const std::vector<vk::PresentModeKHR>& modes) -> vk::PresentModeKHR {
+      for (const std::vector ordered_preferences{
              vk::PresentModeKHR::eMailbox,
              vk::PresentModeKHR::eImmediate,
            }; const auto& preference: ordered_preferences) {
@@ -54,7 +54,7 @@ namespace ookami {
       return vk::PresentModeKHR::eFifo;
     }
 
-    [[nodiscard]] auto pick_swap_extent(const vk::SurfaceCapabilitiesKHR& capabilities) -> vk::Extent2D {
+    [[nodiscard]] auto pick_swap_extent(const vk::SurfaceCapabilitiesKHR& capabilities) const -> vk::Extent2D {
       if (capabilities.currentExtent.width != std::numeric_limits<koyote::u32>::max()) {
         return capabilities.currentExtent;
       }
@@ -86,7 +86,7 @@ namespace ookami {
       ) };
 
       const auto& [graphics, present]{ context_->queue_families() };
-      const std::vector<koyote::u32> queue_family_indices{
+      const std::vector queue_family_indices{
         graphics.value(),
         present.value(),
       };
@@ -119,7 +119,7 @@ namespace ookami {
       try {
         return { context_->logical_device().createSwapchainKHR(swapchain_create_info) };
       } catch (const std::exception& e) {
-        koyote::Log::fatal("Failed to create swapchain.");
+        koyote::Log::fatal("Failed to create swapchain: ", e.what());
         return nullptr;
       }
     }
@@ -159,8 +159,8 @@ namespace ookami {
   //  Swapchain
   //
 
-  Swapchain::Swapchain(koyote::shared<GLFWwindow> window, koyote::shared<Context> context)
-    : pImpl_{std::make_unique<Impl>(window, context)} {}
+  Swapchain::Swapchain(const koyote::shared<GLFWwindow>& window, const koyote::shared<Context>& context)
+    : p_impl_{std::make_unique<Impl>(window, context)} {}
 
   Swapchain::~Swapchain() = default;
 }

@@ -5,10 +5,10 @@
 #include <GLFW/glfw3.h>
 
 namespace ookami {
-  inline static VKAPI_ATTR auto vulkan_error_callback(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
-                                                      vk::DebugUtilsMessageTypeFlagBitsEXT type,
-                                                      const vk::DebugUtilsMessengerCallbackDataEXT* callback_data,
-                                                      void*) -> vk::Bool32 {
+  static auto vulkan_error_callback(const vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
+                                    vk::DebugUtilsMessageTypeFlagBitsEXT,
+                                    const vk::DebugUtilsMessengerCallbackDataEXT* callback_data,
+                                    void*) -> vk::Bool32 {
     std::stringstream msg{};
     msg << callback_data->pMessage << " | code " << callback_data->messageIdNumber << ", " << callback_data->pMessageIdName;
     switch (severity) {
@@ -18,8 +18,8 @@ namespace ookami {
       case vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning:
         koyote::Log::trace(msg.str());
         break;
-      default:
-        koyote::Log::info(msg.str());
+      case vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose:
+      case vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo:
         break;
     }
 
@@ -86,11 +86,11 @@ namespace ookami {
       return surface_;
     }
 
-    [[nodiscard]] auto query_swapchain_support() -> SwapchainSupportInfo {
+    [[nodiscard]] auto query_swapchain_support() const -> SwapchainSupportInfo {
       return query_swapchain_support(physical_device_);
     }
 
-    [[nodiscard]] auto queue_families() -> const QueueFamilyIndices& {
+    [[nodiscard]] auto queue_families() const -> const QueueFamilyIndices& {
       return queue_family_indices_;
     }
 
@@ -161,16 +161,16 @@ namespace ookami {
         return nullptr;
       }
 
-      auto callback_create_info = vk::DebugUtilsMessengerCreateInfoEXT{
+      const auto callback_create_info = vk::DebugUtilsMessengerCreateInfoEXT{
         .messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eError | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning,
         .messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation,
-        .pfnUserCallback = (PFN_vkDebugUtilsMessengerCallbackEXT)(vulkan_error_callback),
+        .pfnUserCallback = reinterpret_cast<PFN_vkDebugUtilsMessengerCallbackEXT>(vulkan_error_callback),  // NOLINT(clang-diagnostic-cast-function-type)
       };
 
       try {
         return vk::raii::DebugUtilsMessengerEXT{ instance_, callback_create_info };
       } catch (const std::exception& e) {
-        koyote::Log::fatal("Failed to set up debug messenger.");
+        koyote::Log::fatal("Failed to set up debug messenger: {}", e.what());
         return nullptr;
       }
     }
@@ -189,9 +189,9 @@ namespace ookami {
       vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr);
       extension_data_.instance_extensions = std::vector<VkExtensionProperties>{ extension_count };
       vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, extension_data_.instance_extensions.data());
-      for (const auto& extension: extension_data_.instance_extensions) {
-        if (!required_extensions.contains(extension.extensionName)) {
-          required_extensions.insert(extension.extensionName);
+      for (const auto& [extensionName, specVersion]: extension_data_.instance_extensions) {
+        if (!required_extensions.contains(extensionName)) {
+          required_extensions.insert(extensionName);
         }
       }
 
@@ -233,7 +233,7 @@ namespace ookami {
       auto debug_create_info = vk::DebugUtilsMessengerCreateInfoEXT{
         .messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eError | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning,
         .messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation,
-        .pfnUserCallback = (PFN_vkDebugUtilsMessengerCallbackEXT)(vulkan_error_callback),
+        .pfnUserCallback = reinterpret_cast<PFN_vkDebugUtilsMessengerCallbackEXT>(vulkan_error_callback),  // NOLINT(clang-diagnostic-cast-function-type)
       };
       if (enable_validation_) {
         instance_create_info.enabledLayerCount = static_cast<koyote::u32>(validation_layer_names_.size());
@@ -251,9 +251,9 @@ namespace ookami {
       }
     }
 
-    [[nodiscard]] auto find_queue_families(const PhysicalDevice& physical_device) -> QueueFamilyIndices {
+    [[nodiscard]] auto find_queue_families(const PhysicalDevice& physical_device) const -> QueueFamilyIndices {
       auto queue_family_indices = QueueFamilyIndices{};
-      auto queue_family_properties = physical_device.getQueueFamilyProperties();
+      const auto queue_family_properties = physical_device.getQueueFamilyProperties();
 
       koyote::u32 i{ 0 };
       for (const auto& queue_family: queue_family_properties) {
@@ -261,8 +261,7 @@ namespace ookami {
           queue_family_indices.graphics = i;
         }
 
-        vk::Bool32 surface_support = physical_device.getSurfaceSupportKHR(i, *surface_);
-        if (surface_support) {
+        if (physical_device.getSurfaceSupportKHR(i, *surface_)) {
           queue_family_indices.present = i;
         }
 
@@ -287,7 +286,7 @@ namespace ookami {
       std::ranges::transform(
         device.enumerateDeviceExtensionProperties(),
         std::inserter(available_extensions, available_extensions.end()),
-        [&](vk::ExtensionProperties& properties) {
+        [&](const vk::ExtensionProperties& properties) {
           return properties.extensionName;
         });
 
@@ -297,7 +296,7 @@ namespace ookami {
       });
     }
 
-    [[nodiscard]] auto query_swapchain_support(const PhysicalDevice& device) -> SwapchainSupportInfo {
+    [[nodiscard]] auto query_swapchain_support(const PhysicalDevice& device) const -> SwapchainSupportInfo {
       SwapchainSupportInfo info{
         .capabilities = device.getSurfaceCapabilitiesKHR(*surface_),
         .formats = device.getSurfaceFormatsKHR(*surface_),
@@ -308,12 +307,12 @@ namespace ookami {
     }
 
     [[nodiscard]] auto device_suitable(const PhysicalDevice& physical_device) -> bool {
-      auto queue_family_indices{ find_queue_families(physical_device) };
+      const auto queue_family_indices{ find_queue_families(physical_device) };
 
       bool valid_swapchain{ false };
       if (check_device_extension_support(physical_device)) {
-        auto swapchain_support_info{ query_swapchain_support(physical_device) };
-        valid_swapchain = !swapchain_support_info.formats.empty() && !swapchain_support_info.present_modes.empty();
+        const auto [capabilities, formats, present_modes]{ query_swapchain_support(physical_device) };
+        valid_swapchain = !formats.empty() && !present_modes.empty();
       }
 
       return queue_family_indices.complete() && valid_swapchain;
@@ -321,7 +320,7 @@ namespace ookami {
 
     [[nodiscard]] auto pick_physical_device() -> PhysicalDevice {
       // TODO: Rank suitability and pick highest scoring device
-      vk::raii::PhysicalDevices physical_devices{ instance_ };
+      const vk::raii::PhysicalDevices physical_devices{ instance_ };
       if (physical_devices.empty()) {
         koyote::Log::fatal("No physical Vulkan devices found.");
       }
@@ -338,8 +337,8 @@ namespace ookami {
 
       vk::PhysicalDeviceProperties device_properties{ physical_device.getProperties() };
       std::string device_name{ static_cast<const char*>(device_properties.deviceName) };
-      Version api_version{ device_properties.apiVersion };
-      Version driver_version{ device_properties.driverVersion };
+      const Version api_version{ device_properties.apiVersion };
+      const Version driver_version{ device_properties.driverVersion };
 
       koyote::Log::debug("Vulkan Device: {} | Device driver version: {} | Vulkan API version: {}", 
         device_name, driver_version.to_string(), api_version.to_string());
@@ -349,7 +348,7 @@ namespace ookami {
 
     [[nodiscard]] auto create_logical_device() -> LogicalDevice {
       std::vector<vk::DeviceQueueCreateInfo> queue_create_infos;
-      std::set<koyote::u32> queue_families{
+      const std::set queue_families{
         queue_family_indices_.graphics.value(),
         queue_family_indices_.present.value(),
       };
@@ -362,9 +361,7 @@ namespace ookami {
         });
       }
 
-      vk::PhysicalDeviceFeatures device_features{};
-
-      vk::DeviceCreateInfo device_create_info{
+      const vk::DeviceCreateInfo device_create_info{
         .queueCreateInfoCount = static_cast<koyote::u32>(queue_create_infos.size()),
         .pQueueCreateInfos = queue_create_infos.data(),
         .enabledExtensionCount = static_cast<koyote::u32>(extension_data_.device_extensions.size()),
@@ -374,10 +371,10 @@ namespace ookami {
       return { physical_device_.createDevice(device_create_info, nullptr) };
     }
 
-    [[nodiscard]] auto create_surface(koyote::shared<GLFWwindow>& window) -> Surface {
+    [[nodiscard]] auto create_surface(const koyote::shared<GLFWwindow>& window) const -> Surface {
       VkSurfaceKHR raw_surface;
 
-      auto result = static_cast<vk::Result>(
+      const auto result = static_cast<vk::Result>(
         glfwCreateWindowSurface(*instance_, window.get(), nullptr, &raw_surface)
       );
 
@@ -389,40 +386,40 @@ namespace ookami {
   //  Context
   //
 
-  Context::Context(koyote::shared<GLFWwindow> window, bool enable_validation)
-    : pImpl_{std::make_unique<Impl>(window, enable_validation)} {}
+  Context::Context(const koyote::shared<GLFWwindow>& window, bool enable_validation)
+    : p_impl_{std::make_unique<Impl>(window, enable_validation)} {}
 
   Context::~Context() = default;
 
   auto Context::operator*() -> VulkanContext& {
-    return pImpl_->native();
+    return p_impl_->native();
   }
 
   auto Context::native() -> vk::raii::Context& {
-    return pImpl_->native();
+    return p_impl_->native();
   }
 
   auto Context::instance() -> vk::raii::Instance& {
-    return pImpl_->instance();
+    return p_impl_->instance();
   }
 
   auto Context::surface() -> Surface& {
-    return pImpl_->surface();
+    return p_impl_->surface();
   }
 
-  auto Context::query_swapchain_support() -> SwapchainSupportInfo {
-    return pImpl_->query_swapchain_support();
+  auto Context::query_swapchain_support() const -> SwapchainSupportInfo {
+    return p_impl_->query_swapchain_support();
   }
 
-  auto Context::queue_families() -> const QueueFamilyIndices& {
-    return pImpl_->queue_families();
+  auto Context::queue_families() const -> const QueueFamilyIndices& {
+    return p_impl_->queue_families();
   }
 
   auto Context::physical_device() -> vk::raii::PhysicalDevice& {
-    return pImpl_->physical_device();
+    return p_impl_->physical_device();
   }
 
   auto Context::logical_device() -> vk::raii::Device& {
-    return pImpl_->logical_device();
+    return p_impl_->logical_device();
   }
 }

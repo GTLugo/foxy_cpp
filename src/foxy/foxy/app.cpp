@@ -1,5 +1,7 @@
 #include "app.hpp"
 
+#include <utility>
+
 #include "inferno/window.hpp"
 #include "ookami/render_engine.hpp"
 #include "inu/job_system.hpp"
@@ -43,32 +45,32 @@ namespace foxy {
     }
 
     void set_user_data(koyote::shared<void> data) {
-      user_data_ = data;
+      user_data_ = std::move(data);
     }
 
     void add_stage_before() {
 
     }
     
-    void add_function_to_stage(Stage stage, stage_callback&& callback) {
+    void add_function_to_stage(const Stage stage, StageCallback&& callback) {
       switch (stage) {
         case Stage::Awake:
-          awake_event_.add_callback(std::forward<stage_callback>(callback));
+          awake_event_.add_callback(std::forward<StageCallback>(callback));
           break;
         case Stage::Start:
-          start_event_.add_callback(std::forward<stage_callback>(callback));
+          start_event_.add_callback(std::forward<StageCallback>(callback));
           break;
         case Stage::Tick:
-          tick_event_.add_callback(std::forward<stage_callback>(callback));
+          tick_event_.add_callback(std::forward<StageCallback>(callback));
           break;
         case Stage::EarlyUpdate:
-          early_update_event_.add_callback(std::forward<stage_callback>(callback));
+          early_update_event_.add_callback(std::forward<StageCallback>(callback));
           break;
         case Stage::LateUpdate:
-          late_update_event_.add_callback(std::forward<stage_callback>(callback));
+          late_update_event_.add_callback(std::forward<StageCallback>(callback));
           break;
         case Stage::Stop:
-          stop_event_.add_callback(std::forward<stage_callback>(callback));
+          stop_event_.add_callback(std::forward<StageCallback>(callback));
           break;
       }
     }
@@ -87,7 +89,6 @@ namespace foxy {
     static inline bool instantiated_{ false };
 
     const double frame_time_goal_{ 1. / 250. };
-    bool running_{ true };
 
     koyote::shared<void> user_data_;
     App& app_;
@@ -180,16 +181,15 @@ namespace foxy {
 
     void show_perf_stats() {
       static koyote::u32 counter{ 0 };
-      double frame_time{ koyote::Time::delta<koyote::secs>() };
+      const double frame_time{ koyote::Time::delta<koyote::secs>() };
       if (counter >= static_cast<koyote::u32>(koyote::Time::tick_rate()) / 2.) {
         std::stringstream perf_stats;
 
         perf_stats << "frametime: " 
           << std::fixed << std::setfill(' ') << std::setw(12) << std::setprecision(9) << frame_time << "s | % of target frametime ceiling: " 
-          << std::defaultfloat << std::setfill(' ') << std::setw(9) << std::setprecision(4) << (frame_time / frame_time_goal_) * 100. << '%'
-          /*<< " | avg fps: " << 1. / koyote::Time::avg_delta_secs()*/;
+          << std::defaultfloat << std::setfill(' ') << std::setw(9) << std::setprecision(4) << (frame_time / frame_time_goal_) * 100. << '%';
 
-        //FOXY_DEBUG << "PERF STATS | " << perf_stats.str();
+        // FOXY_DEBUG << "PERF STATS | " << perf_stats.str();
         window_->set_subtitle(perf_stats.str());
         counter = 0;
       } else {
@@ -203,30 +203,30 @@ namespace foxy {
   //
 
   App::App(App::CreateInfo&& create_info)
-    : pImpl_{std::make_unique<Impl>(*this, create_info)} {}
+    : p_impl_{std::make_unique<Impl>(*this, create_info)} {}
 
   App::~App() = default;
 
   void App::run() {
-    pImpl_->run();
+    p_impl_->run();
   }
 
   auto App::set_user_data_ptr(koyote::shared<void> data) -> App& {
-    pImpl_->set_user_data(data);
+    p_impl_->set_user_data(data);
     return *this;
   }
 
   auto App::add_stage_before() -> App& {
-    pImpl_->add_stage_before();
+    p_impl_->add_stage_before();
     return *this;
   }
 
-  auto App::add_function_to_stage(Stage stage, stage_callback&& callback) -> App& {
-    pImpl_->add_function_to_stage(stage, std::forward<stage_callback>(callback));
+  auto App::add_function_to_stage(const Stage stage, StageCallback&& callback) -> App& {
+    p_impl_->add_function_to_stage(stage, std::forward<StageCallback>(callback));
     return *this;
   }
 
   auto App::user_data_ptr() -> koyote::shared<void> {
-    return pImpl_->user_data();
+    return p_impl_->user_data();
   }
 }

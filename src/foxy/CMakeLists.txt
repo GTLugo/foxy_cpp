@@ -12,6 +12,7 @@ option(FOXY_PERF_TITLE "Performance stats displayed in title" ON)
 # LIBRARY
 # ===================================================
 set(SOURCE_FILES
+    "${FOXY_EXTERN_DIR}/../cpp.hint"
     "foxy/icon.rc"
     "foxy/app.cpp"
 )

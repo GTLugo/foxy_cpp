@@ -10,62 +10,38 @@
 namespace ookami {
   class Shader::Impl {
   public:
-    Impl(const vk::raii::Device& device, 
-         const std::filesystem::path& file_path, 
-         const bit_flags shader_bits, 
-         const bool optimize = false)
-      : name_{ file_path.stem().string() } {
+    Impl(const vk::raii::Device& device, const CreateInfo& shader_create_info)
+      : name_{ shader_create_info.shader_directory.stem().string() } {
 
-      if (load_shader_code(file_path, shader_bits, optimize)) {
+      if (load_shader_code(shader_create_info)) {
         koyote::Log::trace("Loaded shader: {}", name_);
         create_shader_modules(device);
         koyote::Log::trace("Shader \"{}\" ready.", name_);
       } else {
         koyote::Log::error("Shader \"{}\" failed creation.", name_);
       }
-
     }
 
     ~Impl() = default;
 
-    [[nodiscard]] auto module(const Kind kind) const -> const vk::raii::ShaderModule& { return shader_modules_.at(kind); }
+    [[nodiscard]] auto module(const Kind stage) const -> const vk::raii::ShaderModule& { return shader_modules_.at(stage); }
   private:
     std::string name_;
     std::unordered_map<Kind, std::vector<char>> bytecode_;
     std::unordered_map<Kind, vk::raii::ShaderModule> shader_modules_;
 
     static inline const std::string preproc_token_type_{ "#type" };
-    static inline std::unordered_map<std::string, Kind> string_to_kind_{
-        {"vertex"  , Kind::Vertex  },
-        {"fragment", Kind::Fragment},
-        {"compute" , Kind::Compute },
-        {"geometry", Kind::Geometry},
-    };
-    static inline std::unordered_map<Kind, std::string> kind_to_string_{
-        {Kind::Vertex  , "vertex"  },
-        {Kind::Fragment, "fragment"},
-        {Kind::Compute , "compute" },
-        {Kind::Geometry, "geometry"},
-    };
-    static inline std::unordered_map<Kind, shaderc_shader_kind> kind_to_shaderc_kind_{
-        {Kind::Vertex  , shaderc_shader_kind::shaderc_glsl_vertex_shader  },
-        {Kind::Fragment, shaderc_shader_kind::shaderc_glsl_fragment_shader},
-        {Kind::Compute , shaderc_shader_kind::shaderc_glsl_compute_shader },
-        {Kind::Geometry, shaderc_shader_kind::shaderc_glsl_geometry_shader},
-    };
 
-    auto load_shader_code(const std::filesystem::path& file_path,
-                          const bit_flags shader_bits, 
-                          const bool optimize = false) -> bool {   
-      namespace fs = std::filesystem;              
+    [[nodiscard]] auto load_shader_code(const CreateInfo& create_info) -> bool {
       bool found_shader{ false };
 
-      if (!fs::exists(file_path)) {
-        koyote::Log::error("Directory {} does not exist", file_path.string());
+      if (!exists(create_info.shader_directory)) {
+        koyote::Log::error("Directory {} does not exist", create_info.shader_directory.string());
       } else {
-        if (fs::is_directory(file_path)) {
+
+        if (is_directory(create_info.shader_directory)) {
           koyote::Log::trace("Loading shader from dir: {}", name_);
-          found_shader = load_from_dir(file_path, shader_bits);
+          found_shader = load_from_dir(create_info);
         } else {
           koyote::Log::error("Failed to load shader from dir: {}", name_);
         }
@@ -74,51 +50,60 @@ namespace ookami {
       return found_shader;
     }
 
-    auto load_from_dir(const std::filesystem::path& dir_path,
-                       const bit_flags shader_bits,
-                       const bool optimize = false) -> bool {
+    [[nodiscard]] auto load_from_dir(const CreateInfo& create_info) -> bool {
       namespace fs = std::filesystem;
-      const fs::path tmp_shader_dir{ fs::path{ "tmp" } / fs::path{ "shader_cache" } / fs::relative(dir_path, {"res/foxy/shaders"}).parent_path() / dir_path.stem() };
+      const fs::path shader_cache_dir{
+        fs::path{ "tmp" } / fs::path{ "shader_cache" } / relative(create_info.shader_directory, {"res/foxy/shaders"}).parent_path() / create_info.shader_directory.stem()
+      };
 
-      for (auto [i, kind] = std::tuple<koyote::u32, Kind>{ 0, static_cast<Kind>(0) }; i <= Kind::Max; ++i, kind = static_cast<Kind>(i)) {
-        fs::path in_shader_path{ dir_path / fs::path{ kind_to_string_.at(kind) + ".hlsl" } };
-
-        if (shader_bits.test(kind)) {
-          koyote::Log::trace("Looking for {}: {}", kind_to_string_.at(kind), name_);
-
-          if (fs::path out_shader_path{ tmp_shader_dir / fs::path{ kind_to_string_.at(kind) + ".spv" } }; fs::exists(out_shader_path)) {
-            koyote::Log::trace("Found cached {} at location {}", kind_to_string_.at(kind), out_shader_path.string());
-
-            if (auto code{ koyote::read_file(in_shader_path, std::ios::binary) }; code.has_value()) {
-              bytecode_[kind] = { code->begin(), code->end() };
-            } else {
-              return false;
-            }
-
-          } else {
-            koyote::Log::trace("Couldn't find cached {} at location {}", kind_to_string_.at(kind), out_shader_path.string());
-
-            if (auto code{ koyote::read_file(in_shader_path) }; code.has_value()) {
-              if (!fs::exists(tmp_shader_dir)) {
-                fs::create_directories(tmp_shader_dir);
-              }
-
-              if (!compile_shader_type(out_shader_path, *code, kind, optimize)) {
-                return false;
-              }
-            } else {
-              return false;
-            }
-          }
-        } else {
-          koyote::Log::trace("Skipping {}", kind_to_string_.at(kind));
+      for (auto [i, stage] = std::tuple<koyote::u32, Kind>{ 0, static_cast<Kind::Value>(0) }; i <= Kind::Max; ++i, stage = static_cast<Kind::Value>(i)) {
+        if (!load_stage(create_info, stage, shader_cache_dir)) {
+          return false;
         }
       }
 
       return true;
     }
 
-    std::unordered_map<Kind, std::string> parse_file(const std::filesystem::path& file_path) {
+    [[nodiscard]] auto load_stage(const CreateInfo& create_info, const Kind stage, const std::filesystem::path& shader_cache_dir) -> bool {
+      namespace fs = std::filesystem;
+      const fs::path in_shader_path{ create_info.shader_directory / fs::path{ *stage.to_string() + ".hlsl" } };
+
+      if (create_info.has_kind(stage)) {
+        koyote::Log::trace("Looking for {}: {}", *stage.to_string(), name_);
+
+        if (const fs::path out_shader_path{ shader_cache_dir / fs::path{ *stage.to_string() + ".spv" } }; exists(out_shader_path)) {
+          koyote::Log::trace("Found cached {} at location {}", *stage.to_string(), out_shader_path.string());
+
+          if (auto code{ koyote::read_file(in_shader_path, std::ios::binary) }; code.has_value()) {
+            bytecode_[stage] = { code->begin(), code->end() };
+          } else {
+            return false;
+          }
+
+        } else {
+          koyote::Log::trace("Couldn't find cached {} at location {}", *stage.to_string(), out_shader_path.string());
+
+          if (const auto code{ koyote::read_file(in_shader_path) }; code.has_value()) {
+            if (!exists(shader_cache_dir)) {
+              create_directories(shader_cache_dir);
+            }
+
+            if (!compile_shader_type(out_shader_path, *code, stage, !create_info.disable_optimizations)) {
+              return false;
+            }
+          } else {
+            return false;
+          }
+        }
+      } else {
+        koyote::Log::trace("Skipping {}", *stage.to_string());
+      }
+
+      return true;
+    }
+
+    [[nodiscard]] auto parse_file(const std::filesystem::path& file_path) -> std::unordered_map<Kind, std::string>{
       koyote::Log::trace("Parsing shader: {}...", name_);
 
       std::unordered_map<Kind, std::string> srcs;
@@ -136,10 +121,10 @@ namespace ookami {
         if (next_word == preproc_token_type_) {
           std::stringstream section_stream;
           // Grab type of shader
-          std::string kind;
-          file >> kind;
-          if (!string_to_kind_.contains(kind)) {
-            koyote::Log::fatal("Shader type {} is not supported.", kind);
+          std::string stage;
+          file >> stage;
+          if (!Kind::from_string(stage).has_value()) {
+            koyote::Log::fatal("Shader type {} is not supported.", stage);
           }
 
           // Loop through shader section body
@@ -152,7 +137,7 @@ namespace ookami {
           }
 
           // add to result map
-          srcs[string_to_kind_[kind]] = section_stream.str();
+          srcs[*Kind::from_string(stage)] = section_stream.str();
         }
       }
 
@@ -161,9 +146,9 @@ namespace ookami {
 
     [[nodiscard]] auto compile_shader_type(const std::filesystem::path& out_file, 
                                            const std::string& code_str, 
-                                           const Kind kind, 
-                                           const bool optimize = false) -> bool {
-      koyote::Log::trace("Compiling {}: {}...", kind_to_string_.at(kind), name_);
+                                           const Kind stage, 
+                                           const bool optimize) -> bool {
+      koyote::Log::trace("Compiling {}: {}...", *stage.to_string(), name_);
 
       const shaderc::Compiler compiler;
       shaderc::CompileOptions options{};
@@ -174,8 +159,8 @@ namespace ookami {
       }
 
       const auto result{ compiler.CompileGlslToSpvAssembly(
-        preprocess(code_str, kind), 
-        kind_to_shaderc_kind_.at(kind),
+        preprocess(code_str, stage), 
+        static_cast<shaderc_shader_kind>(*stage.to_shaderc()),
         name_.c_str(), 
         options) 
       };
@@ -189,36 +174,36 @@ namespace ookami {
       std::ofstream spv_file{ out_file };
       spv_file << assembly;
 
-      bytecode_[kind] = { assembly.begin(), assembly.end() };
+      bytecode_[stage] = { assembly.begin(), assembly.end() };
       return true;
     }
 
-    [[nodiscard]] auto preprocess(const std::string& code_str, const Kind kind) const -> std::string {
+    [[nodiscard]] auto preprocess(const std::string& code_str, const Kind stage) const -> std::string {
       const shaderc::Compiler compiler{};
       shaderc::CompileOptions options{};
       options.SetSourceLanguage(shaderc_source_language_hlsl);
 
-      const auto result{ compiler.PreprocessGlsl(code_str, kind_to_shaderc_kind_.at(kind), name_.c_str(), options) };
-      if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
+      if (const auto result{ compiler.PreprocessGlsl(code_str, static_cast<shaderc_shader_kind>(*stage.to_shaderc()), name_.c_str(), options) }; 
+          result.GetCompilationStatus() == shaderc_compilation_status_success) {
+        return { result.begin(), result.end() };
+      } else {
         koyote::Log::error("Shaderc Preprocess: {}", result.GetErrorMessage());
-        return ""; 
+        return "";
       }
-
-      return { result.begin(), result.end() };
     }
 
     void create_shader_modules(const vk::raii::Device& device) {
       koyote::Log::trace("Building shader modules: {}...", name_);
 
       for (koyote::u32 i{ 0 }; i <= Kind::Max; ++i) {
-        if (auto kind{ static_cast<Kind>(i) }; shader_modules_.contains(kind)) {
+        if (auto stage{ static_cast<Kind::Value>(i) }; shader_modules_.contains(stage)) {
           vk::ShaderModuleCreateInfo create_info{
-            .codeSize = bytecode_.at(kind).size(),
-            .pCode = reinterpret_cast<const koyote::u32*>(bytecode_.at(kind).data())
+            .codeSize = bytecode_.at(stage).size(),
+            .pCode = reinterpret_cast<const koyote::u32*>(bytecode_.at(stage).data())
           };
 
           try {
-            shader_modules_.insert(std::make_pair(kind, device.createShaderModule(create_info)));
+            shader_modules_.insert(std::make_pair(stage, device.createShaderModule(create_info)));
           } catch (const std::exception& e) {
             koyote::Log::error(e.what());
           }
@@ -232,11 +217,34 @@ namespace ookami {
   //
   //  Shader
   //
+  constexpr auto Shader::Kind::from_string(const std::string_view str)->std::optional<Kind> {
+    if (str == "vertex")   return Vertex;
+    if (str == "fragment") return Fragment;
+    if (str == "compute")  return Compute;
+    if (str == "geometry") return Geometry;
+    return std::nullopt;
+  }
 
-  Shader::Shader(const vk::raii::Device& device, const std::filesystem::path& file_path, const bit_flags shader_bits, const bool optimize)
-    : pImpl_{std::make_unique<Impl>(device, file_path, shader_bits, optimize)} {}
+  constexpr auto Shader::Kind::to_string() const -> std::optional<std::string> {
+    if (value_ == Vertex)   return "vertex";
+    if (value_ == Fragment) return "fragment";
+    if (value_ == Compute)  return "compute";
+    if (value_ == Geometry) return "geometry";
+    return std::nullopt;
+  }
+
+  constexpr auto Shader::Kind::to_shaderc() const -> std::optional<koyote::i32> {
+    if (value_ == Vertex)   return shaderc_glsl_vertex_shader;
+    if (value_ == Fragment) return shaderc_glsl_fragment_shader;
+    if (value_ == Compute)  return shaderc_glsl_compute_shader;
+    if (value_ == Geometry) return shaderc_glsl_geometry_shader;
+    return std::nullopt;
+  }
+
+  Shader::Shader(const vk::raii::Device& device, const CreateInfo& shader_create_info)
+    : p_impl_{std::make_unique<Impl>(device, shader_create_info)} {}
 
   Shader::~Shader() = default;
 
-  auto Shader::module(const Shader::Kind kind) const -> const vk::raii::ShaderModule& { return pImpl_->module(kind); }
+  auto Shader::module(const Shader::Kind stage) const -> const vk::raii::ShaderModule& { return p_impl_->module(stage); }
 }
