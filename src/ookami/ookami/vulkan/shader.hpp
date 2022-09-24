@@ -25,8 +25,8 @@ namespace ookami {
 
     explicit Shader(const vk::raii::Device& device,
                     const std::filesystem::path& file_path,
-                    const bit_flags shader_bits,
-                    const bool optimize = false);
+                    bit_flags shader_bits,
+                    bool optimize = false);
     ~Shader();
 
     [[nodiscard]] auto module(Kind kind) const -> const vk::raii::ShaderModule&;

@@ -9,10 +9,10 @@ namespace ookami {
 namespace ookami {
   class Swapchain {
   public:
-    explicit Swapchain(koyote::shared<GLFWwindow> window, koyote::shared<Context> context);
+    explicit Swapchain(const koyote::shared<GLFWwindow>& window, const koyote::shared<Context>& context);
     ~Swapchain();
   private:
     class Impl;
-    koyote::unique<Impl> pImpl_;
+    koyote::unique<Impl> p_impl_;
   };
 }

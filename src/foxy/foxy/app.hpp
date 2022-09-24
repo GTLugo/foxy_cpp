@@ -41,6 +41,6 @@ namespace foxy {
     [[nodiscard]] auto user_data_ptr() -> koyote::shared<void>;
   private:
     class Impl;
-    koyote::pimpl<Impl> p_impl_;
+    koyote::unique<Impl> p_impl_;
   };
 }

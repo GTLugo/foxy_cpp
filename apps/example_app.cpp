@@ -1,24 +1,24 @@
 #include <foxy/framework.hpp>
 REDIRECT_WINMAIN_TO_MAIN
 
-struct ExampleApp: public foxy::App {
+struct ExampleApp: foxy::App {
   std::string waifu{ "Fubuki" };
   int hololive_members{ 71 };
 
   ExampleApp()
-    : foxy::App{ foxy::App::CreateInfo{
+    : App{ CreateInfo{
         .title = "Foxy Example App"
       } } {
-    add_function_to_stage(foxy::App::Stage::Start, FOXY_LAMBDA(start));
-    add_function_to_stage(foxy::App::Stage::EarlyUpdate, FOXY_LAMBDA(update));
-    add_function_to_stage(foxy::App::Stage::Stop, FOXY_LAMBDA(stop));
+    add_function_to_stage(Stage::Start, FOXY_LAMBDA(start));
+    add_function_to_stage(Stage::EarlyUpdate, FOXY_LAMBDA(update));
+    add_function_to_stage(Stage::Stop, FOXY_LAMBDA(stop));
   }
 
-  void start(foxy::App& app) {
+  void start(App&) {
     koyote::Log::info("My favorite out of all {} hololive members is {}", hololive_members, waifu);
   }
 
-  void update(foxy::App& app) {
+  void update(App&) {
     const double delta_time{ koyote::Time::delta<koyote::secs>() };
 
     static double timer{ 0 };
@@ -29,12 +29,12 @@ struct ExampleApp: public foxy::App {
     }
   }
 
-  void stop(foxy::App& app) {
+  void stop(App&) {
     // koyote::Log::fatal("Crash test!");
   }
 };
 
-auto main(int argc, char** argv) -> int {
+auto main(const int, char**) -> int {
   try {
     koyote::Log::enable_backtrace(32);
     ExampleApp{}.run();

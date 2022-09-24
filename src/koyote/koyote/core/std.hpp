@@ -14,10 +14,10 @@ namespace koyote {
   using i64 = std::int64_t;
   using u64 = std::uint64_t;
 
-  struct uuid: public UUIDv4::UUID {
-    uuid() : UUIDv4::UUID{ generate() } {}
+  struct uuid: UUIDv4::UUID {
+    uuid() : UUID{ generate() } {}
   private:
-    [[nodiscard]] static inline auto generate() -> UUIDv4::UUID {
+    [[nodiscard]] static auto generate() -> UUIDv4::UUID {
       static UUIDv4::UUIDGenerator<std::mt19937_64> gen{};
       return gen.getUUID();
     }
@@ -33,7 +33,7 @@ namespace koyote {
   using weak = std::weak_ptr<T>;
 
   template<class T, class U>
-  concept Derives = std::is_base_of<U, T>::value;
+  concept Derives = std::is_base_of_v<U, T>;
 
   class Copyable {
   public:

@@ -233,7 +233,7 @@ namespace ookami {
   //  Shader
   //
 
-  Shader::Shader(const vk::raii::Device& device, const std::filesystem::path& file_path, const bit_flags shader_bits, const bool optimize)
+  Shader::Shader(const vk::raii::Device& device, const std::filesystem::path& file_path, bit_flags shader_bits, bool optimize)
     : pImpl_{std::make_unique<Impl>(device, file_path, shader_bits, optimize)} {}
 
   Shader::~Shader() = default;

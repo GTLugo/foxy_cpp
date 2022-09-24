@@ -1,6 +1,7 @@
 #include "app.hpp"
 
-#include "koyote/pimpl_impl.hpp"
+#include <utility>
+
 #include "inferno/window.hpp"
 #include "ookami/render_engine.hpp"
 #include "inu/job_system.hpp"
@@ -44,7 +45,7 @@ namespace foxy {
     }
 
     void set_user_data(koyote::shared<void> data) {
-      user_data_ = data;
+      user_data_ = std::move(data);
     }
 
     void add_stage_before() {
@@ -88,7 +89,6 @@ namespace foxy {
     static inline bool instantiated_{ false };
 
     const double frame_time_goal_{ 1. / 250. };
-    bool running_{ true };
 
     koyote::shared<void> user_data_;
     App& app_;
@@ -181,16 +181,15 @@ namespace foxy {
 
     void show_perf_stats() {
       static koyote::u32 counter{ 0 };
-      double frame_time{ koyote::Time::delta<koyote::secs>() };
+      const double frame_time{ koyote::Time::delta<koyote::secs>() };
       if (counter >= static_cast<koyote::u32>(koyote::Time::tick_rate()) / 2.) {
         std::stringstream perf_stats;
 
         perf_stats << "frametime: " 
           << std::fixed << std::setfill(' ') << std::setw(12) << std::setprecision(9) << frame_time << "s | % of target frametime ceiling: " 
-          << std::defaultfloat << std::setfill(' ') << std::setw(9) << std::setprecision(4) << (frame_time / frame_time_goal_) * 100. << '%'
-          /*<< " | avg fps: " << 1. / koyote::Time::avg_delta_secs()*/;
+          << std::defaultfloat << std::setfill(' ') << std::setw(9) << std::setprecision(4) << (frame_time / frame_time_goal_) * 100. << '%';
 
-        //FOXY_DEBUG << "PERF STATS | " << perf_stats.str();
+        // FOXY_DEBUG << "PERF STATS | " << perf_stats.str();
         window_->set_subtitle(perf_stats.str());
         counter = 0;
       } else {
@@ -204,7 +203,7 @@ namespace foxy {
   //
 
   App::App(App::CreateInfo&& create_info)
-    : p_impl_{*this, create_info} {}
+    : p_impl_{std::make_unique<Impl>(*this, create_info)} {}
 
   App::~App() = default;
 

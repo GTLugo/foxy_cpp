@@ -6,7 +6,6 @@
 
 #include "context.hpp"
 #include "shader.hpp"
-#include "glsl_shader.hpp"
 
 namespace ookami {
   class Pipeline::Impl {
@@ -38,8 +37,8 @@ namespace ookami {
   //  Pipeline
   //
 
-  Pipeline::Pipeline(koyote::shared<Context> context)
-    : pImpl_{ std::make_unique<Impl>(context) } {}
+  Pipeline::Pipeline(const koyote::shared<Context>& context)
+    : p_impl_{ std::make_unique<Impl>(context) } {}
 
   Pipeline::~Pipeline() = default;
 } // foxy // vulkan
