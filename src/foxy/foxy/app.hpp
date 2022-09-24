@@ -27,7 +27,7 @@ namespace foxy {
       Stop,
     };
 
-    using StageCallback = std::function<void(App&)>;
+    using stage_callback = std::function<void(App&)>;
 
     explicit App(CreateInfo&& properties);
     ~App();
@@ -36,7 +36,7 @@ namespace foxy {
 
     auto set_user_data_ptr(koyote::shared<void> data) -> App&;
     auto add_stage_before() -> App&;
-    auto add_function_to_stage(Stage stage, StageCallback&& callback) -> App&;
+    auto add_function_to_stage(Stage stage, stage_callback&& callback) -> App&;
 
     [[nodiscard]] auto user_data_ptr() -> koyote::shared<void>;
   private:

@@ -50,25 +50,25 @@ namespace foxy {
 
     }
     
-    void add_function_to_stage(Stage stage, StageCallback&& callback) {
+    void add_function_to_stage(Stage stage, stage_callback&& callback) {
       switch (stage) {
         case Stage::Awake:
-          awake_event_.add_callback(std::forward<StageCallback>(callback));
+          awake_event_.add_callback(std::forward<stage_callback>(callback));
           break;
         case Stage::Start:
-          start_event_.add_callback(std::forward<StageCallback>(callback));
+          start_event_.add_callback(std::forward<stage_callback>(callback));
           break;
         case Stage::Tick:
-          tick_event_.add_callback(std::forward<StageCallback>(callback));
+          tick_event_.add_callback(std::forward<stage_callback>(callback));
           break;
         case Stage::EarlyUpdate:
-          early_update_event_.add_callback(std::forward<StageCallback>(callback));
+          early_update_event_.add_callback(std::forward<stage_callback>(callback));
           break;
         case Stage::LateUpdate:
-          late_update_event_.add_callback(std::forward<StageCallback>(callback));
+          late_update_event_.add_callback(std::forward<stage_callback>(callback));
           break;
         case Stage::Stop:
-          stop_event_.add_callback(std::forward<StageCallback>(callback));
+          stop_event_.add_callback(std::forward<stage_callback>(callback));
           break;
       }
     }
@@ -221,8 +221,8 @@ namespace foxy {
     return *this;
   }
 
-  auto App::add_function_to_stage(Stage stage, StageCallback&& callback) -> App& {
-    pImpl_->add_function_to_stage(stage, std::forward<StageCallback>(callback));
+  auto App::add_function_to_stage(Stage stage, stage_callback&& callback) -> App& {
+    pImpl_->add_function_to_stage(stage, std::forward<stage_callback>(callback));
     return *this;
   }
 

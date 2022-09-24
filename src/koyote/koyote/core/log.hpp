@@ -35,7 +35,7 @@ namespace koyote {
       }
     };
 
-  #ifndef NDEBUG
+  #ifdef FOXY_DEBUG_MODE
     #define LOGGING_FUNC_TEMPLATE_IMPL(x)\
     template<class... Args>\
     static inline void x ## (\
