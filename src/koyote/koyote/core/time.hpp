@@ -56,8 +56,19 @@ namespace koyote {
 
   class Time {
   public:
+    template<typename F1, typename F2>
+    static void internal_game_loop(const bool& stop_flag, F1&& tick_function, F2&& update_function) {
+      while (!stop_flag) {
+        while (should_do_tick()) {
+          std::forward<F1>(tick_function)();
+          internal_tick();
+        }
+        std::forward<F2>(update_function)();
+        internal_update();
+      }
+    }
 
-    static void i__engine_internal_init(double tick_rate = 128., u32 bail_count = 1024U) {
+    static void init(double tick_rate = 128., u32 bail_count = 1024U) {
       // This is awful and messy, but it'll prevent anyone outside the App class
       // from reinitializing Time, which would cause the engine, the app, life,
       // the universe, and all catgirls to die.
@@ -109,6 +120,10 @@ namespace koyote {
       return Duration{delta_}.count();
     }
 
+    // [[nodiscard]] static double avg_delta_secs() {
+    //   return std::accumulate(last_few_frame_times_.begin(), last_few_frame_times_.end(), 0.) / last_few_frame_times_.size();
+    // }
+
     template<class Duration>
     [[nodiscard]] static double lag() {
       return Duration{lag_}.count();
@@ -116,23 +131,7 @@ namespace koyote {
     
     // These should NEVER be called from anywhere other than the internal app class.
 
-    static void i__engine_internal_update() {
-      // FLUGEL_ENGINE_TRACE("Update!");
-      game_current_ = clock_steady::now();
-      // Seconds::duration()
-      delta_ = std::chrono::duration_cast<secs>(game_current_ - game_last_);
-      game_last_ = game_current_;
-      lag_ += delta_;
-      step_count_ = 0U;
-    }
-
-    static void i__engine_internal_tick() {
-      // FLUGEL_ENGINE_TRACE("Tick!");
-      lag_ -= fixed_time_step_;
-      ++step_count_;
-    }
-
-    [[nodiscard]] static bool i__engine_internal_should_do_tick() {
+    [[nodiscard]] static bool should_do_tick() {
       if (step_count_ >= bail_count_) {
         koyote::Log::warn("Struggling to catch up with physics rate.");
       }
@@ -145,7 +144,7 @@ namespace koyote {
     static inline double tick_rate_{};
     static inline secs fixed_time_step_{};
     // bail out of the fixed updates if iterations exceeds this amount to prevent lockups
-    // on extremely slow systems where updateFixed may be longer than fixedTimeStep_
+    // on extremely slow systems where tick time may exceed fixed time step
     static inline u32 bail_count_{};
 
     static inline time_point game_last_{}; // when last frame started
@@ -154,9 +153,31 @@ namespace koyote {
     static inline secs lag_{secs::zero()}; // how far behind the game is from real world
     static inline u32 step_count_{0U};
 
+    //static inline std::deque<double> last_few_frame_times_{};
+
     static const Stopwatch& stopwatch() {
       static const Stopwatch sw{clock_steady::now()};
       return sw;
     };
+
+    static void internal_update() {
+      // FLUGEL_ENGINE_TRACE("Update!");
+      game_current_ = clock_steady::now();
+      // Seconds::duration()
+      delta_ = std::chrono::duration_cast<secs>(game_current_ - game_last_);
+      // if (static_cast<u32>(last_few_frame_times_.size()) >= 10230U) {
+      //   last_few_frame_times_.pop_front();
+      // }
+      // last_few_frame_times_.push_back(delta_.count());
+      game_last_ = game_current_;
+      lag_ += delta_;
+      step_count_ = 0U;
+    }
+
+    static void internal_tick() {
+      // FLUGEL_ENGINE_TRACE("Tick!");
+      lag_ -= fixed_time_step_;
+      ++step_count_;
+    }
   };
-}
+} // koyote

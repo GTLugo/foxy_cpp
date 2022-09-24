@@ -12,7 +12,7 @@ set(SOURCE_FILES
     "ookami/vulkan/swapchain.cpp"
     "ookami/vulkan/pipeline.cpp"
     "ookami/vulkan/shader.cpp"
-)
+ "ookami/vulkan/glsl_shader.cpp")
 add_library(${TARGET_NAME} STATIC ${SOURCE_FILES})
 target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
 target_compile_options(${TARGET_NAME} PRIVATE "/bigobj" "/std:c++latest" "/experimental:module")
@@ -33,9 +33,12 @@ target_include_directories(${TARGET_NAME} PUBLIC "../koyote")
 target_link_libraries(${TARGET_NAME} PUBLIC koyote)
 # Vulkan
 set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS "/ignore:4099")
-find_package(Vulkan REQUIRED COMPONENTS shaderc_combined)
+find_package(Vulkan REQUIRED)
 target_include_directories(${TARGET_NAME} PRIVATE ${Vulkan_INCLUDE_DIRS})
-target_link_libraries(${TARGET_NAME} PRIVATE ${Vulkan_LIBRARIES} Vulkan::shaderc_combined)
+target_link_libraries(${TARGET_NAME} PRIVATE ${Vulkan_LIBRARIES})
+# Shaderc
+target_include_directories(${TARGET_NAME} PUBLIC "${FOXY_EXTERN_DIR}/shaderc")
+target_link_libraries(${TARGET_NAME} PUBLIC shaderc)
 # GLFW
 target_include_directories(${TARGET_NAME} PRIVATE "${FOXY_EXTERN_DIR}/glfw/include")
 target_link_libraries(${TARGET_NAME} PRIVATE glfw)

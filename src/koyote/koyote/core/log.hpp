@@ -35,6 +35,7 @@ namespace koyote {
       }
     };
 
+  #ifndef NDEBUG
     #define LOGGING_FUNC_TEMPLATE_IMPL(x)\
     template<class... Args>\
     static inline void x ## (\
@@ -42,7 +43,7 @@ namespace koyote {
       Args&&... args\
     ) {\
       x ## _impl(std::vformat(format.fmt_str, std::make_format_args(args..., format.file_name(), format.line_num())));\
-    }\
+    }
 
     template<class... Args>
     static inline void error(
@@ -59,6 +60,26 @@ namespace koyote {
     ) {
       fatal_impl(std::vformat(format.fmt_str + " ({}:{})", std::make_format_args(args..., format.file_name(), format.line_num())));
     }
+  #else
+    #define LOGGING_FUNC_TEMPLATE_IMPL(x)\
+    template<class... Args>\
+    static inline void x ## (\
+      FormatLocation format,\
+      Args&&... args\
+    ) {}
+
+    template<class... Args>
+    static inline void error(
+      FormatLocation format,
+      Args&&... args
+    ) {}
+
+    template<class... Args>
+    static inline void fatal(
+      FormatLocation format,
+      Args&&... args
+    ) {}
+  #endif
 
     LOGGING_FUNC_TEMPLATE_IMPL(trace)
     LOGGING_FUNC_TEMPLATE_IMPL(debug)

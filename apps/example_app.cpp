@@ -26,8 +26,6 @@ struct ExampleApp {
 
   void run(int argc, char** argv) {
     foxy::App{foxy::App::CreateInfo{
-      .argc = argc,
-      .argv = argv,
       .title = "Foxy Example App"
     }}.add_function_to_stage(foxy::App::Stage::Start, FOXY_LAMBDA(start))
       .add_function_to_stage(foxy::App::Stage::EarlyUpdate, FOXY_LAMBDA(update))

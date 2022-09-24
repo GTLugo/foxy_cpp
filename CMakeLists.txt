@@ -31,6 +31,10 @@ set(SPDLOG_USE_STD_FORMAT ON)
 set(SPDLOG_WCHAR_SUPPORT ON)
 set(SPDLOG_WCHAR_TO_UTF8_SUPPORT ON)
 add_subdirectory(extern/spdlog)
+# ShaderC
+set(SHADERC_SKIP_TESTS ON)
+set(SHADERC_SKIP_EXAMPLES ON)
+add_subdirectory(extern/shaderc)
 
 # ===================================================
 # SUBDIRECTORIES

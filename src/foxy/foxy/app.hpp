@@ -21,8 +21,8 @@ namespace foxy {
     enum class Stage {
       Awake,
       Start,
-      EarlyUpdate,
       Tick,
+      EarlyUpdate,
       LateUpdate,
       Stop,
     };

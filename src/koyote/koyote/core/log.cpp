@@ -44,7 +44,7 @@ namespace koyote {
       logger().set_level(spdlog::level::info);
       koyote::Log::set_thread_name("main");
 
-      Log::info(R"(===========================[])");
+      Log::info(R"(--------------=============[])");
       Log::info(R"(  ______ ______   ___     __ )");
       Log::info(R"( |  ____/ __ \ \ / \ \   / / )");
       Log::info(R"( | |__ | |  | \ V / \ \_/ /  )");
@@ -52,7 +52,7 @@ namespace koyote {
       Log::info(R"( | |   | |__| / . \   | |    )");
       Log::info(R"( |_|    \____/_/ \_\  |_|    )");
       Log::info(R"(                             )");
-      Log::info(R"(===========================[])");
+      Log::info(R"(--------------=============[])");
       Log::info("Foxy startup: Kon kon kitsune! Hi, friends!");
       #ifdef FOXY_DEBUG_MODE
       Log::info("Build mode: DEBUG");

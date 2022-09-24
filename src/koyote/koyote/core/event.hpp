@@ -1,6 +1,6 @@
 #pragma once
 
-namespace inferno {
+namespace koyote {
   template<typename... Args>
   class Event {
   public:

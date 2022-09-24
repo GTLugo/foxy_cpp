@@ -10,7 +10,7 @@ namespace vk::raii {
 }
 
 namespace ookami {
-  class Shader {
+  class GLSLShader {
   public:
     enum Kind {
       Vertex   = 0,
@@ -21,13 +21,13 @@ namespace ookami {
       Max = Geometry,
     };
 
-    using bit_flags = std::bitset<Kind::Max + 1>;
+    using BitFlags = std::bitset<Kind::Max + 1>;
 
-    explicit Shader(const vk::raii::Device& device,
+    explicit GLSLShader(const vk::raii::Device& device,
                     const std::filesystem::path& file_path,
-                    const bit_flags shader_bits,
-                    const bool optimize = false);
-    ~Shader();
+                    BitFlags shader_bits,
+                    bool optimize = false);
+    ~GLSLShader();
 
     [[nodiscard]] auto module(Kind kind) const -> const vk::raii::ShaderModule&;
   private:
