@@ -19,7 +19,7 @@ namespace ookami {
       simple_shader_ = std::make_shared<Shader>(
         context_->logical_device(), 
         "res/foxy/shaders/simple", 
-        Shader::bit_flags{BIT(Shader::Vertex) + BIT(Shader::Fragment)},
+        Shader::bit_flags{BIT(Shader::Stage::Vertex) + BIT(Shader::Stage::Fragment)},
         true
       );
       koyote::Log::info("Shader loading complete! ({} s)", sw.get_time_elapsed<koyote::secs>());
