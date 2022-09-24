@@ -8,8 +8,8 @@ namespace ookami {
   class Swapchain::Impl {
   public:
     explicit Impl(koyote::shared<GLFWwindow> window, koyote::shared<Context> context)
-      : window_{window},
-        context_{context},
+      : window_{ std::move(window) },
+        context_{ std::move(context) },
         swapchain_image_format_{vk::Format::eB8G8R8A8Unorm},
         swapchain_{create_swapchain()},
         swap_images_{swapchain_.getImages()},
@@ -30,7 +30,7 @@ namespace ookami {
     std::vector<vk::raii::ImageView> swap_image_views_;
 
     [[nodiscard]] auto pick_swap_surface_format(const std::vector<vk::SurfaceFormatKHR>& formats) -> vk::SurfaceFormatKHR {
-      for (auto format: formats) {
+      for (auto& format : formats) {
         if (format.format == vk::Format::eB8G8R8A8Srgb && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
           return format;
         }
@@ -40,13 +40,11 @@ namespace ookami {
     }
 
     [[nodiscard]] auto pick_swap_present_mode(const std::vector<vk::PresentModeKHR>& modes) -> vk::PresentModeKHR {
-      std::vector<vk::PresentModeKHR> ordered_preferences{
-        vk::PresentModeKHR::eMailbox,
-        vk::PresentModeKHR::eImmediate,
-      };
-
-      for (const auto& preference: ordered_preferences) {
-        for (auto mode: modes) {
+      for (const std::vector<vk::PresentModeKHR> ordered_preferences{
+             vk::PresentModeKHR::eMailbox,
+             vk::PresentModeKHR::eImmediate,
+           }; const auto& preference: ordered_preferences) {
+        for (const auto mode: modes) {
           if (mode == preference) {
             return mode;
           }
@@ -59,38 +57,38 @@ namespace ookami {
     [[nodiscard]] auto pick_swap_extent(const vk::SurfaceCapabilitiesKHR& capabilities) -> vk::Extent2D {
       if (capabilities.currentExtent.width != std::numeric_limits<koyote::u32>::max()) {
         return capabilities.currentExtent;
-      } else {
-        koyote::ivec2 size{};
-        glfwGetFramebufferSize(window_.get(), &size.x, &size.y);
-
-        vk::Extent2D true_extent{
-          std::clamp(static_cast<koyote::u32>(size.x), capabilities.minImageExtent.width, capabilities.maxImageExtent.width),
-          std::clamp(static_cast<koyote::u32>(size.y), capabilities.minImageExtent.height, capabilities.maxImageExtent.height),
-        };
-
-        return true_extent;
       }
+
+      koyote::ivec2 size{};
+      glfwGetFramebufferSize(window_.get(), &size.x, &size.y);
+
+      const vk::Extent2D true_extent{
+        std::clamp(static_cast<koyote::u32>(size.x), capabilities.minImageExtent.width, capabilities.maxImageExtent.width),
+        std::clamp(static_cast<koyote::u32>(size.y), capabilities.minImageExtent.height, capabilities.maxImageExtent.height),
+      };
+
+      return true_extent;
     }
 
     [[nodiscard]] auto create_swapchain() -> vk::raii::SwapchainKHR {
-      auto swapchain_support_info = context_->query_swapchain_support();
+      auto [capabilities, formats, present_modes]{ context_->query_swapchain_support() };
       SwapchainInfo swapchain_info{
-        .format = pick_swap_surface_format(swapchain_support_info.formats),
-        .present_mode = pick_swap_present_mode(swapchain_support_info.present_modes),
-        .extent = swapchain_extent_ = pick_swap_extent(swapchain_support_info.capabilities),
+        .format = pick_swap_surface_format(formats),
+        .present_mode = pick_swap_present_mode(present_modes),
+        .extent = swapchain_extent_ = pick_swap_extent(capabilities),
       };
       swapchain_image_format_ = swapchain_info.format.format;
 
       koyote::u32 image_count{ std::clamp(
-        swapchain_support_info.capabilities.minImageCount + 1,
-        swapchain_support_info.capabilities.minImageCount,
-        swapchain_support_info.capabilities.maxImageCount
+        capabilities.minImageCount + 1,
+        capabilities.minImageCount,
+        capabilities.maxImageCount
       ) };
 
-      const QueueFamilyIndices& indices{ context_->queue_families() };
-      std::vector<koyote::u32> queue_family_indices{
-        indices.graphics.value(),
-        indices.present.value(),
+      const auto& [graphics, present]{ context_->queue_families() };
+      const std::vector<koyote::u32> queue_family_indices{
+        graphics.value(),
+        present.value(),
       };
 
       vk::SwapchainCreateInfoKHR swapchain_create_info{
@@ -101,14 +99,14 @@ namespace ookami {
         .imageExtent = swapchain_info.extent,
         .imageArrayLayers = 1,
         .imageUsage = vk::ImageUsageFlagBits::eColorAttachment,
-        .preTransform = swapchain_support_info.capabilities.currentTransform,
+        .preTransform = capabilities.currentTransform,
         .compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
         .presentMode = swapchain_info.present_mode,
         .clipped = true,
         .oldSwapchain = nullptr,
       };
 
-      if (indices.graphics != indices.present) {
+      if (graphics != present) {
         swapchain_create_info.imageSharingMode = vk::SharingMode::eConcurrent;
         swapchain_create_info.queueFamilyIndexCount = 2;
         swapchain_create_info.pQueueFamilyIndices = queue_family_indices.data();

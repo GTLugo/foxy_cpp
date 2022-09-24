@@ -18,3 +18,6 @@
 	ignore = dirty
 	path = extern/spdlog
 	url = https://github.com/GTLugo/spdlog.git
+[submodule "extern/shaderc"]
+	path = extern/shaderc
+	url = https://github.com/google/shaderc.git

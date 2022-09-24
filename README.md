@@ -5,11 +5,13 @@
  Built with CMake 3.24, C++23, Visual C++ compiler, and Visual Studio 2022 generator.
  
 ## - Dependencies -
+ - python3 (for initializing shaderc)
  - GLFW
  - GLM
  - spdlog - Custom fork
  - BS Thread Pool
- - Vulkan: ***"Batteries not included!"*** Separate install required.
+ - Shaderc - Run python3 ./extern/shaderc/utils/git-sync-deps
+ - Vulkan - ***"Batteries not included!"*** Separate install required.
 
 ## - Credits -
  - https://github.com/jherico/Vulkan - Sascha Willems' examples translated to Vulkan's C++ API

@@ -36,6 +36,14 @@
     {
       "displayName": "Release: x64-windows",
       "name": "x64_windows_release",
+      "inherits": "windows-base",
+      "cacheVariables": {
+        "FOXY_DEBUG_INFO": true
+      }
+    },
+    {
+      "displayName": "Release (Debug Info): x64-windows",
+      "name": "x64_windows_release_debug",
       "inherits": "windows-base"
     },
     {
@@ -82,6 +90,12 @@
       "name": "x64_windows_release_build",
       "configurePreset": "x64_windows_release",
       "configuration": "Release"
+    },
+    {
+      "displayName": "x64_windows_release_debug",
+      "name": "x64_windows_release_debug_build",
+      "configurePreset": "x64_windows_release_debug",
+      "configuration": "RelWithDebInfo"
     },
     {
       "displayName": "linux_debug",

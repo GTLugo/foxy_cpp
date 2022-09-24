@@ -9,7 +9,9 @@ message(STATUS "Configuring ${PROJECT_NAME} sub-project: ${TARGET_NAME}")
 set(SOURCE_FILES
     "koyote/core/std.cpp"
     "koyote/core/log.cpp"
-)
+    "koyote/core/event.cpp"
+    "koyote/core/ring_buffer.cpp"
+    "koyote/core/time.cpp")
 add_library(${TARGET_NAME} STATIC ${SOURCE_FILES})
 target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
 target_compile_options(${TARGET_NAME} PRIVATE "/bigobj" "/std:c++latest" "/experimental:module")

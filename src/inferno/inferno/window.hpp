@@ -43,7 +43,7 @@ namespace inferno {
     [[nodiscard]] auto vsync() const -> bool;
     [[nodiscard]] auto fullscreen() const -> bool;
     [[nodiscard]] auto hidden() const -> bool;
-    [[nodiscard]] auto running() const -> bool;
+    [[nodiscard]] auto should_stop() const -> const bool&;
 
   private:
     class Impl;

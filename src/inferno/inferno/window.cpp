@@ -1,6 +1,5 @@
 #include "window.hpp"
 
-#include "event/event.hpp"
 #include "glfw/context.hpp"
 
 namespace inferno {
@@ -54,7 +53,7 @@ namespace inferno {
 
     void close() {
       koyote::Log::trace("Window close requested.");
-      glfwSetWindowShouldClose(glfw_window_.get(), true);
+      state_.should_stop = true;
     }
 
     void set_icon(koyote::i8* image, koyote::i32 width, koyote::i32 height) {
@@ -99,7 +98,7 @@ namespace inferno {
     [[nodiscard]] auto vsync() const -> bool { return state_.vsync; }
     [[nodiscard]] auto fullscreen() const -> bool { return state_.vsync; }
     [[nodiscard]] auto hidden() const -> bool { return state_.hidden; }
-    [[nodiscard]] auto running() const -> bool { return !static_cast<bool>(glfwWindowShouldClose(glfw_window_.get())); }
+    [[nodiscard]] auto should_close() const -> const bool& { return state_.should_stop; }
   private:
     struct State {
       std::string title;
@@ -110,16 +109,16 @@ namespace inferno {
       bool borderless;
       bool hidden;
       koyote::ivec2 cursor_pos{}, cursor_pos_prev{}, cursor_delta{};
-      bool running{true};
+      bool should_stop{ false };
 
       // Window events
-      Event<> close_event;
+      koyote::Event<> close_event;
       // Input events
-      Event<> key_event;
-      Event<> modifier_event;
-      Event<> mouse_event;
-      Event<> cursor_event;
-      Event<> scroll_event;
+      koyote::Event<> key_event;
+      koyote::Event<> modifier_event;
+      koyote::Event<> mouse_event;
+      koyote::Event<> cursor_event;
+      koyote::Event<> scroll_event;
 
 //      explicit State(const WindowCreateInfo& properties)
 //        : title{ properties.title },
@@ -226,7 +225,7 @@ namespace inferno {
     return pImpl_->hidden();
   }
 
-  auto Window::running() const -> bool {
-    return pImpl_->running();
+  auto Window::should_stop() const -> const bool& {
+    return pImpl_->should_close();
   }
 }

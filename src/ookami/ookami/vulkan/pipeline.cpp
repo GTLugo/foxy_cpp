@@ -6,6 +6,7 @@
 
 #include "context.hpp"
 #include "shader.hpp"
+#include "glsl_shader.hpp"
 
 namespace ookami {
   class Pipeline::Impl {
@@ -15,11 +16,11 @@ namespace ookami {
       koyote::Log::trace("Creating Vulkan pipeline...");
       
       koyote::Log::info("Please wait while shaders load...");
-      auto sw{ koyote::Stopwatch() };
+      const auto sw{ koyote::Stopwatch() };
       simple_shader_ = std::make_shared<Shader>(
         context_->logical_device(), 
         "res/foxy/shaders/simple", 
-        Shader::BitFlags{BIT(Shader::Vertex) + BIT(Shader::Fragment)},
+        Shader::bit_flags{BIT(Shader::Vertex) + BIT(Shader::Fragment)},
         true
       );
       koyote::Log::info("Shader loading complete! ({} s)", sw.get_time_elapsed<koyote::secs>());

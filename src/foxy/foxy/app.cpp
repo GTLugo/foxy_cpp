@@ -1,7 +1,6 @@
 #include "app.hpp"
 
 #include "inferno/window.hpp"
-#include "inferno/event/event.hpp"
 #include "ookami/render_engine.hpp"
 #include "inu/job_system.hpp"
 #include "neko/ecs.hpp"
@@ -16,7 +15,7 @@ namespace foxy {
         koyote::Log::fatal("Attempted second instantiation of foxy::App");
       }
       instantiated_ = true;
-      koyote::Time::i__engine_internal_init(128, 1024U);
+      koyote::Time::init(128, 1024U);
 
       window_ = std::make_unique<inferno::Window>(inferno::Window::CreateInfo{
         create_info.title,
@@ -51,25 +50,25 @@ namespace foxy {
 
     }
     
-    void add_function_to_stage(Stage stage, StageCallback&& callback) {
+    void add_function_to_stage(Stage stage, stage_callback&& callback) {
       switch (stage) {
         case Stage::Awake:
-          awake_event_.add_callback(std::forward<StageCallback>(callback));
+          awake_event_.add_callback(std::forward<stage_callback>(callback));
           break;
         case Stage::Start:
-          start_event_.add_callback(std::forward<StageCallback>(callback));
-          break;
-        case Stage::EarlyUpdate:
-          early_update_event_.add_callback(std::forward<StageCallback>(callback));
+          start_event_.add_callback(std::forward<stage_callback>(callback));
           break;
         case Stage::Tick:
-          tick_event_.add_callback(std::forward<StageCallback>(callback));
+          tick_event_.add_callback(std::forward<stage_callback>(callback));
+          break;
+        case Stage::EarlyUpdate:
+          early_update_event_.add_callback(std::forward<stage_callback>(callback));
           break;
         case Stage::LateUpdate:
-          late_update_event_.add_callback(std::forward<StageCallback>(callback));
+          late_update_event_.add_callback(std::forward<stage_callback>(callback));
           break;
         case Stage::Stop:
-          stop_event_.add_callback(std::forward<StageCallback>(callback));
+          stop_event_.add_callback(std::forward<stage_callback>(callback));
           break;
       }
     }
@@ -99,21 +98,21 @@ namespace foxy {
     BS::thread_pool thread_pool_{ std::thread::hardware_concurrency() - 1 };
 
     // Main Thread events
-    inferno::Event<> main_awake_event_;
-    inferno::Event<> main_start_event_;
-    inferno::Event<> main_poll_event_;
-    inferno::Event<> main_update_event_;
-    inferno::Event<> main_stop_event_;
+    koyote::Event<> main_awake_event_;
+    koyote::Event<> main_start_event_;
+    koyote::Event<> main_poll_event_;
+    koyote::Event<> main_update_event_;
+    koyote::Event<> main_stop_event_;
     // Game Thread events
-    inferno::Event<App&> awake_event_;
-    inferno::Event<App&> start_event_;
-    inferno::Event<App&> early_update_event_;
-    inferno::Event<App&> tick_event_;
-    inferno::Event<App&> late_update_event_;
-    inferno::Event<App&> stop_event_;
+    koyote::Event<App&> awake_event_;
+    koyote::Event<App&> start_event_;
+    koyote::Event<App&> early_update_event_;
+    koyote::Event<App&> tick_event_;
+    koyote::Event<App&> late_update_event_;
+    koyote::Event<App&> stop_event_;
 
     void main_loop() {
-      while (window_->running()) {
+      while (!window_->should_stop()) {
         main_poll_event_();
       }
     }
@@ -125,15 +124,15 @@ namespace foxy {
       try {
         awake_event_(app_);
         start_event_(app_);
-        while (window_->running()) {
-          early_update_event_(app_);
-          while (koyote::Time::i__engine_internal_should_do_tick()) {
+        koyote::Time::internal_game_loop(
+          window_->should_stop(),
+          [this]() { // Tick
             tick_event_(app_);
-            koyote::Time::i__engine_internal_tick();
-          }
-          late_update_event_(app_);
-          koyote::Time::i__engine_internal_update();
-        }
+          }, 
+          [this]() { // Update
+            early_update_event_(app_);
+            late_update_event_(app_);
+          });
         stop_event_(app_);
       } catch (const std::exception& e) {
         koyote::Log::error(e.what());
@@ -165,7 +164,7 @@ namespace foxy {
     }
 
     void stop(App& app) {
-      //FOXY_DEBUG << "Stop";
+      // koyote::Log::info("Stop");
     }
 
     void set_callbacks() {
@@ -187,7 +186,8 @@ namespace foxy {
 
         perf_stats << "frametime: " 
           << std::fixed << std::setfill(' ') << std::setw(12) << std::setprecision(9) << frame_time << "s | % of target frametime ceiling: " 
-          << std::defaultfloat << std::setfill(' ') << std::setw(9) << std::setprecision(4) << (frame_time / frame_time_goal_) * 100. << '%';
+          << std::defaultfloat << std::setfill(' ') << std::setw(9) << std::setprecision(4) << (frame_time / frame_time_goal_) * 100. << '%'
+          /*<< " | avg fps: " << 1. / koyote::Time::avg_delta_secs()*/;
 
         //FOXY_DEBUG << "PERF STATS | " << perf_stats.str();
         window_->set_subtitle(perf_stats.str());
@@ -221,8 +221,8 @@ namespace foxy {
     return *this;
   }
 
-  auto App::add_function_to_stage(Stage stage, StageCallback&& callback) -> App& {
-    pImpl_->add_function_to_stage(stage, std::forward<StageCallback>(callback));
+  auto App::add_function_to_stage(Stage stage, stage_callback&& callback) -> App& {
+    pImpl_->add_function_to_stage(stage, std::forward<stage_callback>(callback));
     return *this;
   }
 
