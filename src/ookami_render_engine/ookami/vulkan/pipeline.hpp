@@ -4,20 +4,23 @@
 
 #pragma once
 
-namespace ookami {
-  class Context;
+namespace fx {
   class Shader;
   class Swapchain;
 }
 
-namespace ookami {
+namespace fx::ookami {
+  class Context;
+}
+
+namespace fx {
   class Pipeline {
   public:
-    explicit Pipeline(koyote::shared<Context> context, koyote::shared<Swapchain> swap_chain, koyote::shared<Shader> shader);
+    explicit Pipeline(shared<ookami::Context> context, shared<Swapchain> swap_chain, shared<Shader> shader);
     ~Pipeline();
 
   private:
     class Impl;
-    koyote::unique<Impl> p_impl_;
+    fx::unique<Impl> p_impl_;
   };
 }  // foxy // vulkan

@@ -5,7 +5,7 @@
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/pattern_formatter.h>
 
-namespace koyote {
+namespace fx {
   class Log::Impl {
   public:
     class ThreadNameFlag final: public spdlog::custom_flag_formatter {
@@ -42,7 +42,7 @@ namespace koyote {
 
       logger() = spdlog::logger{name, {console_sink, file_sink}};
       logger().set_level(spdlog::level::info);
-      koyote::Log::set_thread_name("main");
+      fx::Log::set_thread_name("main");
 
       Log::info(R"(--------------=============[])");
       Log::info(R"(  ______ ______   ___     __ )");
@@ -99,8 +99,8 @@ namespace koyote {
       names_.insert_or_assign(std::this_thread::get_id(), name);
     }
 
-    static void enable_backtrace(koyote::u32 count) {
-      logger().enable_backtrace(32);
+    static void enable_backtrace(u32 count) {
+      logger().enable_backtrace(count);
     }
 
     static void dump_backtrace() {
@@ -127,7 +127,7 @@ namespace koyote {
     }
   }; // Log
 
-  koyote::shared<Log::Impl> Log::p_impl_ = std::make_shared<Impl>("koyote", "./tmp/logs/app.log");
+  fx::shared<Log::Impl> Log::p_impl_ = std::make_shared<Impl>("fx", "./tmp/logs/app.log");
 
   Log::Log() = default;
 
@@ -165,11 +165,11 @@ namespace koyote {
     Impl::set_thread_name(name);
   }
 
-  void Log::enable_backtrace(const koyote::u32 count) {
+  void Log::enable_backtrace(const fx::u32 count) {
     Impl::enable_backtrace(count);
   }
 
   void Log::dump_backtrace() {
     Impl::dump_backtrace();
   }
-} // koyote
+} // fx

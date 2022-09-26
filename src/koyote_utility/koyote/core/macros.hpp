@@ -26,7 +26,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 #if defined(_WIN32) and not defined(FOXY_DEBUG_MODE)
 #define REDIRECT_WINMAIN_TO_KOYOTE_MAIN \
-auto main(koyote::i32, koyote::i8**) -> koyote::i32;\
+auto main(fx::i32, fx::i8**) -> fx::i32;\
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {\
   return main(__argc, reinterpret_cast<std::int8_t**>(__argv));\
 }

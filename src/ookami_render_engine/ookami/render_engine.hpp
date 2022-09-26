@@ -6,10 +6,10 @@
 
 class GLFWwindow;
 
-namespace ookami {
+namespace fx {
   class RenderEngine {
   public:
-    explicit RenderEngine(koyote::shared<GLFWwindow> window);
+    explicit RenderEngine(fx::shared<GLFWwindow> window);
     ~RenderEngine();
 
   private:

@@ -2,12 +2,9 @@
 
 class GLFWwindow;
 
-namespace ookami {
+namespace fx {
   class SwapchainSupportInfo;
   class QueueFamilyIndices;
-
-  auto required_instance_extensions_strings() -> std::vector<std::string>;
-  auto required_instance_extensions() -> std::vector<const char*>;
 }
 
 namespace vk::raii {
@@ -21,7 +18,10 @@ namespace vk::raii {
 
 
 
-namespace ookami {
+namespace fx::ookami {
+  auto required_instance_extensions_strings() -> std::vector<std::string>;
+  auto required_instance_extensions() -> std::vector<const char*>;
+
   class Context {
     using VulkanContext = vk::raii::Context;
     using Instance = vk::raii::Instance;
@@ -30,7 +30,7 @@ namespace ookami {
     using Surface = vk::raii::SurfaceKHR;
 
   public:
-    explicit Context(const koyote::shared<GLFWwindow>& window, bool enable_validation = true);
+    explicit Context(const fx::shared<GLFWwindow>& window, bool enable_validation = true);
     ~Context();
 
     auto operator*() -> VulkanContext&;
@@ -45,6 +45,6 @@ namespace ookami {
 
   private:
     class Impl;
-    koyote::unique<Impl> p_impl_;
+    unique<Impl> p_impl_;
   };
 }

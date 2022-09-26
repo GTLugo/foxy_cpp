@@ -6,15 +6,15 @@
 
 #include "glfw.hpp"
 
-namespace inferno {
+namespace fx::inferno {
   struct WindowCreateInfo {
     const std::string title{ "FOXY FRAMEWORK" };
     const int width{ 1600 };
     const int height{ 900 };
   };
 
-  [[nodiscard]] inline auto create_window(const WindowCreateInfo& create_info) -> koyote::unique<GLFWwindow, void(*)(GLFWwindow*)> {
-    return koyote::unique<GLFWwindow, void(*)(GLFWwindow*)>{
+  [[nodiscard]] inline auto create_window(const WindowCreateInfo& create_info) -> fx::unique<GLFWwindow, void(*)(GLFWwindow*)> {
+    return fx::unique<GLFWwindow, void(*)(GLFWwindow*)>{
       glfwCreateWindow(
         create_info.width,
         create_info.height,

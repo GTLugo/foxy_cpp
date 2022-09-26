@@ -1,6 +1,6 @@
 #pragma once
 
-namespace koyote {
+namespace fx {
   template<typename T, std::size_t S>
   class ring_buffer {
   public:
@@ -35,4 +35,4 @@ namespace koyote {
     std::array<T, S>::iterator tail_;
     std::array<T, S> buffer_{};
   };
-} // koyote
+} // fx

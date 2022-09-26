@@ -4,7 +4,7 @@
 
 #include "job_system.hpp"
 
-namespace foxy {
+namespace fx {
   // class JobSystem::Impl {
   // public:
   //   Impl() {

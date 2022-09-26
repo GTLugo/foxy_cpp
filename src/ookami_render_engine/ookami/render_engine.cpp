@@ -6,26 +6,26 @@
 #include "ookami/vulkan/shader.hpp"
 #include <GLFW/glfw3.h>
 
-namespace ookami {
+namespace fx {
   class RenderEngine::Impl {
   public:
-    explicit Impl(koyote::shared<GLFWwindow> window) {
+    explicit Impl(fx::shared<GLFWwindow> window) {
       if (instantiated_) {
-        koyote::Log::fatal("Attempted second instantiation of ookami::RenderEngine");
+        fx::Log::fatal("Attempted second instantiation of fx::RenderEngine");
       }
       instantiated_ = true;
-      koyote::Log::trace("Starting Ookami Render Engine...");
+      fx::Log::trace("Starting Ookami Render Engine...");
 
       #ifdef FOXY_DEBUG_MODE
-      context_ = std::make_shared<Context>(window);
+      context_ = std::make_shared<ookami::Context>(window);
       #else
-      context_ = std::make_shared<Context>(window, false);
+      context_ = std::make_shared<ookami::Context>(window, false);
       #endif
 
       swap_chain_ = std::make_shared<Swapchain>(window, context_);
 
-      koyote::Log::info("Please wait while shaders load...");
-      const auto sw{ koyote::Stopwatch() };
+      fx::Log::info("Please wait while shaders load...");
+      const auto sw{ fx::Stopwatch() };
 
       auto simple_shader = std::make_shared<Shader>(
         context_->logical_device(),
@@ -45,29 +45,29 @@ namespace ookami {
         }
       );
 
-      koyote::Log::info("Shader loading complete! ({} s)", sw.get_time_elapsed<koyote::secs>());
+      fx::Log::info("Shader loading complete! ({} s)", sw.get_time_elapsed<fx::secs>());
       pipeline_ = std::make_unique<Pipeline>(context_, swap_chain_, fixed_shader);
 
-      koyote::Log::trace("Ookami Render Engine ready.");
+      fx::Log::trace("Ookami Render Engine ready.");
     }
 
     ~Impl() {
       instantiated_ = false;
-      koyote::Log::trace("Stopping Ookami Engine...");
+      fx::Log::trace("Stopping Ookami Engine...");
     }
   private:
     static inline bool instantiated_{ false };
 
-    koyote::shared<Context> context_;
-    koyote::shared<Swapchain> swap_chain_;
-    koyote::unique<Pipeline> pipeline_;
+    fx::shared<ookami::Context> context_;
+    fx::shared<Swapchain> swap_chain_;
+    fx::unique<Pipeline> pipeline_;
   };
 
   //
   //  Renderer
   //
 
-  RenderEngine::RenderEngine(koyote::shared<GLFWwindow> window)
+  RenderEngine::RenderEngine(fx::shared<GLFWwindow> window)
     : pImpl_{std::make_unique<Impl>(window)} {}
 
   RenderEngine::~RenderEngine() = default;

@@ -2,7 +2,7 @@
 
 #include "koyote/core/std.hpp"
 
-namespace koyote {
+namespace fx {
   class Log {
   public:
     enum Level {
@@ -97,11 +97,20 @@ namespace koyote {
 
     static void set_level_filter(Level level);
     static void set_thread_name(const std::string& name);
-    static void enable_backtrace(koyote::u32 count);
+    static void enable_backtrace(fx::u32 count);
     static void dump_backtrace();
+
+    static void debug_logging_setup() {
+    #if defined(FOXY_DEBUG_MODE)
+      fx::Log::enable_backtrace(32);
+    #endif
+    #if defined(FOXY_DEBUG_MODE) and not defined(FOXY_RELEASE_MODE)
+      fx::Log::set_level_filter(fx::Log::Trace);
+    #endif
+    }
   private:
     class Impl;
-    static koyote::shared<Impl> p_impl_;
+    static fx::shared<Impl> p_impl_;
 
     Log();
     ~Log();

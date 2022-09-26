@@ -4,15 +4,15 @@
 
 #pragma once
 
-namespace foxy {
+namespace fx {
   class App {
   public:
     struct CreateInfo {
       int argc{ 0 };
       char** argv{ nullptr };
       std::string title{ "FOXY FRAMEWORK" };
-      koyote::i32 width{ 800 };
-      koyote::i32 height{ 450 };
+      fx::i32 width{ 800 };
+      fx::i32 height{ 450 };
       bool vsync{ true };
       bool fullscreen{ false };
       bool borderless{ false };
@@ -34,13 +34,13 @@ namespace foxy {
 
     void run();
 
-    auto set_user_data_ptr(koyote::shared<void> data) -> App&;
+    auto set_user_data_ptr(fx::shared<void> data) -> App&;
     auto add_stage_before() -> App&;
     auto add_function_to_stage(Stage stage, StageCallback&& callback) -> App&;
 
-    [[nodiscard]] auto user_data_ptr() -> koyote::shared<void>;
+    [[nodiscard]] auto user_data_ptr() -> fx::shared<void>;
   private:
     class Impl;
-    koyote::unique<Impl> p_impl_;
+    unique<Impl> p_impl_;
   };
 }

@@ -8,7 +8,7 @@
 #include "koyote/core/std.hpp"
 #include "koyote/core/log.hpp"
 
-namespace koyote {
+namespace fx {
   // duration types
   using nanosecs = std::chrono::duration<double, std::nano>;
   using microsecs = std::chrono::duration<double, std::micro>;
@@ -73,7 +73,7 @@ namespace koyote {
       // from reinitializing Time, which would cause the engine, the app, life,
       // the universe, and all catgirls to die.
       if (!virgin_) return;
-      koyote::Log::trace("Initializing Time...");
+      fx::Log::trace("Initializing Time...");
 
       tick_rate_ = tick_rate;
       bail_count_ = bail_count;
@@ -133,7 +133,7 @@ namespace koyote {
 
     [[nodiscard]] static bool should_do_tick() {
       if (step_count_ >= bail_count_) {
-        koyote::Log::warn("Struggling to catch up with physics rate.");
+        fx::Log::warn("Struggling to catch up with physics rate.");
       }
 
       return lag_.count() >= fixed_time_step_.count() && step_count_ < bail_count_;
@@ -180,4 +180,4 @@ namespace koyote {
       ++step_count_;
     }
   };
-} // koyote
+} // fx

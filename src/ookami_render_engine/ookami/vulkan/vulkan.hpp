@@ -7,7 +7,7 @@
 #define VULKAN_HPP_NO_CONSTRUCTORS
 #include <vulkan/vulkan_raii.hpp>
 
-namespace ookami {
+namespace fx {
   struct ExtensionData {
     std::vector<const char*> window_extensions{};
     std::vector<VkExtensionProperties> instance_extensions{};
@@ -16,8 +16,8 @@ namespace ookami {
   };
 
   struct QueueFamilyIndices {
-    std::optional<koyote::u32> graphics;
-    std::optional<koyote::u32> present;
+    std::optional<u32> graphics;
+    std::optional<u32> present;
 
     [[nodiscard]] auto complete() const -> bool {
       return graphics.has_value() && present.has_value();

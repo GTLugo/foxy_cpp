@@ -7,7 +7,7 @@
 
 #pragma once
 
-namespace ookami {
+namespace fx {
   // Version information for Vulkan is stored in a single 32 bit integer
   // with individual bits representing the major, minor and patch versions.
   // The maximum possible major and minor version is 512 (look out nVidia)
@@ -17,24 +17,24 @@ namespace ookami {
         : vulkan_major(0),
           vulkan_minor(0),
           vulkan_patch(0) {}
-    Version(koyote::u32 version)
+    Version(fx::u32 version)
         : Version() {
       *this = version;
     }
 
-    Version& operator=(koyote::u32 version) {
-      memcpy(this, &version, sizeof(koyote::u32));
+    Version& operator=(fx::u32 version) {
+      memcpy(this, &version, sizeof(fx::u32));
       return *this;
     }
 
-    operator koyote::u32() const {
-      koyote::u32 result;
-      memcpy(&result, this, sizeof(koyote::u32));
+    operator fx::u32() const {
+      fx::u32 result;
+      memcpy(&result, this, sizeof(fx::u32));
       return result;
     }
 
     bool operator>=(const Version& other) const {
-      return (operator koyote::u32()) >= (other.operator koyote::u32());
+      return (operator fx::u32()) >= (other.operator fx::u32());
     }
 
     [[nodiscard]] std::string to_string() const {
@@ -43,8 +43,8 @@ namespace ookami {
       return buffer.str();
     }
 
-    const koyote::u32 vulkan_patch: 12;
-    const koyote::u32 vulkan_minor: 10;
-    const koyote::u32 vulkan_major: 10;
+    const fx::u32 vulkan_patch: 12;
+    const fx::u32 vulkan_minor: 10;
+    const fx::u32 vulkan_major: 10;
   };
 }

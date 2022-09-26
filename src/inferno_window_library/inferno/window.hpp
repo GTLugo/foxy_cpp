@@ -6,7 +6,7 @@
 
 class GLFWwindow;
 
-namespace inferno {
+namespace fx {
   template<class... Args>
   class Event;
 
@@ -24,22 +24,22 @@ namespace inferno {
     explicit Window(const CreateInfo&& create_info);
     ~Window();
 
-    auto operator*() -> koyote::shared<GLFWwindow>&;
+    auto operator*() -> fx::shared<GLFWwindow>&;
 
     void poll_events();
     void close();
 
-    void set_icon(koyote::i8* image, koyote::i32 width, koyote::i32 height);
+    void set_icon(fx::i8* image, fx::i32 width, fx::i32 height);
     void set_title(const std::string& title);
     void set_subtitle(const std::string& title);
-    void set_pos(koyote::ivec2 position);
+    void set_pos(fx::ivec2 position);
     void set_vsync(bool enabled);
     void set_fullscreen(bool enabled);
     void set_hidden(bool hidden);
 
-    [[nodiscard]] auto native() -> koyote::shared<GLFWwindow>&;
+    [[nodiscard]] auto native() -> fx::shared<GLFWwindow>&;
     [[nodiscard]] auto title() const -> std::string;
-    [[nodiscard]] auto bounds() const -> koyote::rect;
+    [[nodiscard]] auto bounds() const -> fx::rect;
     [[nodiscard]] auto vsync() const -> bool;
     [[nodiscard]] auto fullscreen() const -> bool;
     [[nodiscard]] auto hidden() const -> bool;
@@ -47,6 +47,6 @@ namespace inferno {
 
   private:
     class Impl;
-    koyote::unique<Impl> pImpl_;
+    unique<Impl> p_impl_;
   };
 }

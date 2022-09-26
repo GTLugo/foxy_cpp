@@ -1,5 +1,5 @@
 #include "ring_buffer.hpp"
 
-namespace koyote {
+namespace fx {
 
-} // koyote
+} // fx

@@ -2,7 +2,7 @@
 
 #include "koyote/core/log.hpp"
 
-namespace koyote {
+namespace fx {
   [[nodiscard]] auto read_file(
     const std::filesystem::path& file_path,
     const std::ios::fmtflags flags

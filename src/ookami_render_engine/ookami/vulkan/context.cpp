@@ -4,7 +4,7 @@
 #include "version.hpp"
 #include <GLFW/glfw3.h>
 
-namespace ookami {
+namespace fx::ookami {
   static auto vulkan_error_callback(const vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
                                     vk::DebugUtilsMessageTypeFlagBitsEXT,
                                     const vk::DebugUtilsMessengerCallbackDataEXT* callback_data,
@@ -13,10 +13,10 @@ namespace ookami {
     msg << callback_data->pMessage << " | code " << callback_data->messageIdNumber << ", " << callback_data->pMessageIdName;
     switch (severity) {
       case vk::DebugUtilsMessageSeverityFlagBitsEXT::eError:
-        koyote::Log::error(msg.str());
+        fx::Log::error(msg.str());
         break;
       case vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning:
-        koyote::Log::trace(msg.str());
+        fx::Log::trace(msg.str());
         break;
       case vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose:
       case vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo:
@@ -29,16 +29,16 @@ namespace ookami {
 
   auto required_instance_extensions_strings() -> std::vector<std::string> {
     std::vector<std::string> result;
-    auto count = koyote::u32{ 0 };
+    auto count = fx::u32{ 0 };
     const char** extensions = glfwGetRequiredInstanceExtensions(&count);
-    for (auto i = koyote::u32{ 0 }; i < count; ++i) {
+    for (auto i = fx::u32{ 0 }; i < count; ++i) {
       result.emplace_back(extensions[i]);
     }
     return result;
   }
 
   auto required_instance_extensions() -> std::vector<const char*> {
-    auto count = koyote::u32{ 0 };
+    auto count = fx::u32{ 0 };
     const char** extensions = glfwGetRequiredInstanceExtensions(&count);
     std::vector<const char*> result{extensions, extensions + count};
     return result;
@@ -46,7 +46,7 @@ namespace ookami {
 
   class Context::Impl {
   public:
-    explicit Impl(koyote::shared<GLFWwindow> window, bool enable_validation = true)
+    explicit Impl(fx::shared<GLFWwindow> window, bool enable_validation = true)
       : enable_validation_{enable_validation},
         window_{window},
         context_{vk::raii::Context{}},
@@ -63,14 +63,14 @@ namespace ookami {
         logical_device_{create_logical_device()},
         graphics_queue_{logical_device_.getQueue(queue_family_indices_.graphics.value(), 0)},
         present_queue_{logical_device_.getQueue(queue_family_indices_.present.value(), 0)} {
-      koyote::Log::trace("Vulkan context ready.");
+      fx::Log::trace("Vulkan context ready.");
     }
 
     ~Impl() {
-      koyote::Log::trace("Destroying Vulkan context...");
+      fx::Log::trace("Destroying Vulkan context...");
     }
 
-    [[nodiscard]] auto window() -> koyote::shared<GLFWwindow> {
+    [[nodiscard]] auto window() -> fx::shared<GLFWwindow> {
       return window_;
     }
 
@@ -109,7 +109,7 @@ namespace ookami {
 
     bool enable_validation_;
 
-    koyote::shared<GLFWwindow> window_;
+    fx::shared<GLFWwindow> window_;
 
     vk::raii::Context context_;
     ExtensionData extension_data_;
@@ -127,7 +127,7 @@ namespace ookami {
 
 
     [[nodiscard]] static auto check_validation_layer_support() -> bool {
-      auto layer_count = koyote::u32{ 0 };
+      auto layer_count = fx::u32{ 0 };
       vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
       auto layer_properties = std::vector<VkLayerProperties>{ layer_count };
       vkEnumerateInstanceLayerProperties(&layer_count, layer_properties.data());
@@ -137,7 +137,7 @@ namespace ookami {
       for (const auto& layer: layer_properties) {
         lyrs << " | " << layer.layerName;
       }
-      koyote::Log::debug("Available Vulkan Layers {}", lyrs.str());
+      fx::Log::debug("Available Vulkan Layers {}", lyrs.str());
 
       for (const auto& layer_name: validation_layer_names_) {
         auto layer_found{ false };
@@ -170,7 +170,7 @@ namespace ookami {
       try {
         return vk::raii::DebugUtilsMessengerEXT{ instance_, callback_create_info };
       } catch (const std::exception& e) {
-        koyote::Log::fatal("Failed to set up debug messenger: {}", e.what());
+        fx::Log::fatal("Failed to set up debug messenger: {}", e.what());
         return nullptr;
       }
     }
@@ -185,7 +185,7 @@ namespace ookami {
         }
       }
       // Vulkan
-      auto extension_count = koyote::u32{ 0 };
+      auto extension_count = fx::u32{ 0 };
       vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr);
       extension_data_.instance_extensions = std::vector<VkExtensionProperties>{ extension_count };
       vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, extension_data_.instance_extensions.data());
@@ -204,7 +204,7 @@ namespace ookami {
       for (const auto& extension: required_extensions) {
         exts << " | " << extension;
       }
-      koyote::Log::debug("Enabled Vulkan Extensions {}", exts.str());
+      fx::Log::debug("Enabled Vulkan Extensions {}", exts.str());
 
       return {required_extensions.begin(), required_extensions.end()};
     }
@@ -221,12 +221,12 @@ namespace ookami {
       };
 
       if (enable_validation_ && !check_validation_layer_support()) {
-        koyote::Log::error("Validation layers requested, but none are available. Disabling validation.");
+        fx::Log::error("Validation layers requested, but none are available. Disabling validation.");
         enable_validation_ = false;
       }
       extension_data_.enabled_extensions = get_enabled_extensions();
       if (!extension_data_.enabled_extensions.empty()) {
-        instance_create_info.enabledExtensionCount = static_cast<koyote::u32>(extension_data_.enabled_extensions.size());
+        instance_create_info.enabledExtensionCount = static_cast<fx::u32>(extension_data_.enabled_extensions.size());
         instance_create_info.ppEnabledExtensionNames = extension_data_.enabled_extensions.data();
       }
 
@@ -236,7 +236,7 @@ namespace ookami {
         .pfnUserCallback = reinterpret_cast<PFN_vkDebugUtilsMessengerCallbackEXT>(vulkan_error_callback),  // NOLINT(clang-diagnostic-cast-function-type)
       };
       if (enable_validation_) {
-        instance_create_info.enabledLayerCount = static_cast<koyote::u32>(validation_layer_names_.size());
+        instance_create_info.enabledLayerCount = static_cast<fx::u32>(validation_layer_names_.size());
         instance_create_info.ppEnabledLayerNames = validation_layer_names_.data();
         instance_create_info.pNext = reinterpret_cast<VkDebugUtilsMessengerCreateInfoEXT*>(&debug_create_info);
       } else {
@@ -246,7 +246,7 @@ namespace ookami {
       try {
         return { context_, instance_create_info };
       } catch (const std::exception& e) {
-        koyote::Log::fatal(e.what());
+        fx::Log::fatal(e.what());
         return nullptr;
       }
     }
@@ -255,7 +255,7 @@ namespace ookami {
       auto queue_family_indices = QueueFamilyIndices{};
       const auto queue_family_properties = physical_device.getQueueFamilyProperties();
 
-      koyote::u32 i{ 0 };
+      fx::u32 i{ 0 };
       for (const auto& queue_family: queue_family_properties) {
         if (queue_family.queueFlags & vk::QueueFlagBits::eGraphics) {
           queue_family_indices.graphics = i;
@@ -322,7 +322,7 @@ namespace ookami {
       // TODO: Rank suitability and pick highest scoring device
       const vk::raii::PhysicalDevices physical_devices{ instance_ };
       if (physical_devices.empty()) {
-        koyote::Log::fatal("No physical Vulkan devices found.");
+        fx::Log::fatal("No physical Vulkan devices found.");
       }
       vk::raii::PhysicalDevice physical_device{ nullptr };
       for (const auto& device: physical_devices) {
@@ -332,7 +332,7 @@ namespace ookami {
         }
       }
       if (physical_devices.empty()) {
-        koyote::Log::fatal("No *viable* physical Vulkan devices found.");
+        fx::Log::fatal("No *viable* physical Vulkan devices found.");
       }
 
       vk::PhysicalDeviceProperties device_properties{ physical_device.getProperties() };
@@ -340,7 +340,7 @@ namespace ookami {
       const Version api_version{ device_properties.apiVersion };
       const Version driver_version{ device_properties.driverVersion };
 
-      koyote::Log::debug("Vulkan Device: {} | Device driver version: {} | Vulkan API version: {}", 
+      fx::Log::debug("Vulkan Device: {} | Device driver version: {} | Vulkan API version: {}", 
         device_name, driver_version.to_string(), api_version.to_string());
 
       return physical_device;
@@ -362,16 +362,16 @@ namespace ookami {
       }
 
       const vk::DeviceCreateInfo device_create_info{
-        .queueCreateInfoCount = static_cast<koyote::u32>(queue_create_infos.size()),
+        .queueCreateInfoCount = static_cast<fx::u32>(queue_create_infos.size()),
         .pQueueCreateInfos = queue_create_infos.data(),
-        .enabledExtensionCount = static_cast<koyote::u32>(extension_data_.device_extensions.size()),
+        .enabledExtensionCount = static_cast<fx::u32>(extension_data_.device_extensions.size()),
         .ppEnabledExtensionNames = extension_data_.device_extensions.data(),
       };
 
       return { physical_device_.createDevice(device_create_info, nullptr) };
     }
 
-    [[nodiscard]] auto create_surface(const koyote::shared<GLFWwindow>& window) const -> Surface {
+    [[nodiscard]] auto create_surface(const fx::shared<GLFWwindow>& window) const -> Surface {
       VkSurfaceKHR raw_surface;
 
       const auto result = static_cast<vk::Result>(
@@ -386,7 +386,7 @@ namespace ookami {
   //  Context
   //
 
-  Context::Context(const koyote::shared<GLFWwindow>& window, bool enable_validation)
+  Context::Context(const fx::shared<GLFWwindow>& window, bool enable_validation)
     : p_impl_{std::make_unique<Impl>(window, enable_validation)} {}
 
   Context::~Context() = default;

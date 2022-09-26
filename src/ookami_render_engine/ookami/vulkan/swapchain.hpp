@@ -7,20 +7,20 @@ namespace vk {
   class Extent2D;
 }
 
-namespace ookami {
+namespace fx::ookami {
   class Context;
 }
 
-namespace ookami {
+namespace fx {
   class Swapchain {
   public:
-    explicit Swapchain(const koyote::shared<GLFWwindow>& window, const koyote::shared<Context>& context);
+    explicit Swapchain(const fx::shared<GLFWwindow>& window, const fx::shared<ookami::Context>& context);
     ~Swapchain();
 
-    [[nodiscard]] auto format() -> vk::Format;
-    [[nodiscard]] auto extent() -> vk::Extent2D;
+    [[nodiscard]] auto format() const -> vk::Format;
+    [[nodiscard]] auto extent() const -> vk::Extent2D;
   private:
     class Impl;
-    koyote::unique<Impl> p_impl_;
+    fx::unique<Impl> p_impl_;
   };
 }

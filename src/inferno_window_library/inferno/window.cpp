@@ -2,7 +2,7 @@
 
 #include "glfw/context.hpp"
 
-namespace inferno {
+namespace fx {
   class Window::Impl {
   public:
     explicit Impl(const CreateInfo& create_info)
@@ -17,18 +17,18 @@ namespace inferno {
           .hidden = true,
         }} {
       if (instantiated_) {
-        koyote::Log::fatal("Attempted second instantiation of foxy::Window");
+        fx::Log::fatal("Attempted second instantiation of foxy::Window");
       }
       instantiated_ = true;
 
-      koyote::Log::trace("Creating Window...");
+      fx::Log::trace("Creating Window...");
 
       // Create GLFW window
       glfwWindowHint(GLFW_RESIZABLE, false);
       glfwWindowHint(GLFW_VISIBLE, false);
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-      glfw_window_ = create_window(WindowCreateInfo{
+      glfw_window_ = create_window(inferno::WindowCreateInfo{
         .title = create_info.title,
         .width = create_info.width,
         .height = create_info.height,
@@ -39,12 +39,12 @@ namespace inferno {
       set_fullscreen(create_info.fullscreen);
       set_callbacks();
 
-      koyote::Log::trace("Window ready.");
+      fx::Log::trace("Window ready.");
     }
 
     ~Impl() {
       instantiated_ = false;
-      koyote::Log::trace("Destroying Window...");
+      fx::Log::trace("Destroying Window...");
     }
 
     void poll_events() {
@@ -52,11 +52,11 @@ namespace inferno {
     }
 
     void close() {
-      koyote::Log::trace("Window close requested.");
+      fx::Log::trace("Window close requested.");
       state_.should_stop = true;
     }
 
-    void set_icon(koyote::i8* image, koyote::i32 width, koyote::i32 height) {
+    void set_icon(fx::i8* image, fx::i32 width, fx::i32 height) {
 
     }
 
@@ -71,7 +71,7 @@ namespace inferno {
       glfwSetWindowTitle(glfw_window_.get(), t.str().c_str());
     }
 
-    void set_pos(koyote::ivec2 position) {
+    void set_pos(fx::ivec2 position) {
 
     }
 
@@ -93,8 +93,8 @@ namespace inferno {
     }
 
     [[nodiscard]] auto title() const -> std::string { return state_.title; }
-    [[nodiscard]] auto native() -> koyote::shared<GLFWwindow>& { return glfw_window_; }
-    [[nodiscard]] auto bounds() const -> koyote::rect { return state_.bounds; }
+    [[nodiscard]] auto native() -> fx::shared<GLFWwindow>& { return glfw_window_; }
+    [[nodiscard]] auto bounds() const -> fx::rect { return state_.bounds; }
     [[nodiscard]] auto vsync() const -> bool { return state_.vsync; }
     [[nodiscard]] auto fullscreen() const -> bool { return state_.vsync; }
     [[nodiscard]] auto hidden() const -> bool { return state_.hidden; }
@@ -102,23 +102,23 @@ namespace inferno {
   private:
     struct State {
       std::string title;
-      koyote::rect bounds;
-      koyote::rect bounds_before_fullscreen;
+      fx::rect bounds;
+      fx::rect bounds_before_fullscreen;
       bool vsync;
       bool fullscreen;
       bool borderless;
       bool hidden;
-      koyote::ivec2 cursor_pos{}, cursor_pos_prev{}, cursor_delta{};
+      fx::ivec2 cursor_pos{}, cursor_pos_prev{}, cursor_delta{};
       bool should_stop{ false };
 
       // Window events
-      koyote::Event<> close_event;
+      fx::Event<> close_event;
       // Input events
-      koyote::Event<> key_event;
-      koyote::Event<> modifier_event;
-      koyote::Event<> mouse_event;
-      koyote::Event<> cursor_event;
-      koyote::Event<> scroll_event;
+      fx::Event<> key_event;
+      fx::Event<> modifier_event;
+      fx::Event<> mouse_event;
+      fx::Event<> cursor_event;
+      fx::Event<> scroll_event;
 
 //      explicit State(const WindowCreateInfo& properties)
 //        : title{ properties.title },
@@ -133,15 +133,15 @@ namespace inferno {
     static inline bool instantiated_{ false };
 
     // GLFW
-    Context glfw_context_;
-    koyote::shared<GLFWwindow> glfw_window_{ nullptr };
+    inferno::Context glfw_context_;
+    fx::shared<GLFWwindow> glfw_window_{ nullptr };
 
     // Foxy
     State state_;
 
     void set_callbacks() {
       // Foxy
-      koyote::shared<GLFWwindow> x;
+      fx::shared<GLFWwindow> x;
       state_.close_event.add_callback(FOXY_LAMBDA(close));
 
       // GLFW
@@ -157,75 +157,75 @@ namespace inferno {
   //
 
   Window::Window(const Window::CreateInfo&& properties)
-      : pImpl_{std::make_unique<Impl>(properties)} {}
+      : p_impl_{std::make_unique<Impl>(properties)} {}
 
   Window::~Window() = default;
 
-  auto Window::operator*() -> koyote::shared<GLFWwindow>& {
-    return pImpl_->native();
+  auto Window::operator*() -> fx::shared<GLFWwindow>& {
+    return p_impl_->native();
   }
 
   void Window::poll_events() {
-    pImpl_->poll_events();
+    p_impl_->poll_events();
   }
 
   void Window::close() {
-    pImpl_->close();
+    p_impl_->close();
   }
 
-  void Window::set_icon(koyote::i8* image, koyote::i32 width, koyote::i32 height) {
-    pImpl_->set_icon(image, width, height);
+  void Window::set_icon(fx::i8* image, fx::i32 width, fx::i32 height) {
+    p_impl_->set_icon(image, width, height);
   }
 
   void Window::set_title(const std::string& title) {
-    pImpl_->set_title(title);
+    p_impl_->set_title(title);
   }
 
   void Window::set_subtitle(const std::string& title) {
-    pImpl_->set_subtitle(title);
+    p_impl_->set_subtitle(title);
   }
 
-  void Window::set_pos(koyote::ivec2 position) {
-    pImpl_->set_pos(position);
+  void Window::set_pos(fx::ivec2 position) {
+    p_impl_->set_pos(position);
   }
 
   void Window::set_vsync(bool enabled) {
-    pImpl_->set_vsync(enabled);
+    p_impl_->set_vsync(enabled);
   }
 
   void Window::set_fullscreen(bool enabled) {
-    pImpl_->set_fullscreen(enabled);
+    p_impl_->set_fullscreen(enabled);
   }
 
   void Window::set_hidden(bool hidden) {
-    pImpl_->set_hidden(hidden);
+    p_impl_->set_hidden(hidden);
   }
 
-  auto Window::native() -> koyote::shared<GLFWwindow>& {
-    return pImpl_->native();
+  auto Window::native() -> fx::shared<GLFWwindow>& {
+    return p_impl_->native();
   }
 
   auto Window::title() const -> std::string {
-    return pImpl_->title();
+    return p_impl_->title();
   }
 
-  auto Window::bounds() const -> koyote::rect {
-    return pImpl_->bounds();
+  auto Window::bounds() const -> fx::rect {
+    return p_impl_->bounds();
   }
 
   auto Window::vsync() const -> bool {
-    return pImpl_->vsync();
+    return p_impl_->vsync();
   }
 
   auto Window::fullscreen() const -> bool {
-    return pImpl_->fullscreen();
+    return p_impl_->fullscreen();
   }
 
   auto Window::hidden() const -> bool {
-    return pImpl_->hidden();
+    return p_impl_->hidden();
   }
 
   auto Window::should_stop() const -> const bool& {
-    return pImpl_->should_close();
+    return p_impl_->should_close();
   }
 }
