@@ -36,8 +36,17 @@ namespace ookami {
         }
       );
 
+      auto fixed_shader = std::make_shared<Shader>(
+        context_->logical_device(),
+        Shader::CreateInfo{
+          .vertex = true,
+          .fragment = true,
+          .shader_directory = "res/foxy/shaders/fixed"
+        }
+      );
+
       koyote::Log::info("Shader loading complete! ({} s)", sw.get_time_elapsed<koyote::secs>());
-      pipeline_ = std::make_unique<Pipeline>(context_, swap_chain_, simple_shader);
+      pipeline_ = std::make_unique<Pipeline>(context_, swap_chain_, fixed_shader);
 
       koyote::Log::trace("Ookami Render Engine ready.");
     }

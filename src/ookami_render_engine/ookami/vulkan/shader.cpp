@@ -36,6 +36,15 @@ namespace ookami {
     {
       return shader_modules_.contains(stage);
     }
+
+    [[nodiscard]] static constexpr auto kind_to_vk_flag(const Kind kind) -> std::optional<koyote::i32>
+    {
+      if (kind.underlying_value() == Kind::Vertex)   return static_cast<koyote::i32>(vk::ShaderStageFlagBits::eVertex);
+      if (kind.underlying_value() == Kind::Fragment) return static_cast<koyote::i32>(vk::ShaderStageFlagBits::eFragment);
+      if (kind.underlying_value() == Kind::Compute)  return static_cast<koyote::i32>(vk::ShaderStageFlagBits::eCompute);
+      if (kind.underlying_value() == Kind::Geometry) return static_cast<koyote::i32>(vk::ShaderStageFlagBits::eGeometry);
+      return std::nullopt;
+    }
   private:
     static constexpr inline koyote::word32 spirv_magic_number_{ 0x07230203 };
 
@@ -70,7 +79,9 @@ namespace ookami {
         fs::path{ "tmp" } / fs::path{ "shader_cache" } / relative(create_info.shader_directory, {"res/foxy/shaders"}).parent_path() / create_info.shader_directory.stem()
       };
 
-      for (auto [i, stage] = std::tuple<koyote::u32, Kind>{ 0, static_cast<Kind::Value>(0) }; i <= Kind::Max; ++i, stage = static_cast<Kind::Value>(i)) {
+      for (auto [i, stage] = std::tuple<koyote::u32, Kind>{ 0, static_cast<Kind::Value>(0) }; 
+           i <= Kind::Max; 
+           ++i, stage = static_cast<Kind::Value>(i)) {
         if (!load_stage(create_info, stage, shader_cache_dir)) {
           return false;
         }
@@ -258,6 +269,8 @@ namespace ookami {
     return std::nullopt;
   }
 
+  auto Shader::Kind::to_vk_flag() const -> std::optional<koyote::i32> { return Impl::kind_to_vk_flag(*this); }
+
   Shader::Shader(const vk::raii::Device& device, const CreateInfo& shader_create_info)
     : p_impl_{std::make_unique<Impl>(device, shader_create_info)} {}
 
@@ -266,4 +279,6 @@ namespace ookami {
   auto Shader::module(const Kind stage) const -> const vk::raii::ShaderModule& { return p_impl_->module(stage); }
 
   auto Shader::has_stage(const Kind stage) const -> bool { return p_impl_->has_stage(stage); }
+
+  auto Shader::kind_to_vk_flag(const Kind kind) -> std::optional<koyote::i32> { return Impl::kind_to_vk_flag(kind); }
 }
