@@ -81,6 +81,9 @@ namespace fx {
         case Stage::Stop:
           stop_event_.add_callback(std::forward<StageCallback>(callback));
           break;
+        case Stage::Asleep:
+          stop_event_.add_callback(std::forward<StageCallback>(callback));
+          break;
       }
     }
 
@@ -123,11 +126,16 @@ namespace fx {
     fx::Event<App&> update_event_;
     fx::Event<App&> late_update_event_;
     fx::Event<App&> stop_event_;
+    fx::Event<App&> asleep_event_;
 
     void main_loop() {
+      main_awake_event_();
+      main_start_event_();
       while (!window_->should_stop()) {
         main_poll_event_();
+        main_update_event_();
       }
+      main_stop_event_();
     }
 
     void game_loop()
@@ -150,6 +158,7 @@ namespace fx {
             late_update_event_(app_);
           });
         stop_event_(app_);
+        asleep_event_(app_);
       } catch (const std::exception& e) {
         Log::error(e.what());
       }
@@ -197,6 +206,11 @@ namespace fx {
       // fx::Log::info("Stop");
     }
 
+    void asleep(App& app)
+    {
+      // fx::Log::info("Stop");
+    }
+
     void set_callbacks() {
       main_poll_event_.add_callback(FOXY_LAMBDA(window_->poll_events));
 
@@ -212,6 +226,7 @@ namespace fx {
       late_update_event_.add_callback(FOXY_LAMBDA(late_update));
 
       stop_event_.add_callback(FOXY_LAMBDA(stop));
+      asleep_event_.add_callback(FOXY_LAMBDA(asleep));
     }
 
     void show_perf_stats() {

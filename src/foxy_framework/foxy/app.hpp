@@ -28,6 +28,7 @@ namespace fx {
       Update,
       LateUpdate,
       Stop,
+      Asleep,
     };
 
     using StageCallback = std::function<void(App&)>;
