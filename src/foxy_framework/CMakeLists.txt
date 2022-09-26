@@ -35,14 +35,14 @@ target_include_directories(${TARGET_NAME} PUBLIC "../../include" ".")
 # DEPENDENCIES
 # ===================================================
 # Koyote
-target_include_directories(${TARGET_NAME} PUBLIC "../../koyote")
+target_include_directories(${TARGET_NAME} PUBLIC "../../koyote_utility")
 target_link_libraries(${TARGET_NAME} PUBLIC koyote)
 # Ookami
-target_include_directories(${TARGET_NAME} PUBLIC "../../ookami")
+target_include_directories(${TARGET_NAME} PUBLIC "../../ookami_render_engine")
 target_link_libraries(${TARGET_NAME} PUBLIC ookami)
 # Neko
-target_include_directories(${TARGET_NAME} PUBLIC "../../neko")
+target_include_directories(${TARGET_NAME} PUBLIC "../../neko_ecs")
 target_link_libraries(${TARGET_NAME} PUBLIC neko)
 # Inferno
-target_include_directories(${TARGET_NAME} PUBLIC "../../inferno")
+target_include_directories(${TARGET_NAME} PUBLIC "../../inferno_window_library")
 target_link_libraries(${TARGET_NAME} PUBLIC inferno)

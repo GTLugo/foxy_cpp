@@ -3,6 +3,7 @@
 #include "ookami/vulkan/context.hpp"
 #include "ookami/vulkan/swapchain.hpp"
 #include "ookami/vulkan/pipeline.hpp"
+#include "ookami/vulkan/shader.hpp"
 #include <GLFW/glfw3.h>
 
 namespace ookami {
@@ -21,8 +22,22 @@ namespace ookami {
       context_ = std::make_shared<Context>(window, false);
       #endif
 
-      swapchain_ = std::make_unique<Swapchain>(window, context_);
-      pipeline_ = std::make_unique<Pipeline>(context_);
+      swap_chain_ = std::make_shared<Swapchain>(window, context_);
+
+      koyote::Log::info("Please wait while shaders load...");
+      const auto sw{ koyote::Stopwatch() };
+
+      auto simple_shader = std::make_shared<Shader>(
+        context_->logical_device(),
+        Shader::CreateInfo{
+          .vertex = true,
+          .fragment = true,
+          .shader_directory = "res/foxy/shaders/simple"
+        }
+      );
+
+      koyote::Log::info("Shader loading complete! ({} s)", sw.get_time_elapsed<koyote::secs>());
+      pipeline_ = std::make_unique<Pipeline>(context_, swap_chain_, simple_shader);
 
       koyote::Log::trace("Ookami Render Engine ready.");
     }
@@ -35,7 +50,7 @@ namespace ookami {
     static inline bool instantiated_{ false };
 
     koyote::shared<Context> context_;
-    koyote::unique<Swapchain> swapchain_;
+    koyote::shared<Swapchain> swap_chain_;
     koyote::unique<Pipeline> pipeline_;
   };
 

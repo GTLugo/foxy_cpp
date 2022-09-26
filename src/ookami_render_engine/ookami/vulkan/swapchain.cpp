@@ -18,6 +18,15 @@ namespace ookami {
     }
 
     ~Impl() = default;
+
+
+    auto format() -> vk::Format {
+      return swapchain_image_format_;
+    }
+
+    auto extent() -> vk::Extent2D {
+      return swapchain_extent_;
+    }
   private:
     koyote::shared<GLFWwindow> window_;
     koyote::shared<Context> context_;
@@ -163,4 +172,12 @@ namespace ookami {
     : p_impl_{std::make_unique<Impl>(window, context)} {}
 
   Swapchain::~Swapchain() = default;
+
+  auto Swapchain::format() -> vk::Format {
+    return p_impl_->format();
+  }
+
+  auto Swapchain::extent() -> vk::Extent2D {
+    return p_impl_->extent();
+  }
 }

@@ -4,7 +4,8 @@
 #include <uuid_v4.h>
 
 namespace koyote {
-  using byte = std::uint8_t;
+  using byte8 = std::uint8_t;
+  using word32 = std::uint32_t;
   using i8 = std::int8_t;
   using u8 = std::uint8_t;
   using i16 = std::int16_t;
@@ -75,6 +76,6 @@ namespace koyote {
     koyote::unique<T> ptr_;
   };
 
-  [[nodiscard]] auto read_file(const std::filesystem::path& file_path, 
-                               std::ios::fmtflags flags = {}) -> std::optional<std::string> const;
+  [[nodiscard]] auto read_file(const std::filesystem::path& file_path,
+                               std::ios::fmtflags flags = {}) -> std::optional<std::string>;
 }
