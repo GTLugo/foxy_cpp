@@ -75,6 +75,6 @@ namespace koyote {
     koyote::unique<T> ptr_;
   };
 
-  [[nodiscard]] auto read_file(const std::filesystem::path& file_path, 
-                               std::ios::fmtflags flags = {}) -> std::optional<std::string> const;
+  [[nodiscard]] auto read_file(const std::filesystem::path& file_path,
+                               std::ios::fmtflags flags = {}) -> std::optional<std::string>;
 }

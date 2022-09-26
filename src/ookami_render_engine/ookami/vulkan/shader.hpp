@@ -15,9 +15,9 @@ namespace ookami {
     class Kind {
     public:
       enum Value: koyote::u32 {
-        Vertex = 0,
+        Vertex   = 0,
         Fragment = 1,
-        Compute = 2,
+        Compute  = 2,
         Geometry = 3,
 
         Max = Geometry,
@@ -67,7 +67,7 @@ namespace ookami {
         case Kind::Fragment: return fragment;
         case Kind::Compute:  return compute;
         case Kind::Geometry: return geometry;
-        default:             return false;
+        default:             return false;  // NOLINT(clang-diagnostic-covered-switch-default)
         }
       }
     };
@@ -78,6 +78,7 @@ namespace ookami {
     ~Shader();
 
     [[nodiscard]] auto module(Kind stage) const -> const vk::raii::ShaderModule&;
+    [[nodiscard]] auto has_stage(Kind stage) const -> bool;
   private:
     class Impl;
     koyote::unique<Impl> p_impl_;

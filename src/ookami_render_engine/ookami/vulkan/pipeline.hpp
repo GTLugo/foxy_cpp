@@ -6,12 +6,14 @@
 
 namespace ookami {
   class Context;
+  class Shader;
+  class Swapchain;
 }
 
 namespace ookami {
   class Pipeline {
   public:
-    explicit Pipeline(const koyote::shared<Context>& context);
+    explicit Pipeline(koyote::shared<Context> context, koyote::shared<Swapchain> swap_chain, koyote::shared<Shader> shader);
     ~Pipeline();
 
   private:

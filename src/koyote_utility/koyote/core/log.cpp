@@ -41,7 +41,7 @@ namespace koyote {
       file_sink->set_formatter(std::move(file_formatter));
 
       logger() = spdlog::logger{name, {console_sink, file_sink}};
-      logger().set_level(spdlog::level::info);
+      logger().set_level(spdlog::level::trace);
       koyote::Log::set_thread_name("main");
 
       Log::info(R"(--------------=============[])");

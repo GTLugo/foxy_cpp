@@ -14,7 +14,7 @@ namespace ookami {
       : name_{ shader_create_info.shader_directory.stem().string() } {
 
       if (load_shader_code(shader_create_info)) {
-        koyote::Log::trace("Loaded shader: {}", name_);
+        koyote::Log::trace("Compiled or read in shader: {}", name_);
         create_shader_modules(device);
         koyote::Log::trace("Shader \"{}\" ready.", name_);
       } else {
@@ -24,10 +24,19 @@ namespace ookami {
 
     ~Impl() = default;
 
-    [[nodiscard]] auto module(const Kind stage) const -> const vk::raii::ShaderModule& { return shader_modules_.at(stage); }
+    [[nodiscard]] auto module(const Kind stage) const -> const vk::raii::ShaderModule& {
+      if (!shader_modules_.contains(stage)) {
+        koyote::Log::fatal("Shader module for {} stage not found.", *stage.to_string());
+      }
+      return shader_modules_.at(stage);
+    }
+
+    [[nodiscard]] auto has_stage(const Kind stage) const -> bool {
+      return shader_modules_.contains(stage);
+    }
   private:
     std::string name_;
-    std::unordered_map<Kind, std::vector<char>> bytecode_;
+    std::unordered_map<Kind, std::vector<koyote::u32>> bytecode_;
     std::unordered_map<Kind, vk::raii::ShaderModule> shader_modules_;
 
     static inline const std::string preproc_token_type_{ "#type" };
@@ -68,6 +77,8 @@ namespace ookami {
     [[nodiscard]] auto load_stage(const CreateInfo& create_info, const Kind stage, const std::filesystem::path& shader_cache_dir) -> bool {
       namespace fs = std::filesystem;
       const fs::path in_shader_path{ create_info.shader_directory / fs::path{ *stage.to_string() + ".hlsl" } };
+      // std::unordered_map<Kind, std::vector<koyote::u32>> quadbytecode;
+      // std::unordered_map<Kind, std::vector<koyote::byte>> bytecode;
 
       if (create_info.has_kind(stage)) {
         koyote::Log::trace("Looking for {}: {}", *stage.to_string(), name_);
@@ -75,8 +86,8 @@ namespace ookami {
         if (const fs::path out_shader_path{ shader_cache_dir / fs::path{ *stage.to_string() + ".spv" } }; exists(out_shader_path)) {
           koyote::Log::trace("Found cached {} at location {}", *stage.to_string(), out_shader_path.string());
 
-          if (auto code{ koyote::read_file(in_shader_path, std::ios::binary) }; code.has_value()) {
-            bytecode_[stage] = { code->begin(), code->end() };
+          if (const auto code{ read_spv(in_shader_path) }; code.has_value()) {
+            bytecode_[stage] = code.value();
           } else {
             return false;
           }
@@ -89,7 +100,9 @@ namespace ookami {
               create_directories(shader_cache_dir);
             }
 
-            if (!compile_shader_type(out_shader_path, *code, stage, !create_info.disable_optimizations)) {
+            if (auto result{ compile_shader_type(out_shader_path, *code, stage, !create_info.disable_optimizations) }; result.has_value()) {
+              bytecode_[stage] = *result;
+            } else {
               return false;
             }
           } else {
@@ -103,51 +116,10 @@ namespace ookami {
       return true;
     }
 
-    [[nodiscard]] auto parse_file(const std::filesystem::path& file_path) -> std::unordered_map<Kind, std::string>{
-      koyote::Log::trace("Parsing shader: {}...", name_);
-
-      std::unordered_map<Kind, std::string> srcs;
-
-      std::ifstream file{ file_path };
-      if (!file.is_open()) {
-        koyote::Log::error("File {} does not exist.", file_path.string());
-        return srcs;
-      }
-
-      // TODO: Re-Optimize this
-      std::string next_word;
-      file >> next_word;
-      while (file) {
-        if (next_word == preproc_token_type_) {
-          std::stringstream section_stream;
-          // Grab type of shader
-          std::string stage;
-          file >> stage;
-          if (!Kind::from_string(stage).has_value()) {
-            koyote::Log::fatal("Shader type {} is not supported.", stage);
-          }
-
-          // Loop through shader section body
-          file >> next_word;
-          while (file && next_word != preproc_token_type_) {
-            char line[256]{};
-            file.getline(&line[0], 256);
-            section_stream << next_word << line << '\n';
-            file >> next_word;
-          }
-
-          // add to result map
-          srcs[*Kind::from_string(stage)] = section_stream.str();
-        }
-      }
-
-      return srcs;
-    }
-
     [[nodiscard]] auto compile_shader_type(const std::filesystem::path& out_file, 
                                            const std::string& code_str, 
                                            const Kind stage, 
-                                           const bool optimize) -> bool {
+                                           const bool optimize) -> std::optional<std::vector<koyote::u32>> {
       koyote::Log::trace("Compiling {}: {}...", *stage.to_string(), name_);
 
       const shaderc::Compiler compiler;
@@ -158,24 +130,31 @@ namespace ookami {
         options.SetOptimizationLevel(shaderc_optimization_level_performance);
       }
 
-      const auto result{ compiler.CompileGlslToSpvAssembly(
+      const auto result{ compiler.CompileGlslToSpv(
         preprocess(code_str, stage), 
         static_cast<shaderc_shader_kind>(*stage.to_shaderc()),
         name_.c_str(), 
-        options) 
-      };
+        options
+      ) };
 
       if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
         koyote::Log::error("Shaderc Compile: {}", result.GetErrorMessage());
-        return false; 
+        return std::nullopt;
       }
 
-      std::string assembly{ result.begin(), result.end() };
-      std::ofstream spv_file{ out_file };
-      spv_file << assembly;
+      std::vector<koyote::u32> spv{ result.begin(), result.end() };
+      std::ofstream spv_file{ out_file, std::ios::binary };
+      //std::ranges::copy(spv, std::ostreambuf_iterator(spv_file));
+      spv_file.write(reinterpret_cast<char*>(spv.data()), spv.size() * sizeof(koyote::u32));
 
-      bytecode_[stage] = { assembly.begin(), assembly.end() };
-      return true;
+      if (!spv_file.good()) {
+        koyote::Log::error("Error while writing to file: {}", out_file.string());
+      }
+      koyote::Log::info("Vector size: {} File size: {}", spv.size(), file_size(out_file));
+
+      //auto res = compiler.AssembleToSpv(assembly, options);
+
+      return spv;
     }
 
     [[nodiscard]] auto preprocess(const std::string& code_str, const Kind stage) const -> std::string {
@@ -192,18 +171,26 @@ namespace ookami {
       }
     }
 
+    [[nodiscard]] static auto read_spv(const std::filesystem::path& path) -> std::optional<std::vector<koyote::byte>> {
+      if (std::ifstream file{ path, std::ios::binary }; file.is_open()) {
+        return std::vector<koyote::byte>{ std::istreambuf_iterator(file), {} };
+      }
+      koyote::Log::error("Failed to open file: {}", path.string());
+      return std::nullopt;
+    }
+
     void create_shader_modules(const vk::raii::Device& device) {
       koyote::Log::trace("Building shader modules: {}...", name_);
 
       for (koyote::u32 i{ 0 }; i <= Kind::Max; ++i) {
-        if (auto stage{ static_cast<Kind::Value>(i) }; shader_modules_.contains(stage)) {
+        if (auto stage{ static_cast<Kind::Value>(i) }; bytecode_.contains(stage)) {
           vk::ShaderModuleCreateInfo create_info{
-            .codeSize = bytecode_.at(stage).size(),
+            .codeSize = bytecode_.at(stage).size() * 4,
             .pCode = reinterpret_cast<const koyote::u32*>(bytecode_.at(stage).data())
           };
 
           try {
-            shader_modules_.insert(std::make_pair(stage, device.createShaderModule(create_info)));
+            shader_modules_.emplace(stage, device.createShaderModule(create_info));
           } catch (const std::exception& e) {
             koyote::Log::error(e.what());
           }
@@ -246,5 +233,7 @@ namespace ookami {
 
   Shader::~Shader() = default;
 
-  auto Shader::module(const Shader::Kind stage) const -> const vk::raii::ShaderModule& { return p_impl_->module(stage); }
+  auto Shader::module(const Kind stage) const -> const vk::raii::ShaderModule& { return p_impl_->module(stage); }
+
+  auto Shader::has_stage(const Kind stage) const -> bool { return p_impl_->has_stage(stage); }
 }

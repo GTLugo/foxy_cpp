@@ -5,24 +5,34 @@
 //   float4x4 viewProj;
 // }
 
-struct VertexInput {
-  float4 position: POSITION;
-  float4 color: COLOR;
+
+struct VertexInput
+{
+    float4 position : POSITION;
+    float4 color : COLOR;
 };
 
-struct FragInput {
-  float4 position: SV_POSITION;
-  float4 color: COLOR;
+struct FragInput
+{
+    float4 position : SV_POSITION;
+    float4 color : COLOR;
 };
 
-FragInput main(VertexInput input) {
-  FragInput output;
+FragInput main(uint vertex_index : SV_VertexID)
+{
+    FragInput output;
 
-  input.position.w = 1.0f;
+    float4 positions[3] = {
+        float4(-0.5, -0.5, 0.0, 1.0),
+        float4(0.5, -0.5, 0.0, 1.0),
+        float4(0.0, 0.5, 0.0, 1.0),
+    };
 
-  // output.position = mul(viewProj, input.position);
-  output.position = input.position;
-  output.color = input.color;
+    // input.position.w = 1.0f;
 
-  return output;
+    // output.position = mul(viewProj, input.position);
+    output.position = positions[vertex_index];
+    output.color = float4(1.0, 1.0, 1.0, 1.0);
+
+    return output;
 }

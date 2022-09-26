@@ -49,4 +49,4 @@ endif()
 # ===================================================
 # CMake Extensions
 # ===================================================
-include(cmake/copy_resources.cmake)
+#include(cmake/copy_resources.cmake)
