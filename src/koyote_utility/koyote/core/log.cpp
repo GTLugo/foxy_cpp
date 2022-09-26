@@ -8,10 +8,10 @@
 namespace koyote {
   class Log::Impl {
   public:
-    class thread_name_flag : public spdlog::custom_flag_formatter {
+    class ThreadNameFlag final: public spdlog::custom_flag_formatter {
     public:
       void format(const spdlog::details::log_msg&, const std::tm&, spdlog::memory_buf_t& dest) override {
-        auto thread_id{ std::this_thread::get_id() };
+        const auto thread_id{ std::this_thread::get_id() };
         std::stringstream thread_name{};
         if (names_.contains(thread_id)) {
           thread_name << names_.at(thread_id);
@@ -22,26 +22,26 @@ namespace koyote {
         dest.append(thread_name_str.data(), thread_name_str.data() + thread_name_str.size());
       }
 
-      std::unique_ptr<custom_flag_formatter> clone() const override {
-        return spdlog::details::make_unique<thread_name_flag>();
+      [[nodiscard]] std::unique_ptr<custom_flag_formatter> clone() const override {
+        return spdlog::details::make_unique<ThreadNameFlag>();
       }
     };
     
     Impl(const std::string& name, const std::filesystem::path& log_file) {
       auto console_formatter = std::make_unique<spdlog::pattern_formatter>();
-      console_formatter->add_flag<thread_name_flag>('~').set_pattern("[%^%4!L%$|%T.%f] %~ | %v");
+      console_formatter->add_flag<ThreadNameFlag>('~').set_pattern("[%^%4!L%$|%T.%f] %~ | %v");
       auto console_sink{ std::make_shared<spdlog::sinks::stdout_color_sink_mt>() };
       console_sink->set_level(spdlog::level::trace);
       console_sink->set_formatter(std::move(console_formatter));
       
       auto file_formatter = std::make_unique<spdlog::pattern_formatter>();
-      file_formatter->add_flag<thread_name_flag>('~').set_pattern("[%^%4!L%$] [%m-%d %T.%f] %~ | %v");
+      file_formatter->add_flag<ThreadNameFlag>('~').set_pattern("[%^%4!L%$] [%m-%d %T.%f] %~ | %v");
       auto file_sink{ std::make_shared<spdlog::sinks::rotating_file_sink_mt>(log_file.string(), 2097152, 5, false) };
       file_sink->set_level(spdlog::level::trace);
       file_sink->set_formatter(std::move(file_formatter));
 
       logger() = spdlog::logger{name, {console_sink, file_sink}};
-      logger().set_level(spdlog::level::trace);
+      logger().set_level(spdlog::level::info);
       koyote::Log::set_thread_name("main");
 
       Log::info(R"(--------------=============[])");
@@ -65,30 +65,34 @@ namespace koyote {
       Log::info("Foxy shutdown: Otsukon deshita! Bye bye!");
     }
     
-    static inline void trace(std::string_view msg) {
+    static inline void trace(const std::string_view msg) {
       logger().trace(msg);
     }
 
-    static inline void debug(std::string_view msg) {
+    static inline void debug(const std::string_view msg) {
       logger().debug(msg);
     }
 
-    static inline void info(std::string_view msg) {
+    static inline void info(const std::string_view msg) {
       logger().info(msg);
     }
 
-    static inline void warn(std::string_view msg) {
+    static inline void warn(const std::string_view msg) {
       logger().warn(msg);
     }
 
-    static inline void error(std::string_view msg) {
+    static inline void error(const std::string_view msg) {
       logger().error(msg);
     }
 
-    static inline void fatal(std::string_view msg) {
+    static inline void fatal(const std::string_view msg) {
       logger().critical(msg);
       dump_backtrace();
       std::terminate();
+    }
+
+    static void set_level_filter(const Level level) {
+      logger().set_level(*to_spdlog_level(level));
     }
 
     static void set_thread_name(const std::string& name) {
@@ -110,47 +114,62 @@ namespace koyote {
       static spdlog::logger lg{""};
       return lg;
     }
+
+    static constexpr auto to_spdlog_level(const Level level) -> std::optional<spdlog::level::level_enum>
+    {
+      if (level == Trace)   return spdlog::level::trace;
+      if (level == Debug) return spdlog::level::debug;
+      if (level == Info)  return spdlog::level::info;
+      if (level == Warn) return spdlog::level::warn;
+      if (level == Error) return spdlog::level::err;
+      if (level == Fatal) return spdlog::level::critical;
+      return std::nullopt;
+    }
   }; // Log
 
-  koyote::shared<Log::Impl> Log::pImpl_ = std::make_shared<Impl>("koyote", "./tmp/logs/app.log");
+  koyote::shared<Log::Impl> Log::p_impl_ = std::make_shared<Impl>("koyote", "./tmp/logs/app.log");
 
   Log::Log() = default;
 
   Log::~Log() = default;
 
-  void Log::trace_impl(std::string_view msg) {
-    pImpl_->trace(msg);
+  void Log::trace_impl(const std::string_view msg) {
+    Impl::trace(msg);
   }
 
-  void Log::debug_impl(std::string_view msg) {
-    pImpl_->debug(msg);
+  void Log::debug_impl(const std::string_view msg) {
+    Impl::debug(msg);
   }
 
-  void Log::info_impl(std::string_view msg) {
-    pImpl_->info(msg);
+  void Log::info_impl(const std::string_view msg) {
+    Impl::info(msg);
   }
 
-  void Log::warn_impl(std::string_view msg) {
-    pImpl_->warn(msg);
+  void Log::warn_impl(const std::string_view msg) {
+    Impl::warn(msg);
   }
 
-  void Log::error_impl(std::string_view msg) {
-    pImpl_->error(msg);
+  void Log::error_impl(const std::string_view msg) {
+    Impl::error(msg);
   }
 
-  void Log::fatal_impl(std::string_view msg) {
-    pImpl_->fatal(msg);
+  void Log::fatal_impl(const std::string_view msg) {
+    Impl::fatal(msg);
+  }
+
+  void Log::set_level_filter(const Level level) {
+    Impl::set_level_filter(level);
   }
   
   void Log::set_thread_name(const std::string& name) {
-    pImpl_->set_thread_name(name);
+    Impl::set_thread_name(name);
   }
 
-  void Log::enable_backtrace(koyote::u32 count) {
-    pImpl_->enable_backtrace(count);
+  void Log::enable_backtrace(const koyote::u32 count) {
+    Impl::enable_backtrace(count);
   }
 
   void Log::dump_backtrace() {
-    pImpl_->dump_backtrace();
+    Impl::dump_backtrace();
   }
 } // koyote

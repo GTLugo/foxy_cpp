@@ -5,9 +5,18 @@
 namespace koyote {
   class Log {
   public:
+    enum Level {
+      Trace,
+      Debug,
+      Info,
+      Warn,
+      Error,
+      Fatal,
+    };
+
     struct FormatLocation {
       std::string fmt_str;
-      std::source_location location;
+      std::source_location location{};
 
       FormatLocation(const char* fmt_str_, const std::source_location& location_ = std::source_location::current())
         : fmt_str{fmt_str_}, location{location_} {}
@@ -86,12 +95,13 @@ namespace koyote {
     LOGGING_FUNC_TEMPLATE_IMPL(info)
     LOGGING_FUNC_TEMPLATE_IMPL(warn)
 
+    static void set_level_filter(Level level);
     static void set_thread_name(const std::string& name);
     static void enable_backtrace(koyote::u32 count);
     static void dump_backtrace();
   private:
     class Impl;
-    static koyote::shared<Impl> pImpl_;
+    static koyote::shared<Impl> p_impl_;
 
     Log();
     ~Log();
