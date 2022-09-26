@@ -35,8 +35,9 @@ namespace ookami {
       [[nodiscard]] static constexpr auto from_string(std::string_view str) -> std::optional<Kind>;
       [[nodiscard]] constexpr auto to_string() const -> std::optional<std::string>;
       [[nodiscard]] constexpr auto to_shaderc() const -> std::optional<koyote::i32>;
+      [[nodiscard]] auto to_vk_flag() const->std::optional<koyote::i32>; // This cannot be constexpr or inline without introducing a linker error
 
-      [[nodiscard]] auto underlying_value() const -> Value { return value_; }
+      [[nodiscard]] constexpr auto underlying_value() const -> Value { return value_; }
 
       template<typename... Args>
       [[nodiscard]] static constexpr auto bits(Args&&... args) -> koyote::u32 {
@@ -79,6 +80,9 @@ namespace ookami {
 
     [[nodiscard]] auto module(Kind stage) const -> const vk::raii::ShaderModule&;
     [[nodiscard]] auto has_stage(Kind stage) const -> bool;
+
+    // This cannot be constexpr or inline without introducing a linker error
+    [[nodiscard]] static auto kind_to_vk_flag(const Kind kind) -> std::optional<koyote::i32>;
   private:
     class Impl;
     koyote::unique<Impl> p_impl_;

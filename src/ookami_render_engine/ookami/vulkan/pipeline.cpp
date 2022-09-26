@@ -19,42 +19,18 @@ namespace ookami {
       koyote::Log::trace("Creating Vulkan pipeline...");
 
       std::vector<vk::PipelineShaderStageCreateInfo> shader_stages;
-      if (shader_->has_stage(Shader::Kind::Vertex)) {
-        const vk::PipelineShaderStageCreateInfo info{
-          .stage = vk::ShaderStageFlagBits::eVertex,
-          .module = *shader_->module(Shader::Kind::Vertex),
-          .pName = "main",
-        };
-        shader_stages.push_back(info);
+      for (auto [i, stage] = std::tuple<koyote::u32, Shader::Kind>{ 0, static_cast<Shader::Kind::Value>(0) }; 
+           i <= Shader::Kind::Max; 
+           ++i, stage = static_cast<Shader::Kind::Value>(i)) {
+        if (shader_->has_stage(stage)) {
+          const vk::PipelineShaderStageCreateInfo info{
+            .stage = static_cast<vk::ShaderStageFlagBits>(*stage.to_vk_flag()),
+            .module = *shader_->module(stage),
+            .pName = "main",
+          };
+          shader_stages.push_back(info);
+        }
       }
-
-      if (shader_->has_stage(Shader::Kind::Fragment)) {
-        const vk::PipelineShaderStageCreateInfo info{
-          .stage = vk::ShaderStageFlagBits::eFragment,
-          .module = *shader_->module(Shader::Kind::Fragment),
-          .pName = "main",
-        };
-        shader_stages.push_back(info);
-      }
-
-      if (shader_->has_stage(Shader::Kind::Compute)) {
-        const vk::PipelineShaderStageCreateInfo info{
-          .stage = vk::ShaderStageFlagBits::eCompute,
-          .module = *shader_->module(Shader::Kind::Compute),
-          .pName = "main",
-        };
-        shader_stages.push_back(info);
-      }
-
-      if (shader_->has_stage(Shader::Kind::Geometry)) {
-        const vk::PipelineShaderStageCreateInfo info{
-          .stage = vk::ShaderStageFlagBits::eGeometry,
-          .module = *shader_->module(Shader::Kind::Geometry),
-          .pName = "main",
-        };
-        shader_stages.push_back(info);
-      }
-
       koyote::Log::trace("Shader stage count: {}", shader_stages.size());
 
       std::vector dynamic_states{
