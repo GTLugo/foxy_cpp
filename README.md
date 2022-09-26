@@ -3,6 +3,8 @@
 
 ## - Requirements -
  Built with CMake 3.24, C++23, Visual C++ compiler, and Visual Studio 2022 generator.
+
+ Run "setup.bat" once downloaded. This just sets up shaderc's dependencies for now.
  
 ## - Dependencies -
  - python3 (for initializing shaderc)
@@ -10,7 +12,7 @@
  - GLM
  - spdlog - Custom fork
  - BS Thread Pool
- - Shaderc - Run python3 ./extern/shaderc/utils/git-sync-deps
+ - Shaderc
  - Vulkan - ***"Batteries not included!"*** Separate install required.
 
 ## - Credits -

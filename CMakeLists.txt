@@ -21,6 +21,7 @@ set(FOXY_EXTERN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/extern)
 # ===================================================
 # DEPENDENCIES
 # ===================================================
+add_subdirectory(extern)
 # GLFW
 add_subdirectory(extern/glfw)
 # GLM
