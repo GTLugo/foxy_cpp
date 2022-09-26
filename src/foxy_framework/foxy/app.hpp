@@ -21,8 +21,11 @@ namespace fx {
     enum class Stage {
       Awake,
       Start,
+      EarlyTick,
       Tick,
+      LateTick,
       EarlyUpdate,
+      Update,
       LateUpdate,
       Stop,
     };

@@ -60,10 +60,19 @@ namespace fx {
         case Stage::Start:
           start_event_.add_callback(std::forward<StageCallback>(callback));
           break;
+        case Stage::EarlyTick:
+          tick_event_.add_callback(std::forward<StageCallback>(callback));
+          break;
         case Stage::Tick:
           tick_event_.add_callback(std::forward<StageCallback>(callback));
           break;
+        case Stage::LateTick:
+          tick_event_.add_callback(std::forward<StageCallback>(callback));
+          break;
         case Stage::EarlyUpdate:
+          early_update_event_.add_callback(std::forward<StageCallback>(callback));
+          break;
+        case Stage::Update:
           early_update_event_.add_callback(std::forward<StageCallback>(callback));
           break;
         case Stage::LateUpdate:
@@ -107,8 +116,11 @@ namespace fx {
     // Game Thread events
     fx::Event<App&> awake_event_;
     fx::Event<App&> start_event_;
-    fx::Event<App&> early_update_event_;
+    fx::Event<App&> early_tick_event_;
     fx::Event<App&> tick_event_;
+    fx::Event<App&> late_tick_event_;
+    fx::Event<App&> early_update_event_;
+    fx::Event<App&> update_event_;
     fx::Event<App&> late_update_event_;
     fx::Event<App&> stop_event_;
 
@@ -118,28 +130,30 @@ namespace fx {
       }
     }
 
-    void game_loop() {
-      fx::Log::set_thread_name("game");
-
-      fx::Log::trace("Starting game thread...");
+    void game_loop()
+    {
+      Log::set_thread_name("game");
+      Log::trace("Starting game thread...");
       try {
         awake_event_(app_);
         start_event_(app_);
-        fx::Time::internal_game_loop(
+        Time::internal_game_loop(
           window_->should_stop(),
-          [this]() { // Tick
+          [this] { // Tick
+            early_tick_event_(app_);
             tick_event_(app_);
-          }, 
-          [this]() { // Update
+            late_tick_event_(app_);
+          },
+          [this] { // Update
             early_update_event_(app_);
+            update_event_(app_);
             late_update_event_(app_);
           });
         stop_event_(app_);
       } catch (const std::exception& e) {
-        fx::Log::error(e.what());
+        Log::error(e.what());
       }
-
-      fx::Log::trace("Joining game thread...");
+      Log::trace("Joining game thread...");
     }
 
     void awake(App& app) {
@@ -150,14 +164,29 @@ namespace fx {
       //FOXY_DEBUG << "Start";
     }
 
+    void early_tick(App& app)
+    {
+
+    }
+
+    void tick(App& app) {
+    #if defined(FOXY_DEBUG_MODE) and defined(FOXY_PERF_TITLE)
+      show_perf_stats();
+    #endif
+    }
+
+    void late_tick(App& app)
+    {
+
+    }
+
     void early_update(App& app) {
       //FOXY_DEBUG << "Early";
     }
 
-    void tick(App& app) {
-      #if defined(FOXY_DEBUG_MODE) and defined(FOXY_PERF_TITLE)
-      show_perf_stats();
-      #endif
+    void update(App& app)
+    {
+
     }
 
     void late_update(App& app) {
@@ -173,9 +202,15 @@ namespace fx {
 
       awake_event_.add_callback(FOXY_LAMBDA(awake));
       start_event_.add_callback(FOXY_LAMBDA(start));
-      early_update_event_.add_callback(FOXY_LAMBDA(early_update));
+
+      early_tick_event_.add_callback(FOXY_LAMBDA(early_tick));
       tick_event_.add_callback(FOXY_LAMBDA(tick));
+      late_tick_event_.add_callback(FOXY_LAMBDA(late_tick));
+
+      early_update_event_.add_callback(FOXY_LAMBDA(early_update));
+      update_event_.add_callback(FOXY_LAMBDA(update));
       late_update_event_.add_callback(FOXY_LAMBDA(late_update));
+
       stop_event_.add_callback(FOXY_LAMBDA(stop));
     }
 

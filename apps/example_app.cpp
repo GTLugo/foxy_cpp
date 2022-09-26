@@ -11,7 +11,7 @@ struct ExampleApp: fx::App {
     } }
   {
     add_function_to_stage(Stage::Start, FOXY_LAMBDA(start));
-    add_function_to_stage(Stage::EarlyUpdate, FOXY_LAMBDA(update));
+    add_function_to_stage(Stage::Update, FOXY_LAMBDA(update));
     add_function_to_stage(Stage::Stop, FOXY_LAMBDA(stop));
   }
 
