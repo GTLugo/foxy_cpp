@@ -3,8 +3,6 @@
 
 ## - Requirements -
  Built with CMake 3.24, C++23, Visual C++ compiler, and Visual Studio 2022 generator.
-
- Run "setup.bat" once downloaded. This just sets up shaderc's dependencies for now.
  
 ## - Dependencies -
  - python3 (for initializing shaderc)
@@ -14,6 +12,15 @@
  - BS Thread Pool
  - Shaderc
  - Vulkan - ***"Batteries not included!"*** Separate install required.
+
+## - Setup -
+
+ Run "setup.bat" once downloaded. This just sets up shaderc's dependencies for now.
+
+ There's 3 build modes supported: Debug, Release, and Release with Debug Info. Some things 
+ to note: 
+ - Logging is disabled in Release mode.
+ - Debug has the slowest compile time for shaders.
 
 ## - Credits -
  - https://github.com/jherico/Vulkan - Sascha Willems' examples translated to Vulkan's C++ API
