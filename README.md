@@ -20,7 +20,8 @@
  There's 3 build modes supported: Debug, Release, and Release with Debug Info. Some things 
  to note: 
  - Logging is disabled in Release mode.
- - Debug has the slowest compile time for shaders.
+ - Debug has the slowest compile time for shaders. It might be smarter to do shader development 
+ in Release with Debug Info.
 
 ## - Credits -
  - https://github.com/jherico/Vulkan - Sascha Willems' examples translated to Vulkan's C++ API
