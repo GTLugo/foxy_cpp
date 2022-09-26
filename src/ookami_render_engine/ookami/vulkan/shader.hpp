@@ -9,12 +9,12 @@ namespace vk::raii {
   class Device;
 }
 
-namespace ookami {
+namespace fx {
   class Shader {
   public:
     class Kind {
     public:
-      enum Value: koyote::u32 {
+      enum Value: fx::u32 {
         Vertex   = 0,
         Fragment = 1,
         Compute  = 2,
@@ -34,13 +34,13 @@ namespace ookami {
 
       [[nodiscard]] static constexpr auto from_string(std::string_view str) -> std::optional<Kind>;
       [[nodiscard]] constexpr auto to_string() const -> std::optional<std::string>;
-      [[nodiscard]] constexpr auto to_shaderc() const -> std::optional<koyote::i32>;
-      [[nodiscard]] auto to_vk_flag() const->std::optional<koyote::i32>; // This cannot be constexpr or inline without introducing a linker error
+      [[nodiscard]] constexpr auto to_shaderc() const -> std::optional<fx::i32>;
+      [[nodiscard]] auto to_vk_flag() const->std::optional<fx::i32>; // This cannot be constexpr or inline without introducing a linker error
 
       [[nodiscard]] constexpr auto underlying_value() const -> Value { return value_; }
 
       template<typename... Args>
-      [[nodiscard]] static constexpr auto bits(Args&&... args) -> koyote::u32 {
+      [[nodiscard]] static constexpr auto bits(Args&&... args) -> fx::u32 {
         return (BIT(args) | ...);
       }
 
@@ -82,10 +82,10 @@ namespace ookami {
     [[nodiscard]] auto has_stage(Kind stage) const -> bool;
 
     // This cannot be constexpr or inline without introducing a linker error
-    [[nodiscard]] static auto kind_to_vk_flag(const Kind kind) -> std::optional<koyote::i32>;
+    [[nodiscard]] static auto kind_to_vk_flag(const Kind kind) -> std::optional<fx::i32>;
   private:
     class Impl;
-    koyote::unique<Impl> p_impl_;
+    fx::unique<Impl> p_impl_;
   };
 }
 
@@ -97,8 +97,8 @@ namespace ookami {
 #define OOKAMI_SHADER_GEOMETRY BIT(Shader::Kind::Geometry)
 
 template<>
-struct std::hash<ookami::Shader::Kind> {
-  std::size_t operator()(const ookami::Shader::Kind& s) const noexcept {
-    return std::hash<koyote::u32>{}(s.underlying_value());
+struct std::hash<fx::Shader::Kind> {
+  std::size_t operator()(const fx::Shader::Kind& s) const noexcept {
+    return std::hash<fx::u32>{}(s.underlying_value());
   }
 };

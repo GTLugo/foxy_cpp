@@ -1,5 +1,5 @@
 #include "time.hpp"
 
-namespace koyote {
+namespace fx {
   
-} // koyote
+} // fx

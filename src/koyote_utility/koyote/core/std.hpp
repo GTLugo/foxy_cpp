@@ -3,7 +3,7 @@
 #include "koyote/internal/includes.hpp"
 #include <uuid_v4.h>
 
-namespace koyote {
+namespace fx {
   using byte8 = std::uint8_t;
   using word32 = std::uint32_t;
   using i8 = std::int8_t;
@@ -73,7 +73,7 @@ namespace koyote {
     T& operator*();
 
   private:
-    koyote::unique<T> ptr_;
+    fx::unique<T> ptr_;
   };
 
   [[nodiscard]] auto read_file(const std::filesystem::path& file_path,

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace koyote {
+namespace fx {
   template<typename... Args>
   class Event {
   public:

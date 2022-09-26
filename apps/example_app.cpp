@@ -1,7 +1,7 @@
 #include <foxy/framework.hpp>
 REDIRECT_WINMAIN_TO_MAIN
 
-struct ExampleApp: foxy::App {
+struct ExampleApp: fx::App {
   std::string waifu{ "Fubuki" };
   int hololive_members{ 71 };
 
@@ -17,35 +17,35 @@ struct ExampleApp: foxy::App {
 
   void start(App&)
   {
-    koyote::Log::info("My favorite out of all {} hololive members is {}", hololive_members, waifu);
+    fx::Log::info("My favorite out of all {} hololive members is {}", hololive_members, waifu);
   }
 
   void update(App&)
   {
-    const double delta_time{ koyote::Time::delta<koyote::secs>() };
-
+    const double delta_time{ fx::Time::delta<fx::secs>() };
+    
     static double timer{ 0 };
-    static koyote::u64 counter{ 0 };
+    static fx::u64 counter{ 0 };
     if (1. <= (timer += delta_time)) {
-      koyote::Log::info("uwu {} - {}", counter++, timer);
+      fx::Log::info("uwu {} - {}", counter++, timer);
       timer = 0;
     }
   }
 
   void stop(App&)
   {
-    // koyote::Log::fatal("Crash test!");
+    // fx::Log::fatal("Crash test!");
   }
 };
 
 auto main(const int, char**) -> int
 {
   try {
-    koyote::Log::enable_backtrace(32);
+    fx::Log::debug_logging_setup();
     ExampleApp{}.run();
     return EXIT_SUCCESS;
   } catch (const std::exception& e) {
-    koyote::Log::fatal(e.what());
+    fx::Log::fatal(e.what());
     return EXIT_FAILURE;
   }
 }

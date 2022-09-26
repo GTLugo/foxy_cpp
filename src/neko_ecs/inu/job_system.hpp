@@ -11,7 +11,7 @@
 
 #include <BS_thread_pool.hpp>
 
-namespace foxy {
+namespace fx {
   // class JobSystem {
   // public:
   //   JobSystem();

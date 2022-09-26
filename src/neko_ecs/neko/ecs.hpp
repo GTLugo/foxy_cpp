@@ -12,7 +12,7 @@
 // #include "core/ecs/components/component.hpp"
 // #include "core/threading/job_system.hpp"
 
-// namespace foxy {
+// namespace fx {
 //   struct Entity {
 //     friend class ECSManager;
 //   public:

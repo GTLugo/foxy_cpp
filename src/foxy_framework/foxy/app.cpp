@@ -7,19 +7,19 @@
 #include "inu/job_system.hpp"
 #include "neko/ecs.hpp"
 
-namespace foxy {
+namespace fx {
   class App::Impl {
     friend class App;
   public:
     explicit Impl(App& app, const CreateInfo& create_info)
       : app_{app} {
       if (instantiated_) {
-        koyote::Log::fatal("Attempted second instantiation of foxy::App");
+        fx::Log::fatal("Attempted second instantiation of fx::App");
       }
       instantiated_ = true;
-      koyote::Time::init(128, 1024U);
+      fx::Time::init(128, 1024U);
 
-      window_ = std::make_unique<inferno::Window>(inferno::Window::CreateInfo{
+      window_ = std::make_unique<fx::Window>(fx::Window::CreateInfo{
         create_info.title,
         create_info.width,
         create_info.height,
@@ -28,7 +28,7 @@ namespace foxy {
         create_info.borderless,
       });
 
-      renderer_ = std::make_unique<ookami::RenderEngine>(**window_);
+      renderer_ = std::make_unique<fx::RenderEngine>(**window_);
 
       window_->set_hidden(false);
       
@@ -44,7 +44,7 @@ namespace foxy {
       instantiated_ = false;
     }
 
-    void set_user_data(koyote::shared<void> data) {
+    void set_user_data(fx::shared<void> data) {
       user_data_ = std::move(data);
     }
 
@@ -75,7 +75,7 @@ namespace foxy {
       }
     }
 
-    [[nodiscard]] auto user_data() -> koyote::shared<void> {
+    [[nodiscard]] auto user_data() -> fx::shared<void> {
       return user_data_;
     }
 
@@ -90,27 +90,27 @@ namespace foxy {
 
     const double frame_time_goal_{ 1. / 250. };
 
-    koyote::shared<void> user_data_;
+    fx::shared<void> user_data_;
     App& app_;
 
-    koyote::unique<inferno::Window> window_;
-    koyote::unique<ookami::RenderEngine> renderer_;
+    fx::unique<fx::Window> window_;
+    fx::unique<fx::RenderEngine> renderer_;
 
     BS::thread_pool thread_pool_{ std::thread::hardware_concurrency() - 1 };
 
     // Main Thread events
-    koyote::Event<> main_awake_event_;
-    koyote::Event<> main_start_event_;
-    koyote::Event<> main_poll_event_;
-    koyote::Event<> main_update_event_;
-    koyote::Event<> main_stop_event_;
+    fx::Event<> main_awake_event_;
+    fx::Event<> main_start_event_;
+    fx::Event<> main_poll_event_;
+    fx::Event<> main_update_event_;
+    fx::Event<> main_stop_event_;
     // Game Thread events
-    koyote::Event<App&> awake_event_;
-    koyote::Event<App&> start_event_;
-    koyote::Event<App&> early_update_event_;
-    koyote::Event<App&> tick_event_;
-    koyote::Event<App&> late_update_event_;
-    koyote::Event<App&> stop_event_;
+    fx::Event<App&> awake_event_;
+    fx::Event<App&> start_event_;
+    fx::Event<App&> early_update_event_;
+    fx::Event<App&> tick_event_;
+    fx::Event<App&> late_update_event_;
+    fx::Event<App&> stop_event_;
 
     void main_loop() {
       while (!window_->should_stop()) {
@@ -119,13 +119,13 @@ namespace foxy {
     }
 
     void game_loop() {
-      koyote::Log::set_thread_name("game");
+      fx::Log::set_thread_name("game");
 
-      koyote::Log::trace("Starting game thread...");
+      fx::Log::trace("Starting game thread...");
       try {
         awake_event_(app_);
         start_event_(app_);
-        koyote::Time::internal_game_loop(
+        fx::Time::internal_game_loop(
           window_->should_stop(),
           [this]() { // Tick
             tick_event_(app_);
@@ -136,10 +136,10 @@ namespace foxy {
           });
         stop_event_(app_);
       } catch (const std::exception& e) {
-        koyote::Log::error(e.what());
+        fx::Log::error(e.what());
       }
 
-      koyote::Log::trace("Joining game thread...");
+      fx::Log::trace("Joining game thread...");
     }
 
     void awake(App& app) {
@@ -165,7 +165,7 @@ namespace foxy {
     }
 
     void stop(App& app) {
-      // koyote::Log::info("Stop");
+      // fx::Log::info("Stop");
     }
 
     void set_callbacks() {
@@ -180,9 +180,9 @@ namespace foxy {
     }
 
     void show_perf_stats() {
-      static koyote::u32 counter{ 0 };
-      const double frame_time{ koyote::Time::delta<koyote::secs>() };
-      if (counter >= static_cast<koyote::u32>(koyote::Time::tick_rate()) / 2.) {
+      static fx::u32 counter{ 0 };
+      const double frame_time{ fx::Time::delta<fx::secs>() };
+      if (counter >= static_cast<fx::u32>(fx::Time::tick_rate()) / 2.) {
         std::stringstream perf_stats;
 
         perf_stats << "frametime: " 
@@ -211,7 +211,7 @@ namespace foxy {
     p_impl_->run();
   }
 
-  auto App::set_user_data_ptr(koyote::shared<void> data) -> App& {
+  auto App::set_user_data_ptr(fx::shared<void> data) -> App& {
     p_impl_->set_user_data(data);
     return *this;
   }
@@ -226,7 +226,7 @@ namespace foxy {
     return *this;
   }
 
-  auto App::user_data_ptr() -> koyote::shared<void> {
+  auto App::user_data_ptr() -> fx::shared<void> {
     return p_impl_->user_data();
   }
 }
