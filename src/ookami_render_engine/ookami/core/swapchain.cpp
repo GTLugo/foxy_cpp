@@ -7,29 +7,32 @@
 namespace fx {
   class Swapchain::Impl {
   public:
-    explicit Impl(fx::shared<GLFWwindow> window, fx::shared<ookami::Context> context)
+    explicit Impl(shared<GLFWwindow> window, shared<ookami::Context> context)
       : window_{ std::move(window) },
         context_{ std::move(context) },
         swapchain_image_format_{vk::Format::eB8G8R8A8Unorm},
         swapchain_{create_swapchain()},
         swap_images_{swapchain_.getImages()},
         swap_image_views_{create_image_views()} {
-      fx::Log::trace("Created Vulkan swapchain.");
+      Log::trace("Created Vulkan swapchain.");
     }
 
     ~Impl() = default;
 
-
-    auto format() -> vk::Format {
+    [[nodiscard]] auto format() -> vk::Format {
       return swapchain_image_format_;
     }
 
-    auto extent() -> vk::Extent2D {
+    [[nodiscard]] auto extent() -> vk::Extent2D {
       return swapchain_extent_;
     }
+
+    [[nodiscard]] auto image_views() -> std::vector<vk::raii::ImageView>& {
+      return swap_image_views_;
+    }
   private:
-    fx::shared<GLFWwindow> window_;
-    fx::shared<ookami::Context> context_;
+    shared<GLFWwindow> window_;
+    shared<ookami::Context> context_;
 
     vk::Format swapchain_image_format_;
     vk::Extent2D swapchain_extent_;
@@ -64,16 +67,16 @@ namespace fx {
     }
 
     [[nodiscard]] auto pick_swap_extent(const vk::SurfaceCapabilitiesKHR& capabilities) const -> vk::Extent2D {
-      if (capabilities.currentExtent.width != std::numeric_limits<fx::u32>::max()) {
+      if (capabilities.currentExtent.width != std::numeric_limits<u32>::max()) {
         return capabilities.currentExtent;
       }
 
-      fx::ivec2 size{};
+      ivec2 size{};
       glfwGetFramebufferSize(window_.get(), &size.x, &size.y);
 
       const vk::Extent2D true_extent{
-        std::clamp(static_cast<fx::u32>(size.x), capabilities.minImageExtent.width, capabilities.maxImageExtent.width),
-        std::clamp(static_cast<fx::u32>(size.y), capabilities.minImageExtent.height, capabilities.maxImageExtent.height),
+        std::clamp(static_cast<u32>(size.x), capabilities.minImageExtent.width, capabilities.maxImageExtent.width),
+        std::clamp(static_cast<u32>(size.y), capabilities.minImageExtent.height, capabilities.maxImageExtent.height),
       };
 
       return true_extent;
@@ -88,7 +91,7 @@ namespace fx {
       };
       swapchain_image_format_ = swapchain_info.format.format;
 
-      fx::u32 image_count{ std::clamp(
+      u32 image_count{ std::clamp(
         capabilities.minImageCount + 1,
         capabilities.minImageCount,
         capabilities.maxImageCount
@@ -128,7 +131,7 @@ namespace fx {
       try {
         return { context_->logical_device().createSwapchainKHR(swapchain_create_info) };
       } catch (const std::exception& e) {
-        fx::Log::fatal("Failed to create swapchain: ", e.what());
+        Log::fatal("Failed to create swapchain: ", e.what());
         return nullptr;
       }
     }
@@ -168,7 +171,7 @@ namespace fx {
   //  Swapchain
   //
 
-  Swapchain::Swapchain(const fx::shared<GLFWwindow>& window, const fx::shared<ookami::Context>& context)
+  Swapchain::Swapchain(const shared<GLFWwindow>& window, const shared<ookami::Context>& context)
     : p_impl_{std::make_unique<Impl>(window, context)} {}
 
   Swapchain::~Swapchain() = default;
@@ -179,5 +182,9 @@ namespace fx {
 
   auto Swapchain::extent() const -> vk::Extent2D {
     return p_impl_->extent();
+  }
+
+  auto Swapchain::image_views() const -> std::vector<vk::raii::ImageView>& {
+    return p_impl_->image_views();
   }
 }

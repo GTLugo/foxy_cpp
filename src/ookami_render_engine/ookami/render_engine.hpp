@@ -9,10 +9,11 @@ class GLFWwindow;
 namespace fx {
   class RenderEngine {
   public:
-    explicit RenderEngine(fx::shared<GLFWwindow> window);
+    explicit RenderEngine(shared<GLFWwindow> window);
     ~RenderEngine();
 
   private:
-    PIMPL(Impl) pImpl_;
+    class Impl;
+    unique<Impl> p_impl_;
   };
 }

@@ -4,34 +4,32 @@
 
 #include "pipeline.hpp"
 
-#include "ookami/vulkan/context.hpp"
-#include "ookami/vulkan/swapchain.hpp"
-#include "ookami/vulkan/shader.hpp"
-#include "ookami/vulkan/vulkan.hpp"
+#include "context.hpp"
+#include "swapchain.hpp"
+#include "shader.hpp"
+#include "vulkan.hpp"
 
 namespace fx {
   class Pipeline::Impl {
   public:
-    explicit Impl(fx::shared<ookami::Context> context, fx::shared<Swapchain> swap_chain, fx::shared<Shader> shader)
+    explicit Impl(shared<ookami::Context> context, shared<Swapchain> swap_chain, shared<Shader> shader)
       : context_{ std::move(context) },
-        swap_chain_{ std::move(swap_chain) },
+        swapchain_{ std::move(swap_chain) },
         shader_{ std::move(shader) } {
-      fx::Log::trace("Creating Vulkan pipeline...");
+      Log::trace("Creating Vulkan pipeline...");
 
       std::vector<vk::PipelineShaderStageCreateInfo> shader_stages;
-      for (auto [i, stage] = std::tuple<fx::u32, Shader::Kind>{ 0, static_cast<Shader::Kind::Value>(0) }; 
-           i <= Shader::Kind::Max; 
-           ++i, stage = static_cast<Shader::Kind::Value>(i)) {
-        if (shader_->has_stage(stage)) {
+      for (Shader::Kind kind: Shader::Kind::values) {
+        if (shader_->has_stage(kind)) {
           const vk::PipelineShaderStageCreateInfo info{
-            .stage = static_cast<vk::ShaderStageFlagBits>(*stage.to_vk_flag()),
-            .module = *shader_->module(stage),
+            .stage = static_cast<vk::ShaderStageFlagBits>(*kind.to_vk_flag()),
+            .module = *shader_->module(kind),
             .pName = "main",
           };
           shader_stages.push_back(info);
         }
       }
-      fx::Log::trace("Shader stage count: {}", shader_stages.size());
+      Log::trace("Shader stage count: {}", shader_stages.size());
 
       std::vector dynamic_states{
         vk::DynamicState::eViewport,
@@ -39,7 +37,7 @@ namespace fx {
       };
 
       vk::PipelineDynamicStateCreateInfo dynamic_state{
-        .dynamicStateCount = static_cast<fx::u32>(dynamic_states.size()),
+        .dynamicStateCount = static_cast<u32>(dynamic_states.size()),
         .pDynamicStates = dynamic_states.data(),
       };
 
@@ -56,15 +54,15 @@ namespace fx {
       viewport_ = vk::Viewport{
         .x = 0.f,
         .y = 0.f,
-        .width = static_cast<float>(swap_chain_->extent().width),
-        .height = static_cast<float>(swap_chain_->extent().height),
+        .width = static_cast<float>(swapchain_->extent().width),
+        .height = static_cast<float>(swapchain_->extent().height),
         .minDepth = 0.f,
         .maxDepth = 1.f,
       };
 
       scissor_ = vk::Rect2D{
         .offset = { 0, 0 },
-        .extent = swap_chain_->extent()
+        .extent = swapchain_->extent()
       };
 
       vk::PipelineViewportStateCreateInfo viewport_state_info{
@@ -117,13 +115,13 @@ namespace fx {
           }
         );
       } catch (const std::exception& e) {
-        fx::Log::fatal("Failed to create pipeline layout: {}", e.what());
+        Log::fatal("Failed to create pipeline layout: {}", e.what());
       }
 
       render_pass_ = create_render_pass();
 
       vk::GraphicsPipelineCreateInfo pipeline_info{
-        .stageCount = static_cast<fx::u32>(shader_stages.size()),
+        .stageCount = static_cast<u32>(shader_stages.size()),
         .pStages = shader_stages.data(),
         .pVertexInputState = &vertex_input_info,
         .pInputAssemblyState = &input_assembly_info,
@@ -141,28 +139,43 @@ namespace fx {
       try {
         pipeline_ = std::make_unique<vk::raii::Pipeline>(context_->logical_device(), nullptr, pipeline_info);
       } catch (const std::exception& e) {
-        fx::Log::fatal("Failed to create graphics pipeline: {}", e.what());
+        Log::fatal("Failed to create graphics pipeline: {}", e.what());
       }
 
-      fx::Log::trace("Created Vulkan pipeline.");
+      for (const auto& image_view : swapchain_->image_views()) {
+        framebuffers_.emplace_back(
+          context_->logical_device(),
+          vk::FramebufferCreateInfo{
+            .renderPass = **render_pass_,
+            .attachmentCount = 1,
+            .pAttachments = &*image_view,
+            .width = swapchain_->extent().width,
+            .height = swapchain_->extent().height,
+            .layers = 1,
+          });
+      }
+
+      Log::trace("Created Vulkan pipeline.");
     }
 
     ~Impl() = default;
-  private:
-    fx::shared<ookami::Context> context_;
-    fx::shared<Swapchain> swap_chain_;
 
-    fx::shared<Shader> shader_;
+  private:
+    shared<ookami::Context> context_;
+    shared<Swapchain> swapchain_;
+
+    shared<Shader> shader_;
     vk::Viewport viewport_;
     vk::Rect2D scissor_;
     vk::PipelineColorBlendAttachmentState color_blend_attachment_;
-    fx::unique<vk::raii::PipelineLayout> layout_;
-    fx::unique<vk::raii::RenderPass> render_pass_;
-    fx::unique<vk::raii::Pipeline> pipeline_;
+    unique<vk::raii::PipelineLayout> layout_;
+    shared<vk::raii::RenderPass> render_pass_;
+    unique<vk::raii::Pipeline> pipeline_;
+    std::vector<vk::raii::Framebuffer> framebuffers_;
 
-    [[nodiscard]] auto create_render_pass() const -> fx::unique<vk::raii::RenderPass> {
+    [[nodiscard]] auto create_render_pass() const -> unique<vk::raii::RenderPass> {
       vk::AttachmentDescription color_attachment{
-        .format = swap_chain_->format(),
+        .format = swapchain_->format(),
         .samples = vk::SampleCountFlagBits::e1,
         .loadOp = vk::AttachmentLoadOp::eClear,
         .storeOp = vk::AttachmentStoreOp::eStore,
@@ -194,7 +207,7 @@ namespace fx {
           }
         );
       } catch (const std::exception& e) {
-        fx::Log::fatal("Failed to create render pass: {}", e.what());
+        Log::fatal("Failed to create render pass: {}", e.what());
         return nullptr;
       }
     }
@@ -204,7 +217,7 @@ namespace fx {
   //  Pipeline
   //
 
-  Pipeline::Pipeline(fx::shared<ookami::Context> context, fx::shared<Swapchain> swap_chain, fx::shared<Shader> shader)
+  Pipeline::Pipeline(shared<ookami::Context> context, shared<Swapchain> swap_chain, shared<Shader> shader)
     : p_impl_{ std::make_unique<Impl>(std::move(context), std::move(swap_chain), std::move(shader)) } {}
 
   Pipeline::~Pipeline() = default;

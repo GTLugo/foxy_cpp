@@ -78,4 +78,22 @@ namespace fx {
 
   [[nodiscard]] auto read_file(const std::filesystem::path& file_path,
                                std::ios::fmtflags flags = {}) -> std::optional<std::string>;
+
+
+
+  template<typename EnumType, typename EnumValueType, typename Callback>
+  void for_each_enum(Callback&& callback)
+  {
+    for (auto [i, stage] { std::tuple<u32, EnumType>{ 0, static_cast<EnumValueType>(0) } };
+         i <= EnumType::Max;
+         stage = static_cast<EnumValueType>(++i)) {
+      std::forward<Callback>(callback)(stage);
+    }
+  }
+
+  template<typename E, typename Callback>
+  void for_each_enum(Callback&& callback)
+  {
+    for_each_enum<E, E>(std::forward<Callback>(callback));
+  }
 }

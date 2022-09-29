@@ -7,6 +7,10 @@ namespace vk {
   class Extent2D;
 }
 
+namespace vk::raii {
+  class ImageView;
+}
+
 namespace fx::ookami {
   class Context;
 }
@@ -19,8 +23,9 @@ namespace fx {
 
     [[nodiscard]] auto format() const -> vk::Format;
     [[nodiscard]] auto extent() const -> vk::Extent2D;
+    [[nodiscard]] auto image_views() const -> std::vector<vk::raii::ImageView>&;
   private:
     class Impl;
-    fx::unique<Impl> p_impl_;
+    unique<Impl> p_impl_;
   };
 }

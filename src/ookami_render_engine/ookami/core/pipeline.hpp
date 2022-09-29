@@ -4,23 +4,26 @@
 
 #pragma once
 
+namespace vk::raii {
+  class RenderPass;
+}
+
+
+
 namespace fx {
   class Shader;
   class Swapchain;
-}
+  class Framebuffer;
 
-namespace fx::ookami {
-  class Context;
-}
-
-namespace fx {
+  namespace ookami {
+    class Context;
+  }
   class Pipeline {
   public:
     explicit Pipeline(shared<ookami::Context> context, shared<Swapchain> swap_chain, shared<Shader> shader);
     ~Pipeline();
-
   private:
     class Impl;
-    fx::unique<Impl> p_impl_;
+    unique<Impl> p_impl_;
   };
 }  // foxy // vulkan

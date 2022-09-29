@@ -8,10 +8,11 @@ message(STATUS "Configuring ${PROJECT_NAME} sub-project: ${TARGET_NAME}")
 # ===================================================
 set(SOURCE_FILES
     "ookami/render_engine.cpp"
-    "ookami/vulkan/context.cpp"
-    "ookami/vulkan/swapchain.cpp"
-    "ookami/vulkan/pipeline.cpp"
-    "ookami/vulkan/shader.cpp"
+    "ookami/core/context.cpp"
+    "ookami/core/swapchain.cpp"
+    "ookami/core/pipeline.cpp"
+    "ookami/core/shader.cpp"
+    
  )
 add_library(${TARGET_NAME} STATIC ${SOURCE_FILES})
 target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
