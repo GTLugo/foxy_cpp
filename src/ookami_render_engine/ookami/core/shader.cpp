@@ -13,9 +13,9 @@ namespace fx {
     Impl(const vk::raii::Device& device, const CreateInfo& shader_create_info)
     : name_{ shader_create_info.shader_directory.stem().string() }
     {
-      if (load_shader_code(shader_create_info)) {
-        Log::trace("Compiled or read in shader: {}", name_);
-        create_shader_modules(device);
+      if (fetch_shader_bytecode(shader_create_info)) {
+        Log::trace("Fetched shader bytecode: {}", name_);
+        create_shader_modules(shader_create_info, device);
         Log::trace("Shader \"{}\" ready.", name_);
       } else {
         Log::error("Shader \"{}\" failed creation.", name_);
@@ -54,7 +54,7 @@ namespace fx {
 
     static inline const std::string preproc_token_type_{ "#type" };
 
-    [[nodiscard]] auto load_shader_code(const CreateInfo& create_info) -> bool
+    [[nodiscard]] auto fetch_shader_bytecode(const CreateInfo& create_info) -> bool
     {
       bool found_shader{ true };
       namespace fs = std::filesystem;
@@ -66,7 +66,7 @@ namespace fx {
         Log::error("Directory {} does not exist", create_info.shader_directory.string());
       } else {
         if (is_directory(create_info.shader_directory)) {
-          Log::trace("Loading shader from dir: {}", name_);
+          Log::trace("Fetching shader from dir: {}", name_);
 
           for (const auto& kind : Kind::values) {
             if (!create_info.has_kind(kind)) {
@@ -80,7 +80,7 @@ namespace fx {
             }
           }
         } else {
-          Log::error("Failed to load shader from dir: {}", name_);
+          Log::error("Failed to fetch shader from dir: {}", name_);
         }
       }
 
@@ -107,7 +107,7 @@ namespace fx {
           }
         }
 
-        Log::trace("Failed to fetch cached {} for shader \"{}\". Attempting fresh compile.", *kind.to_string(), name_);
+        Log::warn(R"(Failed to fetch valid cached "{}" for shader "{}". Attempting fresh compile.)", *kind.to_string(), name_);
         create_directories(shader_cache_dir);
         return compile_shader_type(in_shader_path, out_shader_path, kind, create_info.disable_optimizations);
       }
@@ -191,7 +191,8 @@ namespace fx {
         std::vector<word32> word_buffer{ array_start, array_start + code_word_count };
 
         if (word_buffer[0] != spirv_magic_number_) {
-          Log::fatal("Invalid SPIR-V binary file magic number: {}", path.string());
+          Log::error("Invalid SPIR-V binary file magic number: {}", path.string());
+          return std::nullopt;
         }
 
         return word_buffer;
@@ -201,26 +202,42 @@ namespace fx {
       return std::nullopt;
     }
 
-    void create_shader_modules(const vk::raii::Device& device)
+    void create_shader_modules(const CreateInfo& shader_create_info, const vk::raii::Device& device)
     {
       Log::trace("Building shader modules: {}...", name_);
 
-      for (const auto& kind: Kind::values) {
+      for (const Kind& kind: Kind::values) {
         if (bytecode_.contains(kind)) {
-          const vk::ShaderModuleCreateInfo create_info{
-            .codeSize = bytecode_.at(kind).size() * 4,
-            .pCode = reinterpret_cast<const u32*>(bytecode_.at(kind).data())
-          };
+          for (u32 attempt_num{ 0 }; attempt_num < 2; ++attempt_num) {
+            const vk::ShaderModuleCreateInfo module_create_info{
+              .codeSize = bytecode_.at(kind).size() * 4,
+              .pCode = reinterpret_cast<const u32*>(bytecode_.at(kind).data())
+            };
 
-          try {
-            shader_modules_.emplace(kind, device.createShaderModule(create_info));
-          } catch (const std::exception& e) {
-            Log::error(e.what());
+            try {
+              shader_modules_.emplace(kind, device.createShaderModule(module_create_info));
+            } catch (const std::exception& e) {
+              Log::error("Shader module creation failure, attempting to recompile ({})", e.what());
+
+              if (attempt_num == 0) {
+                namespace fs = std::filesystem;
+                const fs::path shader_cache_dir{
+                  fs::path{ "tmp" } / fs::path{ "shader_cache" } / relative(
+                    shader_create_info.shader_directory, {"res/foxy/shaders"}
+                  ).parent_path() / shader_create_info.shader_directory.stem()
+                };
+                const fs::path in_shader_path{ shader_create_info.shader_directory / fs::path{ *kind.to_string() + ".hlsl" } };
+                const fs::path out_shader_path{ shader_cache_dir / fs::path{ *kind.to_string() + ".spv" } };
+                bytecode_[kind] = *compile_shader_type(in_shader_path, out_shader_path, kind, shader_create_info.disable_optimizations);
+              } else {
+                Log::error("Could not recover from shader module creation failure ({})", e.what());
+              }
+            }
           }
         }
       }
 
-      Log::trace("Created shader modules: {}", name_);
+      Log::trace("Built shader modules: {}", name_);
     }
   };
 
