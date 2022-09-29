@@ -31,10 +31,6 @@ struct ExampleApp : fx::App {
     static double timer{ 0 };
     static fx::u64 counter{ 1 };
     if (1. <= (timer += delta_time)) {
-      if (counter > 10) {
-        counter = 1;
-      }
-
       std::string extra_message{};
       if (counter == 10) {
         extra_message = ", kawaii~oooh! ...chan!";
@@ -43,6 +39,10 @@ struct ExampleApp : fx::App {
       }
 
       fx::Log::info("{} fox{}", counter++, extra_message);
+
+      if (counter > 10) {
+        counter = 1;
+      }
       timer = 0;
     }
   }
