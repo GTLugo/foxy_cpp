@@ -68,7 +68,7 @@ namespace fx {
         if (is_directory(create_info.shader_directory)) {
           Log::trace("Fetching shader from dir: {}", name_);
 
-          for (const auto& kind : Kind::values) {
+          for (Kind kind : Kind::values) {
             if (!create_info.has_kind(kind)) {
               continue;
             }
@@ -148,7 +148,7 @@ namespace fx {
         const std::vector<u32> spv{ result.begin(), result.end() };
 
         if (std::ofstream spv_file{ out_file, std::ios::out | std::ios::binary }; spv_file.is_open()) {
-          const std::streamsize spv_byte_count{ static_cast<u32>(spv.size() * 4) };
+          const std::streamsize spv_byte_count{ static_cast<std::streamsize>(spv.size() * 4) };
           spv_file.write(reinterpret_cast<const char*>(spv.data()), spv_byte_count);
         } else {
           Log::error("Could not write to output shader file.");
@@ -178,15 +178,14 @@ namespace fx {
     [[nodiscard]] static auto read_spv(const std::filesystem::path& path) -> std::optional<std::vector<word32>>
     {
       if (std::ifstream file{ path, std::ios::in | std::ios::binary }; file.is_open()) {
-        const std::streamsize size{ static_cast<u32>(file_size(path)) };
-        Log::info("Shader read file size: {}", size);
+        const std::streamsize size{ static_cast<std::streamsize>(file_size(path)) };
 
         // Read file
         std::vector<byte8> byte_buffer(size);
         file.read(reinterpret_cast<char*>(byte_buffer.data()), size);
 
         // Convert to words
-        const std::streamsize code_word_count{ static_cast<u32>(byte_buffer.size() / 4) };
+        const std::streamsize code_word_count{ static_cast<std::streamsize>(byte_buffer.size() / 4) };
         const auto array_start{ reinterpret_cast<u32*>(byte_buffer.data()) };
         std::vector<word32> word_buffer{ array_start, array_start + code_word_count };
 
@@ -206,7 +205,7 @@ namespace fx {
     {
       Log::trace("Building shader modules: {}...", name_);
 
-      for (const Kind& kind: Kind::values) {
+      for (Kind kind: Kind::values) {
         if (bytecode_.contains(kind)) {
           for (u32 attempt_num{ 0 }; attempt_num < 2; ++attempt_num) {
             const vk::ShaderModuleCreateInfo module_create_info{
