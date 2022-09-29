@@ -8,8 +8,6 @@ namespace vk::raii {
   class RenderPass;
 }
 
-
-
 namespace fx {
   class Shader;
   class Swapchain;
@@ -18,6 +16,7 @@ namespace fx {
   namespace ookami {
     class Context;
   }
+
   class Pipeline {
   public:
     explicit Pipeline(shared<ookami::Context> context, shared<Swapchain> swap_chain, shared<Shader> shader);

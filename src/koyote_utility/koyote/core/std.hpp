@@ -16,9 +16,10 @@ namespace fx {
   using u64 = std::uint64_t;
 
   struct uuid: UUIDv4::UUID {
-    uuid() : UUID{ generate() } {}
+    uuid(): UUID{ generate() } {}
   private:
-    [[nodiscard]] static auto generate() -> UUIDv4::UUID {
+    [[nodiscard]] static auto generate() -> UUID
+    {
       static UUIDv4::UUIDGenerator<std::mt19937_64> gen{};
       return gen.getUUID();
     }
