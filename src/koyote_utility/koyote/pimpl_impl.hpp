@@ -1,6 +1,6 @@
 #pragma once
 
-namespace koyote {
+namespace fx {
   template<typename T>
   pimpl<T>::pimpl()
     : ptr_{ std::make_unique<T>() } { }
