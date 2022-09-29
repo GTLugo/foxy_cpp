@@ -4,8 +4,8 @@
 #include <uuid_v4.h>
 
 namespace fx {
-  using byte8 = std::uint8_t;
-  using word32 = std::uint32_t;
+  using byte = std::uint8_t;
+  using word = std::uint32_t;
   using i8 = std::int8_t;
   using u8 = std::uint8_t;
   using i16 = std::int16_t;
