@@ -14,18 +14,18 @@ namespace fx {
   public:
     class Kind {
     public:
-      enum Value: fx::u32 {
+      enum Value: u32 {
         Vertex   = 0,
         Fragment = 1,
         Compute  = 2,
         Geometry = 3,
-
-        Max = Geometry,
       };
 
+      static inline const std::array values{ Vertex, Fragment, Compute, Geometry };
+
       Kind() = default;
-      constexpr Kind(const Value value)
-        : value_{ value } { }
+      constexpr Kind(const Value value):
+        value_{ value } { }
 
       constexpr operator Value() const { return value_; }
       explicit operator bool() const = delete;
@@ -34,15 +34,10 @@ namespace fx {
 
       [[nodiscard]] static constexpr auto from_string(std::string_view str) -> std::optional<Kind>;
       [[nodiscard]] constexpr auto to_string() const -> std::optional<std::string>;
-      [[nodiscard]] constexpr auto to_shaderc() const -> std::optional<fx::i32>;
-      [[nodiscard]] auto to_vk_flag() const->std::optional<fx::i32>; // This cannot be constexpr or inline without introducing a linker error
+      [[nodiscard]] constexpr auto to_shaderc() const -> std::optional<i32>;
+      [[nodiscard]] auto to_vk_flag() const->std::optional<i32>; // This cannot be constexpr or inline without introducing a linker error
 
       [[nodiscard]] constexpr auto underlying_value() const -> Value { return value_; }
-
-      template<typename... Args>
-      [[nodiscard]] static constexpr auto bits(Args&&... args) -> fx::u32 {
-        return (BIT(args) | ...);
-      }
 
     private:
       Value value_;
@@ -73,8 +68,6 @@ namespace fx {
       }
     };
 
-    using bit_flags = std::bitset<Kind::Max + 1>;
-
     explicit Shader(const vk::raii::Device& device, const CreateInfo& shader_create_info);
     ~Shader();
 
@@ -82,19 +75,12 @@ namespace fx {
     [[nodiscard]] auto has_stage(Kind stage) const -> bool;
 
     // This cannot be constexpr or inline without introducing a linker error
-    [[nodiscard]] static auto kind_to_vk_flag(const Kind kind) -> std::optional<fx::i32>;
+    [[nodiscard]] static auto kind_to_vk_flag(const Kind kind) -> std::optional<i32>;
   private:
     class Impl;
-    fx::unique<Impl> p_impl_;
+    unique<Impl> p_impl_;
   };
 }
-
-// Shader::bit_flags{ Shader::Kind::bits(Shader::Kind::Vertex, Shader::Kind::Fragment) } // this is how to write it without macros
-// Shader::bit_flags{ OOKAMI_SHADER_VERTEX | OOKAMI_SHADER_FRAGMENT }, // this is another way to write it with macros
-#define OOKAMI_SHADER_VERTEX   BIT(Shader::Kind::Vertex)
-#define OOKAMI_SHADER_FRAGMENT BIT(Shader::Kind::Fragment)
-#define OOKAMI_SHADER_COMPUTE  BIT(Shader::Kind::Compute)
-#define OOKAMI_SHADER_GEOMETRY BIT(Shader::Kind::Geometry)
 
 template<>
 struct std::hash<fx::Shader::Kind> {
