@@ -100,6 +100,10 @@ namespace fx {
     static void enable_backtrace(fx::u32 count);
     static void dump_backtrace();
 
+    /**
+     * \brief This is only necessary if you wish to enable
+     * backtrace and full logging in debug mode.
+     */
     static void debug_logging_setup() {
     #if defined(FOXY_DEBUG_MODE)
       fx::Log::enable_backtrace(32);
