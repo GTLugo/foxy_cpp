@@ -37,17 +37,17 @@ namespace fx {
         }
       );
 
-      auto fixed_shader = std::make_shared<Shader>(
+      auto fixed_value_shader = std::make_shared<Shader>(
         context_->logical_device(),
         Shader::CreateInfo{
           .vertex = true,
           .fragment = true,
-          .shader_directory = "res/foxy/shaders/fixed"
+          .shader_directory = "res/foxy/shaders/fixed_value"
         }
       );
 
       Log::info("Shader loading complete! ({} s)", sw.get_time_elapsed<secs>());
-      pipeline_ = std::make_shared<Pipeline>(context_, swapchain_, fixed_shader);
+      pipeline_ = std::make_shared<Pipeline>(context_, swapchain_, fixed_value_shader);
 
       Log::trace("Ookami Render Engine ready.");
     }
