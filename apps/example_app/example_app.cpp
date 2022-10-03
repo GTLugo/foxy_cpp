@@ -1,7 +1,7 @@
 #include <foxy/framework.hpp>
 REDIRECT_WINMAIN_TO_MAIN
 
-struct ExampleApp : fx::App {
+struct ExampleApp: fx::App {
   using Time = fx::Time;
   
   std::string waifu{ "Fubuki" };

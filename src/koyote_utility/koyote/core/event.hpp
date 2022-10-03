@@ -6,7 +6,7 @@ namespace fx {
   public:
     template<typename Callback>
     void add_callback(Callback&& callback) {
-      handler_functions_.push_back(std::forward<Callback>(callback));
+      handler_functions_.push_back(std::forward<decltype(callback)>(callback));
     }
 
     void operator()(Args... args) {

@@ -27,6 +27,7 @@ namespace fx {
     start_callback(time);
     while (!stop_flag) {
       while (time.should_do_tick()) {
+        tick_callback(time);
         time.internal_tick();
       }
       update_callback(time);

@@ -10,6 +10,7 @@ message(STATUS "Configuring: ${PROJECT_NAME}")
 # CONFIGURATION
 # ===================================================
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+  set(FOXY_PERF_TITLE ON)
   set(ignoreMe "${CMAKE_TOOLCHAIN_FILE}${Boost_NO_WARN_NEW_VERSIONS}")
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/out/bin/$<CONFIG>/${CMAKE_SYSTEM_NAME}")
   if(WIN32)
