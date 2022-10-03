@@ -178,7 +178,7 @@ namespace fx {
     
     void tick(App& app, const Time& time)
     {
-      #if defined(FOXY_DEBUG_MODE) and defined(FOXY_PERF_TITLE)
+      #if defined(FOXY_PERF_TITLE)
       show_perf_stats(time);
       #endif
     }
@@ -245,7 +245,7 @@ namespace fx {
                    << std::defaultfloat << std::setfill(' ') << std::setw(9) << std::setprecision(4)
                    << (frame_time / frame_time_goal_) * 100. << '%';
         
-        // FOXY_DEBUG << "PERF STATS | " << perf_stats.str();
+        // Log::debug("PERF STATS | {}", perf_stats.str());
         window_->set_subtitle(perf_stats.str());
         counter = 0;
       } else {

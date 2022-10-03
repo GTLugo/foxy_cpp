@@ -6,7 +6,7 @@ message(STATUS "Configuring ${PROJECT_NAME} internal project: ${TARGET_NAME}")
 # ===================================================
 # CONFIGURATION
 # ===================================================
-option(FOXY_PERF_TITLE "Performance stats displayed in title" ON)
+option(FOXY_PERF_TITLE "Performance stats displayed in title" OFF)
 
 # ===================================================
 # LIBRARY
