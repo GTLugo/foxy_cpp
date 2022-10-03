@@ -9,8 +9,11 @@ class GLFWwindow;
 namespace fx {
   class RenderEngine {
   public:
-    explicit RenderEngine(shared<GLFWwindow> window);
+    explicit RenderEngine(const shared<GLFWwindow>& window);
     ~RenderEngine();
+    
+    void submit();
+    void draw_frame();
 
   private:
     class Impl;

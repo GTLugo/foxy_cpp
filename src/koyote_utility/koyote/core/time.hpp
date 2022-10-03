@@ -52,22 +52,11 @@ namespace fx {
     }
   private:
     time_point start_{};
-  };
+  }; // Stopwatch
 
   class Time {
+    friend class GameLoop;
   public:
-    template<typename F1, typename F2>
-    static void internal_game_loop(const bool& stop_flag, F1&& tick_function, F2&& update_function) {
-      while (!stop_flag) {
-        while (should_do_tick()) {
-          std::forward<F1>(tick_function)();
-          internal_tick();
-        }
-        std::forward<F2>(update_function)();
-        internal_update();
-      }
-    }
-
     static void init(double tick_rate = 128., u32 bail_count = 1024U) {
       // This is awful and messy, but it'll prevent anyone outside the App class
       // from reinitializing Time, which would cause the engine, the app, life,
@@ -179,5 +168,32 @@ namespace fx {
       lag_ -= fixed_time_step_;
       ++step_count_;
     }
-  };
+  }; // Time
+  
+  /**
+   * @brief You may one have one GameLoop active at any one time. Having multiple is NOT thread-safe for time data.
+   */
+  class GameLoop {
+  public:
+    struct CreateInfo{
+      const bool& stop_flag{ false };
+      std::function<void()> tick_callback{ []{} };
+      std::function<void()> update_callback{ []{} };
+    };
+    
+    static void run(const CreateInfo& game_loop) {
+      if (Time::virgin_) {
+        Time::init();
+      }
+      
+      while (!game_loop.stop_flag) {
+        while (Time::should_do_tick()) {
+          game_loop.tick_callback();
+          Time::internal_tick();
+        }
+        game_loop.update_callback();
+        Time::internal_update();
+      }
+    }
+  }; // GameLoop
 } // fx
