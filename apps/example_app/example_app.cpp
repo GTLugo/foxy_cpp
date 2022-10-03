@@ -2,6 +2,8 @@
 REDIRECT_WINMAIN_TO_MAIN
 
 struct ExampleApp : fx::App {
+  using Time = fx::Time;
+  
   std::string waifu{ "Fubuki" };
   int hololive_members{ 71 };
   bool crash_test{ false };
@@ -19,14 +21,14 @@ struct ExampleApp : fx::App {
     add_function_to_stage(Stage::Asleep, FOXY_LAMBDA(asleep));
   }
 
-  void start(App&)
+  void start(App&, const Time&)
   {
     fx::Log::info("My favorite out of all {} hololive members is {}", hololive_members, waifu);
   }
 
-  void update(App&)
+  void update(App&, const Time& time)
   {
-    const double delta_time{ fx::Time::delta<fx::secs>() };
+    const double delta_time{ time.delta<fx::secs>() };
 
     static double timer{ 0 };
     static fx::u64 counter{ 1 };
@@ -47,14 +49,14 @@ struct ExampleApp : fx::App {
     }
   }
 
-  void stop(App&)
+  void stop(App&, const Time&)
   {
     if (crash_test) {
       fx::Log::info("Crash test incoming...");
     }
   }
 
-  void asleep(App&)
+  void asleep(App&, const Time&)
   {
     if (crash_test) {
       fx::Log::fatal("Crash test!");

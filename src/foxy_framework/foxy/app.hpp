@@ -31,10 +31,12 @@ namespace fx {
       Asleep,
     };
 
-    using StageCallback = std::function<void(App&)>;
+    using StageCallback = std::function<void(App&, const Time&)>;
 
     explicit App(CreateInfo&& create_info);
     ~App();
+  
+    auto operator()() -> void;
 
     void run();
 

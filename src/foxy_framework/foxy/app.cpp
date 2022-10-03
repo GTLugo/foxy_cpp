@@ -19,7 +19,6 @@ namespace fx {
         Log::fatal("Attempted second instantiation of fx::App");
       }
       instantiated_ = true;
-      Time::init(128, 1024U);
       
       window_ = std::make_unique<Window>(
         Window::CreateInfo{
@@ -85,123 +84,138 @@ namespace fx {
     BS::thread_pool thread_pool_{ std::thread::hardware_concurrency() - 1 };
     
     // Main Thread events
-    Event<> main_awake_event_;
-    Event<> main_start_event_;
-    Event<> main_poll_event_;
-    Event<> main_update_event_;
-    Event<> main_stop_event_;
+    Event<const Time&> main_awake_event_;
+    Event<const Time&> main_start_event_;
+    Event<const Time&> main_poll_event_;
+    Event<const Time&> main_update_event_;
+    Event<const Time&> main_stop_event_;
     // Game Thread events
-    Event<App&> awake_event_;
-    Event<App&> start_event_;
-    Event<App&> early_tick_event_;
-    Event<App&> tick_event_;
-    Event<App&> late_tick_event_;
-    Event<App&> early_update_event_;
-    Event<App&> update_event_;
-    Event<App&> late_update_event_;
-    Event<App&> stop_event_;
-    Event<App&> asleep_event_;
+    Event<App&, const Time&> awake_event_;
+    Event<App&, const Time&> start_event_;
+    Event<App&, const Time&> early_tick_event_;
+    Event<App&, const Time&> tick_event_;
+    Event<App&, const Time&> late_tick_event_;
+    Event<App&, const Time&> early_update_event_;
+    Event<App&, const Time&> update_event_;
+    Event<App&, const Time&> late_update_event_;
+    Event<App&, const Time&> stop_event_;
+    Event<App&, const Time&> asleep_event_;
     
-    Event<App&> reserved_event_;
+    Event<App&, const Time&> reserved_event_;
     
   private:
     void main_loop()
     {
-      main_awake_event_();
-      main_start_event_();
-      while (!window_->should_stop()) {
-        main_poll_event_();
-        main_update_event_();
-      }
-      main_stop_event_();
+      GameLoop{
+        GameLoop::CreateInfo{
+          .stop_flag = window_->should_stop(),
+          .start = [this](const Time& time) {
+            main_awake_event_(time);
+            main_start_event_(time);
+          },
+          .update = [this](const Time& time) { // Update
+            main_poll_event_(time);
+            main_update_event_(time);
+          },
+          .stop = [this](const Time& time) {
+            main_stop_event_(time);
+          }
+        }
+      }();
     }
     
     void game_loop()
     {
       Log::set_thread_name("game");
       Log::trace("Starting game thread...");
+      
       try {
-        awake_event_(app_);
-        start_event_(app_);
-        GameLoop::run(
+        GameLoop{
           GameLoop::CreateInfo{
             .stop_flag = window_->should_stop(),
-            .tick_callback = [this] { // Tick
-              early_tick_event_(app_);
-              tick_event_(app_);
-              late_tick_event_(app_);
+            .start = [this](const Time& time) {
+              awake_event_(app_, time);
+              start_event_(app_, time);
             },
-            .update_callback = [this] { // Update
-              early_update_event_(app_);
-              update_event_(app_);
-              late_update_event_(app_);
+            .tick = [this](const Time& time) { // Tick
+              early_tick_event_(app_, time);
+              tick_event_(app_, time);
+              late_tick_event_(app_, time);
+            },
+            .update = [this](const Time& time) { // Update
+              early_update_event_(app_, time);
+              update_event_(app_, time);
+              late_update_event_(app_, time);
               render_engine_->draw_frame();
+            },
+            .stop = [this](const Time& time) {
+              stop_event_(app_, time);
+              asleep_event_(app_, time);
             }
           }
-        );
-        stop_event_(app_);
-        asleep_event_(app_);
+        }();
       } catch (const std::exception& e) {
         Log::error(e.what());
       }
-      Log::trace("Joining game thread...");
+      
+      Log::trace("Joining game thread into main thread...");
     }
     
-    void awake(App& app)
+    void awake(App& app, const Time& time)
     {
     
     }
     
-    void start(App& app)
+    void start(App& app, const Time& time)
     {
     
     }
     
-    void early_tick(App& app)
+    void early_tick(App& app, const Time& time)
     {
     
     }
     
-    void tick(App& app)
+    void tick(App& app, const Time& time)
     {
       #if defined(FOXY_DEBUG_MODE) and defined(FOXY_PERF_TITLE)
-      show_perf_stats();
+      show_perf_stats(time);
       #endif
     }
     
-    void late_tick(App& app)
+    void late_tick(App& app, const Time& time)
     {
     
     }
     
-    void early_update(App& app)
+    void early_update(App& app, const Time& time)
     {
     
     }
     
-    void update(App& app)
+    void update(App& app, const Time& time)
     {
     
     }
     
-    void late_update(App& app)
+    void late_update(App& app, const Time& time)
     {
     
     }
     
-    void stop(App& app)
+    void stop(App& app, const Time& time)
     {
     
     }
     
-    void asleep(App& app)
+    void asleep(App& app, const Time& time)
     {
     
     }
     
     void set_callbacks()
     {
-      main_poll_event_.add_callback(FOXY_LAMBDA(window_->poll_events));
+      main_poll_event_.add_callback([this](const Time& time){ window_->poll_events(); });
       
       awake_event_.add_callback(FOXY_LAMBDA(awake));
       start_event_.add_callback(FOXY_LAMBDA(start));
@@ -218,11 +232,11 @@ namespace fx {
       asleep_event_.add_callback(FOXY_LAMBDA(asleep));
     }
     
-    void show_perf_stats()
+    void show_perf_stats(const Time& time)
     {
       static u32 counter{ 0 };
-      const double frame_time{ Time::delta<secs>() };
-      if (counter >= static_cast<u32>(Time::tick_rate()) / 4.) {
+      const double frame_time{ time.delta<secs>() };
+      if (counter >= static_cast<u32>(time.tick_rate()) / 4.) {
         std::stringstream perf_stats;
         
         perf_stats << "frametime: "
@@ -239,7 +253,7 @@ namespace fx {
       }
     }
     
-    [[nodiscard]] constexpr auto stage_callback(const Stage stage) -> Event<App&>&
+    [[nodiscard]] constexpr auto stage_callback(const Stage stage) -> Event<App&, const Time&>&
     {
       switch (stage) {
         case Stage::Awake:
@@ -298,5 +312,10 @@ namespace fx {
   auto App::user_data_ptr() -> shared<void>
   {
     return p_impl_->user_data();
+  }
+  
+  auto App::operator()() -> void
+  {
+    return p_impl_->run();
   }
 }

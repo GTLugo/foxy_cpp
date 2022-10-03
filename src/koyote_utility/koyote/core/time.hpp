@@ -57,13 +57,7 @@ namespace fx {
   class Time {
     friend class GameLoop;
   public:
-    static void init(double tick_rate = 128., u32 bail_count = 1024U) {
-      // This is awful and messy, but it'll prevent anyone outside the App class
-      // from reinitializing Time, which would cause the engine, the app, life,
-      // the universe, and all catgirls to die.
-      if (!virgin_) return;
-      fx::Log::trace("Initializing Time...");
-
+    Time(double tick_rate = 128., u32 bail_count = 1024U) {
       tick_rate_ = tick_rate;
       bail_count_ = bail_count;
       game_last_ = time_point{clock_steady::now()};
@@ -80,32 +74,22 @@ namespace fx {
 //    }
 //    ~Time() = default;
 
-    [[nodiscard]] static double tick_rate() {
+    [[nodiscard]] double tick_rate() const {
       return tick_rate_;
     }
 
     template<class Duration>
-    [[nodiscard]] static double fixed_step() {
+    [[nodiscard]] double fixed_step() const {
       return Duration{fixed_time_step_}.count();
     }
 
-    template<class Duration>
-    [[nodiscard]] static double start() {
-      return stopwatch().start_time<Duration>();
-    }
-
-    template<class Duration>
-    [[nodiscard]] static double since_start() {
-      return stopwatch().get_time_elapsed<Duration>();
-    }
-
     template<typename Duration>
-    [[nodiscard]] static double now() {
+    [[nodiscard]] double now() const {
       return Duration{clock_steady::now().time_since_epoch()}.count();
     }
 
     template<class Duration>
-    [[nodiscard]] static double delta() {
+    [[nodiscard]] double delta() const {
       return Duration{delta_}.count();
     }
 
@@ -114,13 +98,13 @@ namespace fx {
     // }
 
     template<class Duration>
-    [[nodiscard]] static double lag() {
+    [[nodiscard]] double lag() const {
       return Duration{lag_}.count();
     }
     
     // These should NEVER be called from anywhere other than the internal app class.
 
-    [[nodiscard]] static bool should_do_tick() {
+    [[nodiscard]] bool should_do_tick() const {
       if (step_count_ >= bail_count_) {
         fx::Log::warn("Struggling to catch up with physics rate.");
       }
@@ -128,28 +112,22 @@ namespace fx {
       return lag_.count() >= fixed_time_step_.count() && step_count_ < bail_count_;
     }
   private:
-    static inline bool virgin_{true};
     // fixed number of ticks per second. this will be used for physics and anything else in fixed update
-    static inline double tick_rate_{};
-    static inline secs fixed_time_step_{};
+    double tick_rate_{};
+    secs fixed_time_step_{};
     // bail out of the fixed updates if iterations exceeds this amount to prevent lockups
     // on extremely slow systems where tick time may exceed fixed time step
-    static inline u32 bail_count_{};
+    u32 bail_count_{};
 
-    static inline time_point game_last_{}; // when last frame started
-    static inline time_point game_current_{}; // when this frame started
-    static inline secs delta_{secs{1. / 60.}}; // how much time last frame took
-    static inline secs lag_{secs::zero()}; // how far behind the game is from real world
-    static inline u32 step_count_{0U};
+    time_point game_last_{}; // when last frame started
+    time_point game_current_{}; // when this frame started
+    secs delta_{secs{1. / 60.}}; // how much time last frame took
+    secs lag_{secs::zero()}; // how far behind the game is from real world
+    u32 step_count_{0U};
 
     //static inline std::deque<double> last_few_frame_times_{};
 
-    static const Stopwatch& stopwatch() {
-      static const Stopwatch sw{clock_steady::now()};
-      return sw;
-    };
-
-    static void internal_update() {
+    void internal_update() {
       // FLUGEL_ENGINE_TRACE("Update!");
       game_current_ = clock_steady::now();
       // Seconds::duration()
@@ -163,37 +141,37 @@ namespace fx {
       step_count_ = 0U;
     }
 
-    static void internal_tick() {
+    void internal_tick() {
       // FLUGEL_ENGINE_TRACE("Tick!");
       lag_ -= fixed_time_step_;
       ++step_count_;
     }
   }; // Time
   
-  /**
-   * @brief You may one have one GameLoop active at any one time. Having multiple is NOT thread-safe for time data.
-   */
   class GameLoop {
   public:
-    struct CreateInfo{
+    struct CreateInfo {
+      const double tick_rate{ 128. };
+      const u32 bail_count{ 1024U };
       const bool& stop_flag{ false };
-      std::function<void()> tick_callback{ []{} };
-      std::function<void()> update_callback{ []{} };
+      std::function<void(const Time&)> start{ [](const Time&){} };
+      std::function<void(const Time&)> tick{ [](const Time&){} };
+      std::function<void(const Time&)> update{ [](const Time&){} };
+      std::function<void(const Time&)> stop{ [](const Time&){} };
     };
     
-    static void run(const CreateInfo& game_loop) {
-      if (Time::virgin_) {
-        Time::init();
-      }
-      
-      while (!game_loop.stop_flag) {
-        while (Time::should_do_tick()) {
-          game_loop.tick_callback();
-          Time::internal_tick();
-        }
-        game_loop.update_callback();
-        Time::internal_update();
-      }
-    }
+    explicit GameLoop(const CreateInfo& game_loop);
+  
+    auto operator()() -> GameLoop;
+    
+    void run();
+    
+  private:
+    Time time;
+    const bool& stop_flag;
+    std::function<void(const Time&)> start_callback;
+    std::function<void(const Time&)> tick_callback;
+    std::function<void(const Time&)> update_callback;
+    std::function<void(const Time&)> stop_callback;
   }; // GameLoop
 } // fx
