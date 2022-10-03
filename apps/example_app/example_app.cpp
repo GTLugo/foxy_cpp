@@ -28,11 +28,9 @@ struct ExampleApp : fx::App {
 
   void update(App&, const Time& time)
   {
-    const double delta_time{ time.delta<fx::secs>() };
-
     static double timer{ 0 };
     static fx::u64 counter{ 1 };
-    if (1. <= (timer += delta_time)) {
+    if (1. <= (timer += time.delta<fx::secs>())) {
       std::string extra_message{};
       if (counter == 10) {
         extra_message = ", kawaii~oooh! ...chan!";
