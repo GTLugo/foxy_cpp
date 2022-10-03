@@ -1,6 +1,13 @@
 #include "time.hpp"
 
 namespace fx {
+  Time::Time(double tick_rate, u32 bail_count):
+    tick_rate_ { tick_rate },
+    bail_count_ { bail_count },
+    game_last_ { time_point{clock_steady::now()} },
+    game_current_ { time_point{clock_steady::now()} },
+    fixed_time_step_ { secs{1. / tick_rate_} } {}
+    
   GameLoop::GameLoop(const GameLoop::CreateInfo& game_loop):
     time{ game_loop.tick_rate, game_loop.bail_count },
     stop_flag{ game_loop.stop_flag },

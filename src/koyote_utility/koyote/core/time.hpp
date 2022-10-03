@@ -57,22 +57,8 @@ namespace fx {
   class Time {
     friend class GameLoop;
   public:
-    Time(double tick_rate = 128., u32 bail_count = 1024U) {
-      tick_rate_ = tick_rate;
-      bail_count_ = bail_count;
-      game_last_ = time_point{clock_steady::now()};
-      game_current_ = time_point{clock_steady::now()};
-      fixed_time_step_ = secs{1. / tick_rate_};
-    }
-//    explicit Time(double tickRate, uint32_t bailCount = 1024U)
-//      : tickRate_{tickRate},
-//        bailCount_{bailCount},
-//        stopwatch_{ClockSteady::now()},
-//        gameLast_{ClockSteady::now()},
-//        gameCurrent_{ClockSteady::now()} {
-//      fixedTimeStep_ = Seconds{1. / tickRate_};
-//    }
-//    ~Time() = default;
+    Time(double tick_rate = 128., u32 bail_count = 1024U);
+    ~Time() = default;
 
     [[nodiscard]] double tick_rate() const {
       return tick_rate_;
@@ -161,6 +147,7 @@ namespace fx {
     };
     
     explicit GameLoop(const CreateInfo& game_loop);
+    ~GameLoop() = default;
   
     auto operator()() -> GameLoop;
     
