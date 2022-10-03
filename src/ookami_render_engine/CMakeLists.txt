@@ -12,8 +12,8 @@ set(SOURCE_FILES
     "ookami/core/swapchain.cpp"
     "ookami/core/pipeline.cpp"
     "ookami/core/shader.cpp"
-    
- )
+    "ookami/core/low_level_renderer.cpp")
+
 add_library(${TARGET_NAME} STATIC ${SOURCE_FILES})
 target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
 target_compile_options(${TARGET_NAME} PRIVATE "/bigobj" "/std:c++latest" "/experimental:module")

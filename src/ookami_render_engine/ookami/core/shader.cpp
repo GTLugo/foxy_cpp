@@ -46,10 +46,10 @@ namespace fx {
       return std::nullopt;
     }
   private:
-    static constexpr inline word32 spirv_magic_number_{ 0x07230203 };
+    static constexpr inline word spirv_magic_number_{ 0x07230203 };
 
     std::string name_;
-    std::unordered_map<Kind, std::vector<u32>> bytecode_;
+    std::unordered_map<Kind, std::vector<word>> bytecode_;
     std::unordered_map<Kind, vk::raii::ShaderModule> shader_modules_;
 
     static inline const std::string preproc_token_type_{ "#type" };
@@ -91,7 +91,7 @@ namespace fx {
       const CreateInfo& create_info, 
       const Kind kind, 
       const std::filesystem::path& shader_cache_dir
-    ) -> std::optional<std::vector<word32>>
+    ) -> std::optional<std::vector<word>>
     {
       namespace fs = std::filesystem;
       const fs::path in_shader_path{ create_info.shader_directory / fs::path{ *kind.to_string() + ".hlsl" } };
@@ -175,19 +175,19 @@ namespace fx {
       }
     }
 
-    [[nodiscard]] static auto read_spv(const std::filesystem::path& path) -> std::optional<std::vector<word32>>
+    [[nodiscard]] static auto read_spv(const std::filesystem::path& path) -> std::optional<std::vector<word>>
     {
       if (std::ifstream file{ path, std::ios::in | std::ios::binary }; file.is_open()) {
         const std::streamsize size{ static_cast<std::streamsize>(file_size(path)) };
 
         // Read file
-        std::vector<byte8> byte_buffer(size);
+        std::vector<byte> byte_buffer(size);
         file.read(reinterpret_cast<char*>(byte_buffer.data()), size);
 
         // Convert to words
         const std::streamsize code_word_count{ static_cast<std::streamsize>(byte_buffer.size() / 4) };
         const auto array_start{ reinterpret_cast<u32*>(byte_buffer.data()) };
-        std::vector<word32> word_buffer{ array_start, array_start + code_word_count };
+        std::vector<word> word_buffer{ array_start, array_start + code_word_count };
 
         if (word_buffer[0] != spirv_magic_number_) {
           Log::error("Invalid SPIR-V binary file magic number: {}", path.string());

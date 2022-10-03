@@ -4,8 +4,8 @@
 #include <uuid_v4.h>
 
 namespace fx {
-  using byte8 = std::uint8_t;
-  using word32 = std::uint32_t;
+  using byte = std::uint8_t;
+  using word = std::uint32_t;
   using i8 = std::int8_t;
   using u8 = std::uint8_t;
   using i16 = std::int16_t;
@@ -16,9 +16,10 @@ namespace fx {
   using u64 = std::uint64_t;
 
   struct uuid: UUIDv4::UUID {
-    uuid() : UUID{ generate() } {}
+    uuid(): UUID{ generate() } {}
   private:
-    [[nodiscard]] static auto generate() -> UUIDv4::UUID {
+    [[nodiscard]] static auto generate() -> UUID
+    {
       static UUIDv4::UUIDGenerator<std::mt19937_64> gen{};
       return gen.getUUID();
     }

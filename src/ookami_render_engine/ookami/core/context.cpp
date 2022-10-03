@@ -5,10 +5,13 @@
 #include <GLFW/glfw3.h>
 
 namespace fx::ookami {
-  static auto vulkan_error_callback(const vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
-                                    vk::DebugUtilsMessageTypeFlagBitsEXT,
-                                    const vk::DebugUtilsMessengerCallbackDataEXT* callback_data,
-                                    void*) -> vk::Bool32 {
+  static auto vulkan_error_callback(
+    const vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
+    vk::DebugUtilsMessageTypeFlagBitsEXT,
+    const vk::DebugUtilsMessengerCallbackDataEXT* callback_data,
+    void*
+  ) -> vk::Bool32
+  {
     std::stringstream msg{};
     msg << callback_data->pMessage << " | code " << callback_data->messageIdNumber << ", " << callback_data->pMessageIdName;
     switch (severity) {

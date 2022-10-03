@@ -5,17 +5,17 @@ class GLFWwindow;
 namespace vk {
   enum class Format;
   class Extent2D;
-}
 
-namespace vk::raii {
-  class ImageView;
-}
-
-namespace fx::ookami {
-  class Context;
+  namespace raii {
+    class ImageView;
+  }
 }
 
 namespace fx {
+  namespace ookami {
+    class Context;
+  }
+
   class Swapchain {
   public:
     explicit Swapchain(const fx::shared<GLFWwindow>& window, const fx::shared<ookami::Context>& context);
