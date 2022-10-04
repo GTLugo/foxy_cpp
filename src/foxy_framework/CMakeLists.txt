@@ -23,7 +23,7 @@ target_compile_definitions(${TARGET_NAME}
     PRIVATE _CRT_SECURE_NO_WARNINGS=1
             WIN32_LEAN_AND_MEAN=1
     PUBLIC $<$<CONFIG:debug>:FOXY_ENABLE_ASSERTS=1;FOXY_DEBUG_MODE=1>
-           $<$<CONFIG:relwithdebinfo>:FOXY_ENABLE_ASSERTS=1;FOXY_DEBUG_MODE=1>
+           $<$<CONFIG:relwithdebinfo>:FOXY_ENABLE_ASSERTS=1;FOXY_DEBUG_MODE=1;FOXY_RELDEB_MODE=1>
 )
 if(FOXY_PERF_TITLE)
   target_compile_definitions(${TARGET_NAME} PRIVATE FOXY_PERF_TITLE=1)

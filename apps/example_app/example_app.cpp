@@ -11,7 +11,7 @@ struct ExampleApp: fx::App {
   ExampleApp():
     App{
       CreateInfo{
-        .title = "Foxy Example App"
+        .title = "Foxy Example App",
       }
     }
   {
@@ -66,7 +66,7 @@ auto main(const int, char**) -> int
 {
   try {
     fx::Log::debug_logging_setup();
-    ExampleApp{}.run();
+    ExampleApp{}(); // there is also a standard .run() method if you prefer. Both are identical in functionality.
     return EXIT_SUCCESS;
   } catch (const std::exception& e) {
     fx::Log::fatal(e.what());

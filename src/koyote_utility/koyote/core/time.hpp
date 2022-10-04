@@ -50,6 +50,7 @@ namespace fx {
     [[nodiscard]] double get_time_elapsed() const {
       return Duration{(clock_steady::now() - start_)}.count();
     }
+    
   private:
     time_point start_{};
   }; // Stopwatch
@@ -79,24 +80,13 @@ namespace fx {
       return Duration{delta_}.count();
     }
 
-    // [[nodiscard]] static double avg_delta_secs() {
-    //   return std::accumulate(last_few_frame_times_.begin(), last_few_frame_times_.end(), 0.) / last_few_frame_times_.size();
-    // }
-
     template<class Duration>
     [[nodiscard]] double lag() const {
       return Duration{lag_}.count();
     }
+
+    [[nodiscard]] bool should_do_tick() const;
     
-    // These should NEVER be called from anywhere other than the internal app class.
-
-    [[nodiscard]] bool should_do_tick() const {
-      if (step_count_ >= bail_count_) {
-        fx::Log::warn("Struggling to catch up with physics rate.");
-      }
-
-      return lag_.count() >= fixed_time_step_.count() && step_count_ < bail_count_;
-    }
   private:
     // fixed number of ticks per second. this will be used for physics and anything else in fixed update
     double tick_rate_{};
@@ -110,28 +100,10 @@ namespace fx {
     secs delta_{secs{1. / 60.}}; // how much time last frame took
     secs lag_{secs::zero()}; // how far behind the game is from real world
     u32 step_count_{0U};
-
-    //static inline std::deque<double> last_few_frame_times_{};
-
-    void internal_update() {
-      // FLUGEL_ENGINE_TRACE("Update!");
-      game_current_ = clock_steady::now();
-      // Seconds::duration()
-      delta_ = std::chrono::duration_cast<secs>(game_current_ - game_last_);
-      // if (static_cast<u32>(last_few_frame_times_.size()) >= 10230U) {
-      //   last_few_frame_times_.pop_front();
-      // }
-      // last_few_frame_times_.push_back(delta_.count());
-      game_last_ = game_current_;
-      lag_ += delta_;
-      step_count_ = 0U;
-    }
-
-    void internal_tick() {
-      // FLUGEL_ENGINE_TRACE("Tick!");
-      lag_ -= fixed_time_step_;
-      ++step_count_;
-    }
+    
+  private:
+    void internal_update();
+    void internal_tick();
   }; // Time
   
   class GameLoop {
@@ -148,10 +120,10 @@ namespace fx {
     
     explicit GameLoop(const CreateInfo& game_loop);
     ~GameLoop() = default;
-  
-    auto operator()() -> GameLoop;
     
     void run();
+  
+    auto operator()() -> GameLoop;
     
   private:
     Time time;

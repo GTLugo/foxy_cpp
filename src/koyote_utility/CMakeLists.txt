@@ -20,7 +20,7 @@ target_compile_definitions(${TARGET_NAME}
             WIN32_LEAN_AND_MEAN=1
     PUBLIC NOMINMAX=1
            $<$<CONFIG:debug>:FOXY_ENABLE_ASSERTS=1;FOXY_DEBUG_MODE=1>
-           $<$<CONFIG:relwithdebinfo>:FOXY_ENABLE_ASSERTS=1;FOXY_DEBUG_MODE=1>
+           $<$<CONFIG:relwithdebinfo>:FOXY_ENABLE_ASSERTS=1;FOXY_DEBUG_MODE=1;FOXY_RELDEB_MODE=1>
 )
 target_precompile_headers(${TARGET_NAME} PUBLIC "koyote/internal/pch.hpp")
 target_include_directories(${TARGET_NAME} PUBLIC ".")

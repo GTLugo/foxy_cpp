@@ -35,15 +35,16 @@ namespace fx {
 
     explicit App(CreateInfo&& create_info);
     ~App();
-  
-    auto operator()() -> void;
-
-    void run();
 
     auto set_user_data_ptr(shared<void> data) -> App&;
     auto add_function_to_stage(Stage stage, StageCallback&& callback) -> App&;
-
+    
     [[nodiscard]] auto user_data_ptr() -> shared<void>;
+  
+    void run();
+  
+    auto operator()() -> void;
+    
   private:
     class Impl;
     unique<Impl> p_impl_;

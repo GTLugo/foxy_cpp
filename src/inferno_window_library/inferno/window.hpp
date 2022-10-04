@@ -24,22 +24,22 @@ namespace fx {
     explicit Window(const CreateInfo&& create_info);
     ~Window();
 
-    auto operator*() -> fx::shared<GLFWwindow>&;
+    auto operator*() -> shared<GLFWwindow>&;
 
     void poll_events();
     void close();
 
-    void set_icon(fx::i8* image, fx::i32 width, fx::i32 height);
+    void set_icon(i8* image, i32 width, i32 height);
     void set_title(const std::string& title);
     void set_subtitle(const std::string& title);
-    void set_pos(fx::ivec2 position);
+    void set_pos(ivec2 position);
     void set_vsync(bool enabled);
     void set_fullscreen(bool enabled);
     void set_hidden(bool hidden);
 
-    [[nodiscard]] auto native() -> fx::shared<GLFWwindow>&;
+    [[nodiscard]] auto native() -> shared<GLFWwindow>&;
     [[nodiscard]] auto title() const -> std::string;
-    [[nodiscard]] auto bounds() const -> fx::rect;
+    [[nodiscard]] auto bounds() const -> rect;
     [[nodiscard]] auto vsync() const -> bool;
     [[nodiscard]] auto fullscreen() const -> bool;
     [[nodiscard]] auto hidden() const -> bool;
