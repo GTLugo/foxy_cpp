@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+
 #include "koyote/core/std.hpp"
 
 namespace fx {
@@ -21,8 +23,8 @@ namespace fx {
       FormatLocation(const char* fmt_str_, const std::source_location& location_ = std::source_location::current())
         : fmt_str{fmt_str_}, location{location_} {}
 
-      FormatLocation(const std::string& fmt_str_, const std::source_location& location_ = std::source_location::current())
-        : fmt_str{fmt_str_}, location{location_} {}
+      FormatLocation(std::string fmt_str_, const std::source_location& location_ = std::source_location::current())
+        : fmt_str{std::move(fmt_str_)}, location{location_} {}
 
       FormatLocation(std::string_view fmt_str_, const std::source_location& location_ = std::source_location::current())
         : fmt_str{fmt_str_}, location{location_} {}
@@ -35,11 +37,11 @@ namespace fx {
           fmt_str = ss.str();
         }
 
-      [[nodiscard]] inline auto file_name() -> std::string {
+      [[nodiscard]] inline auto file_name() const -> std::string {
         return std::filesystem::path{ location.file_name() }.filename().string();
       }
       
-      [[nodiscard]] inline auto line_num() -> u32 {
+      [[nodiscard]] inline auto line_num() const -> u32 {
         return location.line();
       }
     };

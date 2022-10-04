@@ -28,6 +28,7 @@ namespace fx {
     };
     
     Impl(const std::string& name, const std::filesystem::path& log_file) {
+      #if defined(FOXY_DEBUG_MODE) or defined(FOXY_RELDEB_MODE)
       auto console_formatter = std::make_unique<spdlog::pattern_formatter>();
       console_formatter->add_flag<ThreadNameFlag>('~').set_pattern("[ %^%4!L%$ | %T.%f ] %~ | %v");
       auto console_sink{ std::make_shared<spdlog::sinks::stdout_color_sink_mt>() };
@@ -54,15 +55,18 @@ namespace fx {
       Log::info(R"(                             )");
       Log::info(R"(--------------=============[])");
       Log::info("Foxy startup: Kon kon kitsune! Hi, friends!");
-      #ifdef FOXY_DEBUG_MODE
+      #if defined(FOXY_DEBUG_MODE) and not defined(FOXY_RELDEB_MODE)
       Log::info("Build mode: DEBUG");
       #else
       Log::info("Build mode: RELEASE");
       #endif
+      #endif
     }
 
     ~Impl() {
+      #if defined(FOXY_DEBUG_MODE) or defined(FOXY_RELDEB_MODE)
       Log::info("Foxy shutdown: Otsukon deshita! Bye bye!");
+      #endif
     }
     
     static inline void trace(const std::string_view msg) {

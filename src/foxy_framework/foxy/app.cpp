@@ -292,11 +292,6 @@ namespace fx {
   
   App::~App() = default;
   
-  void App::run()
-  {
-    p_impl_->run();
-  }
-  
   auto App::set_user_data_ptr(shared<void> data) -> App&
   {
     p_impl_->set_user_data(std::move(data));
@@ -312,6 +307,11 @@ namespace fx {
   auto App::user_data_ptr() -> shared<void>
   {
     return p_impl_->user_data();
+  }
+  
+  void App::run()
+  {
+    p_impl_->run();
   }
   
   auto App::operator()() -> void
