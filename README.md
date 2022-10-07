@@ -8,6 +8,7 @@
  - python3 (for initializing shaderc)
  - GLFW
  - GLM
+ - UUIDv4 - Custom fork
  - spdlog - Custom fork
  - BS Thread Pool
  - Shaderc
