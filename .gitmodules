@@ -1,7 +1,3 @@
-[submodule "extern/glm"]
-	ignore = dirty
-	path = extern/glm
-	url = https://github.com/g-truc/glm.git
 [submodule "extern/glfw"]
 	ignore = dirty
 	path = extern/glfw
@@ -10,14 +6,9 @@
 	ignore = dirty
 	path = extern/bs_thread_pool
 	url = https://github.com/bshoshany/thread-pool.git
-[submodule "extern/uuid_v4"]
-	ignore = dirty
-	path = extern/uuid_v4
-	url = https://github.com/crashoz/uuid_v4.git
-[submodule "extern/spdlog"]
-	ignore = dirty
-	path = extern/spdlog
-	url = https://github.com/GTLugo/spdlog.git
 [submodule "extern/shaderc"]
 	path = extern/shaderc
 	url = https://github.com/google/shaderc.git
+[submodule "extern/koyote_utils"]
+	path = extern/koyote_utils
+	url = https://github.com/lugo-studio/koyote_utils.git

@@ -26,7 +26,7 @@ target_include_directories(${TARGET_NAME} PUBLIC ".")
 # DEPENDENCIES
 # ===================================================
 # Koyote
-target_include_directories(${TARGET_NAME} PUBLIC "../koyote")
+target_include_directories(${TARGET_NAME} PUBLIC "${FOXY_EXTERN_DIR}/koyote/include")
 target_link_libraries(${TARGET_NAME} PRIVATE koyote)
 # BS Thread Pool
 target_include_directories(${TARGET_NAME} PUBLIC "${FOXY_EXTERN_DIR}/bs_thread_pool")

@@ -10,8 +10,8 @@
 namespace fx {
   class Shader::Impl {
   public:
-    Impl(const vk::raii::Device& device, const CreateInfo& shader_create_info)
-    : name_{ shader_create_info.shader_directory.stem().string() }
+    Impl(const vk::raii::Device& device, const CreateInfo& shader_create_info):
+      name_{ shader_create_info.shader_directory.stem().string() }
     {
       if (fetch_shader_bytecode(shader_create_info)) {
         Log::trace("Fetched shader bytecode: {}", name_);
@@ -68,12 +68,12 @@ namespace fx {
         if (is_directory(create_info.shader_directory)) {
           Log::trace("Fetching shader from dir: {}", name_);
 
-          for (Kind kind : Kind::values) {
+          for (Kind kind: Kind::values) {
             if (!create_info.has_kind(kind)) {
               continue;
             }
 
-            if (auto bytecode{ fetch_stage_bytecode(create_info, kind, shader_cache_dir) }; bytecode.has_value()) {
+            if (auto bytecode{ fetch_stage_bytecode(create_info, kind, shader_cache_dir) }) {
               bytecode_[kind] = *bytecode;
             } else {
               found_shader = false;
@@ -101,7 +101,7 @@ namespace fx {
         const fs::path out_shader_path{ shader_cache_dir / fs::path{ *kind.to_string() + ".spv" } };
 
         if (exists(out_shader_path)) {
-          if (auto code{ read_spv(out_shader_path) }; code.has_value()) {
+          if (auto code{ fx::io::read_words(out_shader_path) }) {
             Log::trace("Found cached {} at location {}", *kind.to_string(), out_shader_path.string());
             return code;
           }
@@ -123,40 +123,34 @@ namespace fx {
       const bool disable_optimizations
     ) -> std::optional<std::vector<u32>>
     {
-      if (const auto code_str{ read_file(in_file) }; code_str.has_value()) {
+      if (auto result{ fx::io::read_file(in_file) }) {
+        auto& code_str{ *result };
+  
         Log::trace("Compiling {}: {}...", *stage.to_string(), name_);
-
         const shaderc::Compiler compiler;
         shaderc::CompileOptions options{};
         options.SetSourceLanguage(shaderc_source_language_hlsl);
-
         if (!disable_optimizations) {
           options.SetOptimizationLevel(shaderc_optimization_level_performance);
         }
-
-        const auto result{ compiler.CompileGlslToSpv(
-          preprocess(*code_str, stage),
+        const auto compiled{ compiler.CompileGlslToSpv(
+          preprocess(code_str, stage),
           static_cast<shaderc_shader_kind>(*stage.to_shaderc()),
           name_.c_str(),
           options
         ) };
-
-        if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
-          Log::error("Shaderc Compile: {}", result.GetErrorMessage());
+        if (compiled.GetCompilationStatus() != shaderc_compilation_status_success) {
+          Log::error("Shaderc Compile: {}", compiled.GetErrorMessage());
           return std::nullopt;
         }
-        const std::vector<u32> spv{ result.begin(), result.end() };
-
-        if (std::ofstream spv_file{ out_file, std::ios::out | std::ios::binary }; spv_file.is_open()) {
-          const std::streamsize spv_byte_count{ static_cast<std::streamsize>(spv.size() * 4) };
-          spv_file.write(reinterpret_cast<const char*>(spv.data()), spv_byte_count);
-        } else {
+        const std::vector<u32> spv = { compiled.begin(), compiled.end() };
+        if (!fx::io::write_words(out_file, spv)) {
           Log::error("Could not write to output shader file.");
         }
-
+        
         return spv;
       }
-
+      
       return std::nullopt;
     }
 
@@ -173,32 +167,6 @@ namespace fx {
         Log::error("Shaderc Preprocess: {}", result.GetErrorMessage());
         return "";
       }
-    }
-
-    [[nodiscard]] static auto read_spv(const std::filesystem::path& path) -> std::optional<std::vector<word>>
-    {
-      if (std::ifstream file{ path, std::ios::in | std::ios::binary }; file.is_open()) {
-        const std::streamsize size{ static_cast<std::streamsize>(file_size(path)) };
-
-        // Read file
-        std::vector<byte> byte_buffer(size);
-        file.read(reinterpret_cast<char*>(byte_buffer.data()), size);
-
-        // Convert to words
-        const std::streamsize code_word_count{ static_cast<std::streamsize>(byte_buffer.size() / 4) };
-        const auto array_start{ reinterpret_cast<u32*>(byte_buffer.data()) };
-        std::vector<word> word_buffer{ array_start, array_start + code_word_count };
-
-        if (word_buffer[0] != spirv_magic_number_) {
-          Log::error("Invalid SPIR-V binary file magic number: {}", path.string());
-          return std::nullopt;
-        }
-
-        return word_buffer;
-      }
-
-      Log::error("Failed to open file: {}", path.string());
-      return std::nullopt;
     }
 
     void create_shader_modules(const CreateInfo& shader_create_info, const vk::raii::Device& device)
@@ -243,6 +211,7 @@ namespace fx {
   //
   //  Shader
   //
+  
   constexpr auto Shader::Kind::from_string(const std::string_view str) -> std::optional<Kind>
   {
     if (str == "vertex")   return Vertex;

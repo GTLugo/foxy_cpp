@@ -107,21 +107,18 @@ namespace fx {
     void main_loop()
     {
       GameLoop{
-        GameLoop::CreateInfo{
-          .stop_flag = window_->should_stop(),
-          .start = [this](const Time& time) {
-            main_awake_event_(time);
-            main_start_event_(time);
-          },
-          .update = [this](const Time& time) { // Update
-            main_poll_event_(time);
-            main_update_event_(time);
-          },
-          .stop = [this](const Time& time) {
-            main_stop_event_(time);
-          }
+        .start = [this](const Time& time) {
+          main_awake_event_(time);
+          main_start_event_(time);
+        },
+        .update = [this](const Time& time) { // Update
+          main_poll_event_(time);
+          main_update_event_(time);
+        },
+        .stop = [this](const Time& time) {
+          main_stop_event_(time);
         }
-      }();
+      }(window_->should_stop());
     }
     
     void game_loop()
@@ -131,29 +128,26 @@ namespace fx {
       
       try {
         GameLoop{
-          GameLoop::CreateInfo{
-            .stop_flag = window_->should_stop(),
-            .start = [this](const Time& time) {
-              awake_event_(app_, time);
-              start_event_(app_, time);
-            },
-            .tick = [this](const Time& time) { // Tick
-              early_tick_event_(app_, time);
-              tick_event_(app_, time);
-              late_tick_event_(app_, time);
-            },
-            .update = [this](const Time& time) { // Update
-              early_update_event_(app_, time);
-              update_event_(app_, time);
-              late_update_event_(app_, time);
-              render_engine_->draw_frame();
-            },
-            .stop = [this](const Time& time) {
-              stop_event_(app_, time);
-              asleep_event_(app_, time);
-            }
+          .start = [this](const Time& time) {
+            awake_event_(app_, time);
+            start_event_(app_, time);
+          },
+          .tick = [this](const Time& time) { // Tick
+            early_tick_event_(app_, time);
+            tick_event_(app_, time);
+            late_tick_event_(app_, time);
+          },
+          .update = [this](const Time& time) { // Update
+            early_update_event_(app_, time);
+            update_event_(app_, time);
+            late_update_event_(app_, time);
+            render_engine_->draw_frame();
+          },
+          .stop = [this](const Time& time) {
+            stop_event_(app_, time);
+            asleep_event_(app_, time);
           }
-        }();
+        }(window_->should_stop());
       } catch (const std::exception& e) {
         Log::error(e.what());
       }

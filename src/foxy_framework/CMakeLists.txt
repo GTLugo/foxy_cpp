@@ -35,7 +35,7 @@ target_include_directories(${TARGET_NAME} PUBLIC "../../include" ".")
 # DEPENDENCIES
 # ===================================================
 # Koyote
-target_include_directories(${TARGET_NAME} PUBLIC "../../koyote_utility")
+target_include_directories(${TARGET_NAME} PUBLIC "${FOXY_EXTERN_DIR}/koyote/include")
 target_link_libraries(${TARGET_NAME} PUBLIC koyote)
 # Ookami
 target_include_directories(${TARGET_NAME} PUBLIC "../../ookami_render_engine")

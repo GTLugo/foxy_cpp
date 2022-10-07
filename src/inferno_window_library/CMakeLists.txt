@@ -27,7 +27,7 @@ target_include_directories(${TARGET_NAME} PUBLIC ".")
 # DEPENDENCIES
 # ===================================================
 # Koyote
-target_include_directories(${TARGET_NAME} PUBLIC "../koyote")
+target_include_directories(${TARGET_NAME} PUBLIC "${FOXY_EXTERN_DIR}/koyote/include")
 target_link_libraries(${TARGET_NAME} PUBLIC koyote)
 # GLFW
 target_include_directories(${TARGET_NAME} PRIVATE "${FOXY_EXTERN_DIR}/glfw/include")
