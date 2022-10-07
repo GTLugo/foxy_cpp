@@ -11,7 +11,6 @@ message(STATUS "Configuring: ${PROJECT_NAME}")
 # ===================================================
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   set(FOXY_PERF_TITLE ON)
-  set(ignoreMe "${CMAKE_TOOLCHAIN_FILE}${Boost_NO_WARN_NEW_VERSIONS}")
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/out/bin/$<CONFIG>/${CMAKE_SYSTEM_NAME}")
   if(WIN32)
     set(CMAKE_WIN32_EXECUTABLE $<$<OR:$<CONFIG:release>,$<CONFIG:minsizerel>>:TRUE>)
@@ -25,14 +24,8 @@ set(FOXY_EXTERN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/extern)
 add_subdirectory(extern)
 # GLFW
 add_subdirectory(extern/glfw)
-# GLM
-add_subdirectory(extern/glm)
-# SPDLOG
-set(SPDLOG_ENABLE_PCH ON)
-set(SPDLOG_USE_STD_FORMAT ON)
-set(SPDLOG_WCHAR_SUPPORT ON)
-set(SPDLOG_WCHAR_TO_UTF8_SUPPORT ON)
-add_subdirectory(extern/spdlog)
+# Koyote
+add_subdirectory(extern/koyote_utils)
 # ShaderC
 set(SHADERC_SKIP_TESTS ON)
 set(SHADERC_SKIP_EXAMPLES ON)

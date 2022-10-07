@@ -31,7 +31,7 @@ target_include_directories(${TARGET_NAME} PUBLIC ".")
 # DEPENDENCIES
 # ===================================================
 # Koyote
-target_include_directories(${TARGET_NAME} PUBLIC "../koyote")
+target_include_directories(${TARGET_NAME} PUBLIC "${FOXY_EXTERN_DIR}/koyote/include")
 target_link_libraries(${TARGET_NAME} PUBLIC koyote)
 # Vulkan
 set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS "/ignore:4099")
