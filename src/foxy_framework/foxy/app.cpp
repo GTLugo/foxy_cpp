@@ -1,8 +1,7 @@
 #include "app.hpp"
 
-#include <utility>
+#include "version.hpp"
 
-#include <foxy/foxy_config.hpp>
 #include <inferno/window.hpp>
 #include <ookami/render_engine.hpp>
 #include <inu/job_system.hpp>
@@ -29,7 +28,7 @@ namespace fx {
         "RELEASE"
       #endif
       };
-      Log::info("Version: {}.{} : Build mode: DEBUG", FOXY_VERSION_MAJOR, FOXY_VERSION_MINOR, build_mode);
+      Log::info("Version: {} : Build mode: DEBUG", FoxyVersion::str(), build_mode);
     }
     
     ~AppLoggingHelper()

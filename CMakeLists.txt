@@ -2,8 +2,8 @@
 # and include sub-projects here.
 # Based on structure of: https://gitlab.com/CLIUtils/modern-cmake/-/tree/master/examples/extended-project
 cmake_minimum_required(VERSION 3.24)
-#set(CMAKE_CXX_STANDARD 23)
-project("foxy")
+set(FOXY_VERSION "0.1.1")
+project("foxy" VERSION ${FOXY_VERSION})
 message(STATUS "Configuring: ${PROJECT_NAME}")
 
 # ===================================================

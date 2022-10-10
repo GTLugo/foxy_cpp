@@ -16,4 +16,4 @@
   FOXY FRAMEWORK
 ----------------------*/
 #include "foxy/app.hpp"
-#include "foxy/foxy_config.hpp"
+#include "foxy/version.hpp"
