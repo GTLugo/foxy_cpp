@@ -1,0 +1,8 @@
+//
+// Created by galex on 10/10/2022.
+//
+
+#pragma once
+
+#define FOXY_VERSION_MAJOR @foxy_VERSION_MAJOR@
+#define FOXY_VERSION_MINOR @foxy_VERSION_MINOR@
