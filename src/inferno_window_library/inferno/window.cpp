@@ -36,6 +36,7 @@ namespace fx {
       set_callbacks();
 
       Log::trace("Window ready.");
+      std::stop_token stop_token{};
     }
 
     ~Impl()
@@ -51,7 +52,7 @@ namespace fx {
     void close()
     {
       Log::trace("Window close requested.");
-      state_.should_stop = true;
+      state_.should_continue = false;
     }
 
     void set_icon(i8* image, i32 width, i32 height)
@@ -108,7 +109,7 @@ namespace fx {
     [[nodiscard]] auto vsync() const -> bool { return state_.vsync; }
     [[nodiscard]] auto fullscreen() const -> bool { return state_.vsync; }
     [[nodiscard]] auto hidden() const -> bool { return state_.hidden; }
-    [[nodiscard]] auto should_close() const -> const bool& { return state_.should_stop; }
+    [[nodiscard]] auto should_continue() const -> const bool& { return state_.should_continue; }
   private:
     struct State {
       std::string title;
@@ -119,7 +120,7 @@ namespace fx {
       bool borderless;
       bool hidden;
       ivec2 cursor_pos{}, cursor_pos_prev{}, cursor_delta{};
-      bool should_stop{ false };
+      bool should_continue{ true };
 
       // Window events
       Event<> close_event;
@@ -250,8 +251,8 @@ namespace fx {
     return p_impl_->hidden();
   }
 
-  auto Window::should_stop() const -> const bool&
+  auto Window::should_continue() const -> const bool&
   {
-    return p_impl_->should_close();
+    return p_impl_->should_continue();
   }
 }

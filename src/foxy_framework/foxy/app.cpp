@@ -28,7 +28,7 @@ namespace fx {
         "RELEASE"
       #endif
       };
-      Log::info("Version: {} : Build mode: {}", FoxyVersion::str(), build_mode);
+      Log::info("Version: {} // Build mode: {}", FoxyVersion::str(), build_mode);
     }
     
     ~AppLoggingHelper()
@@ -133,7 +133,7 @@ namespace fx {
         .stop = [this](const Time& time) {
           main_stop_event_(time);
         }
-      }(window_->should_stop());
+      }(window_->should_continue());
     }
     
     void game_loop()
@@ -162,7 +162,7 @@ namespace fx {
             stop_event_(app_, time);
             asleep_event_(app_, time);
           }
-        }(window_->should_stop());
+        }(window_->should_continue());
       } catch (const std::exception& e) {
         Log::error(e.what());
       }
