@@ -38,7 +38,7 @@ add_subdirectory(extern/shaderc)
 add_subdirectory("src")
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   # Compiled test app
-  add_subdirectory("apps")
+  add_subdirectory("example")
 endif()
 
 # ===================================================

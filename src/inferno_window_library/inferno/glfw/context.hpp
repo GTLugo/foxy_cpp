@@ -28,12 +28,9 @@ namespace fx::inferno {
     };
   }
 
-  class Context {
+  class Context: types::SingleInstance<Context> {
   public:
     Context();
     ~Context();
-
-  private:
-    static inline bool instantiated_{ false };
   };
 }

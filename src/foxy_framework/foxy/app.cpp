@@ -2,51 +2,69 @@
 
 #include <utility>
 
+#include <foxy/foxy_config.hpp>
 #include <inferno/window.hpp>
 #include <ookami/render_engine.hpp>
 #include <inu/job_system.hpp>
 #include <neko/ecs.hpp>
 
 namespace fx {
-  class App::Impl {
+  struct AppLoggingHelper {
+    AppLoggingHelper()
+    {
+      Log::info(R"(--------------=============[])");
+      Log::info(R"(  ______ ______   ___     __ )");
+      Log::info(R"( |  ____/ __ \ \ / \ \   / / )");
+      Log::info(R"( | |__ | |  | \ V / \ \_/ /  )");
+      Log::info(R"( |  __|| |  | |> <   \   /   )");
+      Log::info(R"( | |   | |__| / . \   | |    )");
+      Log::info(R"( |_|    \____/_/ \_\  |_|    )");
+      Log::info(R"(                             )");
+      Log::info(R"(--------------=============[])");
+      Log::info("Foxy startup: Kon kon kitsune! Hi, friends!");
+      std::string build_mode{
+      #if defined(FOXY_DEBUG_MODE) and not defined(FOXY_RELDEB_MODE)
+        "DEBUG"
+      #else
+        "RELEASE"
+      #endif
+      };
+      Log::info("Version: {}.{} : Build mode: DEBUG", FOXY_VERSION_MAJOR, FOXY_VERSION_MINOR, build_mode);
+    }
+    
+    ~AppLoggingHelper()
+    {
+      #if defined(FOXY_DEBUG_MODE) or defined(FOXY_RELDEB_MODE)
+      Log::info("Foxy shutdown: Otsukon deshita! Bye bye!");
+      #endif
+    }
+  };
+  
+  class App::Impl: types::SingleInstance<App>, AppLoggingHelper {
     friend class App;
   
   public:
     explicit Impl(App& app, const CreateInfo& create_info):
-      app_{ app }
+      app_{ app },
+      window_{
+        std::make_unique<Window>(
+          Window::CreateInfo{
+            .title = create_info.title,
+            .width = create_info.width,
+            .height = create_info.height,
+            .vsync = create_info.vsync,
+            .fullscreen = create_info.fullscreen,
+            .borderless = create_info.borderless
+          }
+        )
+      },
+      render_engine_{ std::make_unique<RenderEngine>(**window_) }
     {
-      if (instantiated_) {
-        Log::fatal("Attempted second instantiation of fx::App");
-      }
-      instantiated_ = true;
-      
-      window_ = std::make_unique<Window>(
-        Window::CreateInfo{
-          .title = create_info.title,
-          .width = create_info.width,
-          .height = create_info.height,
-          .vsync = create_info.vsync,
-          .fullscreen = create_info.fullscreen,
-          .borderless = create_info.borderless
-        }
-      );
-  
-      render_engine_ = std::make_unique<RenderEngine>(**window_);
-      
       window_->set_hidden(false);
-      
       set_callbacks();
     }
     
-    // Foxy Framework
-    // Ookami Render Engine
-    // Neko ECS/Inu Job System
-    // Koyote Utilities
-    
-    ~Impl()
-    {
-      instantiated_ = false;
-    }
+    ~Impl() = default;
     
     void set_user_data(shared<void> data)
     {
@@ -71,8 +89,6 @@ namespace fx {
     }
   
   private:
-    static inline bool instantiated_{ false };
-    
     const double frame_time_goal_{ 1. / 250. };
     
     shared<void> user_data_;

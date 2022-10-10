@@ -70,6 +70,7 @@ namespace fx {
 
           for (Kind kind: Kind::values) {
             if (!create_info.has_kind(kind)) {
+              Log::trace("Skipping {}: {}", *kind.to_string(), name_);
               continue;
             }
 
@@ -95,25 +96,25 @@ namespace fx {
     {
       namespace fs = std::filesystem;
       const fs::path in_shader_path{ create_info.shader_directory / fs::path{ *kind.to_string() + ".hlsl" } };
-
-      if (create_info.has_kind(kind)) {
-        Log::trace("Looking for {}: {}", *kind.to_string(), name_);
-        const fs::path out_shader_path{ shader_cache_dir / fs::path{ *kind.to_string() + ".spv" } };
-
-        if (exists(out_shader_path)) {
-          if (auto code{ fx::io::read_words(out_shader_path) }) {
-            Log::trace("Found cached {} at location {}", *kind.to_string(), out_shader_path.string());
-            return code;
-          }
+  
+      Log::trace("Looking for {}: {}", *kind.to_string(), name_);
+      const fs::path out_shader_path{ shader_cache_dir / fs::path{ *kind.to_string() + ".spv" }};
+  
+      if (exists(out_shader_path)) {
+        if (auto code{ fx::io::read_words(out_shader_path) }) {
+          Log::trace("Found cached {} at location {}", *kind.to_string(), out_shader_path.string());
+          return code;
         }
-
-        Log::warn(R"(Failed to fetch valid cached "{}" for shader "{}". Attempting fresh compile.)", *kind.to_string(), name_);
-        create_directories(shader_cache_dir);
-        return compile_shader_type(in_shader_path, out_shader_path, kind, create_info.disable_optimizations);
       }
-
-      Log::trace("Skipping {}", *kind.to_string());
-      return std::nullopt;
+  
+      Log::warn(
+        R"(Failed to fetch valid cached "{}" for shader "{}". Attempting fresh compile.)",
+        *kind.to_string(),
+        name_
+      );
+      
+      create_directories(shader_cache_dir);
+      return compile_shader_type(in_shader_path, out_shader_path, kind, create_info.disable_optimizations);
     }
 
     [[nodiscard]] auto compile_shader_type(

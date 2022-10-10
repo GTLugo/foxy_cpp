@@ -1,5 +1,5 @@
 # < Foxy Framework (C++) >
- Experimental C++ app framework.
+ Experimental C++ app framework. This is WIP still and not anywhere near completion yet; hence, the "experimental" tag.
 
 ## - Requirements -
  Built with CMake 3.24, C++23, Visual C++ compiler, and Visual Studio 2022 generator.

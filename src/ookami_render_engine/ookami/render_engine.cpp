@@ -4,14 +4,10 @@
 #include <GLFW/glfw3.h>
 
 namespace fx {
-  class RenderEngine::Impl {
+  class RenderEngine::Impl: types::SingleInstance<RenderEngine> {
   public:
     explicit Impl(const shared<GLFWwindow>& window)
     {
-      if (instantiated_) {
-        Log::fatal("Attempted second instantiation of RenderEngine");
-      }
-      instantiated_ = true;
       Log::trace("Starting Ookami Render Engine...");
       
       renderer_ = std::make_unique<LowLevelRenderer>(window);
@@ -21,7 +17,6 @@ namespace fx {
     
     ~Impl()
     {
-      instantiated_ = false;
       Log::trace("Stopping Ookami Engine...");
     }
   
@@ -32,12 +27,10 @@ namespace fx {
   
     void draw_frame()
     {
-    
+      renderer_->draw();
     }
   
   private:
-    static inline bool instantiated_{ false };
-  
     unique<LowLevelRenderer> renderer_;
   };
   
