@@ -3,7 +3,7 @@
 #include "glfw/context.hpp"
 
 namespace fx {
-  class Window::Impl {
+  class Window::Impl: types::SingleInstance<Window> {
   public:
     explicit Impl(const CreateInfo& create_info):
       glfw_context_{},
@@ -17,11 +17,6 @@ namespace fx {
         .hidden = true,
       }}
     {
-      if (instantiated_) {
-        Log::fatal("Attempted second instantiation of foxy::Window");
-      }
-      instantiated_ = true;
-
       Log::trace("Creating Window...");
 
       // Create GLFW window
@@ -45,7 +40,6 @@ namespace fx {
 
     ~Impl()
     {
-      instantiated_ = false;
       Log::trace("Destroying Window...");
     }
 
@@ -145,9 +139,7 @@ namespace fx {
 //          borderless{ properties.borderless },
 //          hidden{ true } {}
     };
-
-    static inline bool instantiated_{ false };
-
+    
     // GLFW
     inferno::Context glfw_context_;
     shared<GLFWwindow> glfw_window_{ nullptr };

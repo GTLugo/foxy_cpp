@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
+project("foxy" VERSION 1.1)
 set(TARGET_NAME "foxy")
 #set(CMAKE_CXX_STANDARD 23)
 message(STATUS "Configuring ${PROJECT_NAME} internal project: ${TARGET_NAME}")
@@ -7,6 +8,7 @@ message(STATUS "Configuring ${PROJECT_NAME} internal project: ${TARGET_NAME}")
 # CONFIGURATION
 # ===================================================
 option(FOXY_PERF_TITLE "Performance stats displayed in title" OFF)
+configure_file("foxy/foxy_config.hpp.in" "foxy/foxy_config.hpp")
 
 # ===================================================
 # LIBRARY
@@ -29,7 +31,7 @@ if(FOXY_PERF_TITLE)
   target_compile_definitions(${TARGET_NAME} PRIVATE FOXY_PERF_TITLE=1)
 endif()
 target_precompile_headers(${TARGET_NAME} PUBLIC "foxy/internal/foxy_pch.hpp")
-target_include_directories(${TARGET_NAME} PUBLIC "../../include" ".")
+target_include_directories(${TARGET_NAME} PUBLIC "../../include" "." "${PROJECT_BINARY_DIR}") # added binary dir to allow searching for the config file)
 
 # ===================================================
 # DEPENDENCIES

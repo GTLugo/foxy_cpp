@@ -13,6 +13,7 @@ namespace fx {
     ~LowLevelRenderer();
     
     void draw();
+    void clear();
 
   private:
     class Impl;

@@ -14,11 +14,6 @@ namespace fx::inferno {
   }
 
   Context::Context() {
-    if (instantiated_) {
-      fx::Log::fatal("Attempted second instantiation of foxy::glfw::Context");
-    }
-    instantiated_ = true;
-
     fx::i32 glfw_init_success = glfwInit();
     if (!glfw_init_success) {
       fx::Log::fatal("Failed to initialize GLFW!");
@@ -31,7 +26,6 @@ namespace fx::inferno {
   }
 
   Context::~Context() {
-    instantiated_ = false;
     glfwTerminate();
   }
 }

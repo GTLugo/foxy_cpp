@@ -12,22 +12,20 @@
 #include <GLFW/glfw3.h>
 
 namespace fx {
-  class LowLevelRenderer::Impl {
+  class LowLevelRenderer::Impl: types::SingleInstance<LowLevelRenderer> {
   public:
-    explicit Impl(const shared<GLFWwindow>& window)
-    {
-      if (instantiated_) {
-        Log::fatal("Attempted second instantiation of LowLevelRenderer");
-      }
-      instantiated_ = true;
-      Log::trace("Creating Low Level Renderer...");
-      
+    explicit Impl(const shared<GLFWwindow>& window):
+      context_{
       #ifdef FOXY_DEBUG_MODE
-      context_ = std::make_shared<ookami::Context>(window);
+        std::make_shared<ookami::Context>(window)
       #else
-      context_ = std::make_shared<ookami::Context>(window, false);
+        std::make_shared<ookami::Context>(window, false)
       #endif
-      
+      },
+      image_available_{ context_->logical_device().createSemaphore({}) },
+      render_complete_{ context_->logical_device().createSemaphore({}) },
+      image_in_flight_{ context_->logical_device().createFence({}) }
+    {
       swapchain_ = std::make_shared<Swapchain>(window, context_);
       
       Log::info("Please wait while shaders load...");
@@ -50,6 +48,7 @@ namespace fx {
           .shader_directory = "res/foxy/shaders/fixed_value"
         }
       );
+  
       
       Log::info("Shader loading complete! ({} s)", sw.get_time_elapsed<secs>());
       pipeline_ = std::make_shared<Pipeline>(context_, swapchain_, fixed_value_shader);
@@ -57,21 +56,26 @@ namespace fx {
       Log::trace("Low Level Renderer ready.");
     }
     
-    ~Impl()
-    {
-      instantiated_ = false;
-    }
+    ~Impl() = default;
     
-    void draw() {
+    void draw()
+    {
+    
+    }
+  
+    void clear()
+    {
     
     }
   
   private:
-    static inline bool instantiated_{ false };
-    
     shared <ookami::Context> context_;
     shared <Swapchain> swapchain_;
     shared <Pipeline> pipeline_;
+    
+    vk::raii::Semaphore image_available_;
+    vk::raii::Semaphore render_complete_;
+    vk::raii::Fence image_in_flight_;
   };
   
   //
@@ -86,5 +90,10 @@ namespace fx {
   void LowLevelRenderer::draw()
   {
     p_impl_->draw();
+  }
+  
+  void LowLevelRenderer::clear()
+  {
+    p_impl_->clear();
   }
 } // fx

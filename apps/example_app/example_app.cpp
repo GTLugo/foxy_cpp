@@ -66,6 +66,7 @@ auto main(const int, char**) -> int
 {
   try {
     fx::Log::debug_logging_setup();
+    fx::Log::set_level_filter(fx::Log::Info);
     ExampleApp{}(); // there is also a standard .run() method if you prefer. Both are identical in functionality.
     return EXIT_SUCCESS;
   } catch (const std::exception& e) {
