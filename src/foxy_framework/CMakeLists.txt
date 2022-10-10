@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project("foxy" VERSION 1.1)
+project("foxy" VERSION ${FOXY_VERSION})
 set(TARGET_NAME "foxy")
 #set(CMAKE_CXX_STANDARD 23)
 message(STATUS "Configuring ${PROJECT_NAME} internal project: ${TARGET_NAME}")
