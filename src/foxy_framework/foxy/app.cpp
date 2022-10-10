@@ -28,7 +28,7 @@ namespace fx {
         "RELEASE"
       #endif
       };
-      Log::info("Version: {} : Build mode: DEBUG", FoxyVersion::str(), build_mode);
+      Log::info("Version: {} : Build mode: {}", FoxyVersion::str(), build_mode);
     }
     
     ~AppLoggingHelper()
