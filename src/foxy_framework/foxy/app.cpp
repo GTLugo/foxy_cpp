@@ -159,6 +159,7 @@ namespace fx {
             render_engine_->draw_frame();
           },
           .stop = [this](const Time& time) {
+            render_engine_->wait_idle();
             stop_event_(app_, time);
             asleep_event_(app_, time);
           }
@@ -187,9 +188,7 @@ namespace fx {
     
     void tick(App& app, const Time& time)
     {
-      #if defined(FOXY_PERF_TITLE)
-      show_perf_stats(time);
-      #endif
+    
     }
     
     void late_tick(App& app, const Time& time)
@@ -204,7 +203,9 @@ namespace fx {
     
     void update(App& app, const Time& time)
     {
-    
+      #if defined(FOXY_PERF_TITLE)
+      //show_perf_stats(time);
+      #endif
     }
     
     void late_update(App& app, const Time& time)
@@ -243,22 +244,20 @@ namespace fx {
     
     void show_perf_stats(const Time& time)
     {
-      static u32 counter{ 0 };
       const double frame_time{ time.delta<secs>() };
-      if (counter >= static_cast<u32>(time.tick_rate()) / 4.) {
+      static double timer{ 0 };
+      if (0.25 <= (timer += frame_time)) {
         std::stringstream perf_stats;
-        
+  
         perf_stats << "frametime: "
                    << std::fixed << std::setfill(' ') << std::setw(12) << std::setprecision(9)
                    << frame_time << "s | % of target frametime ceiling: "
                    << std::defaultfloat << std::setfill(' ') << std::setw(9) << std::setprecision(4)
                    << (frame_time / frame_time_goal_) * 100. << '%';
-        
+  
         // Log::debug("PERF STATS | {}", perf_stats.str());
         window_->set_subtitle(perf_stats.str());
-        counter = 0;
-      } else {
-        ++counter;
+        timer = 0;
       }
     }
     

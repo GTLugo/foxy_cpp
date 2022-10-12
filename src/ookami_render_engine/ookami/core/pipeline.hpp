@@ -4,14 +4,20 @@
 
 #pragma once
 
-namespace vk::raii {
-  class RenderPass;
+namespace vk {
+  class Viewport;
+  class Rect2D;
+  
+  namespace raii {
+    class RenderPass;
+    class Framebuffer;
+    class Pipeline;
+  }
 }
 
 namespace fx {
   class Shader;
   class Swapchain;
-  class Framebuffer;
 
   namespace ookami {
     class Context;
@@ -21,6 +27,14 @@ namespace fx {
   public:
     explicit Pipeline(shared<ookami::Context> context, shared<Swapchain> swap_chain, shared<Shader> shader);
     ~Pipeline();
+  
+    [[nodiscard]] auto render_pass() const -> const shared<vk::raii::RenderPass>&;
+    [[nodiscard]] auto framebuffers() -> std::vector<vk::raii::Framebuffer>&;
+    [[nodiscard]] auto viewport() const -> const vk::Viewport&;
+    [[nodiscard]] auto scissor() const -> const vk::Rect2D&;
+  
+    auto operator*() -> unique<vk::raii::Pipeline>&;
+    
   private:
     class Impl;
     unique<Impl> p_impl_;

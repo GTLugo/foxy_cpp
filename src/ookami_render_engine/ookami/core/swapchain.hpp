@@ -8,6 +8,7 @@ namespace vk {
 
   namespace raii {
     class ImageView;
+    class SwapchainKHR;
   }
 }
 
@@ -18,12 +19,15 @@ namespace fx {
 
   class Swapchain {
   public:
-    explicit Swapchain(const fx::shared<GLFWwindow>& window, const fx::shared<ookami::Context>& context);
+    explicit Swapchain(const fx::shared<ookami::Context>& context);
     ~Swapchain();
 
     [[nodiscard]] auto format() const -> vk::Format;
     [[nodiscard]] auto extent() const -> vk::Extent2D;
     [[nodiscard]] auto image_views() const -> std::vector<vk::raii::ImageView>&;
+  
+    auto operator*() -> vk::raii::SwapchainKHR&;
+    
   private:
     class Impl;
     unique<Impl> p_impl_;

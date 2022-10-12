@@ -14,6 +14,7 @@ namespace fx {
     
     void submit();
     void draw_frame();
+    void wait_idle();
 
   private:
     class Impl;

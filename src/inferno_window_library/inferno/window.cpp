@@ -171,11 +171,6 @@ namespace fx {
 
   Window::~Window() = default;
 
-  auto Window::operator*() -> shared<GLFWwindow>&
-    {
-    return p_impl_->native();
-  }
-
   void Window::poll_events()
   {
     p_impl_->poll_events();
@@ -254,5 +249,10 @@ namespace fx {
   auto Window::should_continue() const -> const bool&
   {
     return p_impl_->should_continue();
+  }
+  
+  auto Window::operator*() -> shared<GLFWwindow>&
+  {
+    return p_impl_->native();
   }
 }

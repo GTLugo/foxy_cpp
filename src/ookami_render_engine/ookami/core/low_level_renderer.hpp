@@ -6,14 +6,24 @@
 
 class GLFWwindow;
 
+namespace vk::raii {
+  class CommandBuffer;
+}
+
 namespace fx {
+  class Shader;
+  
+  namespace ookami {
+    class Context;
+  }
+  
   class LowLevelRenderer {
   public:
-    explicit LowLevelRenderer(const shared<GLFWwindow>& window);
+    explicit LowLevelRenderer(shared<ookami::Context> context, shared<Shader> shader);
     ~LowLevelRenderer();
-    
+  
+    void record_command_buffer(vk::raii::CommandBuffer& command_buffer, u32 image_index);
     void draw();
-    void clear();
 
   private:
     class Impl;
