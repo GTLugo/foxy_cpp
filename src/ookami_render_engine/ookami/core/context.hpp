@@ -9,11 +9,14 @@ namespace vk::raii {
   class Device;
   class SurfaceKHR;
   class PhysicalDevice;
+  class Queue;
 }
 
 namespace fx {
   class SwapchainSupportInfo;
   class QueueFamilyIndices;
+  class Shader;
+  class ShaderCreateInfo;
 
   namespace ookami {
     auto required_instance_extensions_strings() -> std::vector<std::string>;
@@ -27,18 +30,30 @@ namespace fx {
       using Surface = vk::raii::SurfaceKHR;
 
     public:
-      explicit Context(const fx::shared<GLFWwindow>& window, bool enable_validation = true);
+      explicit Context(
+        const fx::shared<GLFWwindow>& window,
+      #ifdef FOXY_DEBUG_MODE
+        bool enable_validation = true
+      #else
+        bool enable_validation = false
+      #endif
+      );
       ~Context();
 
       auto operator*() -> VulkanContext&;
       
+      [[nodiscard]] auto window() -> shared<GLFWwindow>;
       [[nodiscard]] auto native() -> VulkanContext&;
       [[nodiscard]] auto instance() -> Instance&;
       [[nodiscard]] auto surface() -> Surface&;
+      [[nodiscard]] auto graphics_queue() -> vk::raii::Queue&;
+      [[nodiscard]] auto present_queue() -> vk::raii::Queue&;
       [[nodiscard]] auto query_swapchain_support() const -> SwapchainSupportInfo;
       [[nodiscard]] auto queue_families() const -> const QueueFamilyIndices&;
       [[nodiscard]] auto physical_device() -> PhysicalDevice&;
       [[nodiscard]] auto logical_device() -> LogicalDevice&;
+      
+      [[nodiscard]] auto create_shader(const ShaderCreateInfo& shader_create_info) -> unique<Shader>;
 
     private:
       class Impl;

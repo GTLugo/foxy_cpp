@@ -12,7 +12,7 @@ namespace fx {
     [[maybe_unused]] static inline constexpr u32 minor{ FOXY_VERSION_MINOR };
     [[maybe_unused]] static inline constexpr u32 patch{ FOXY_VERSION_PATCH };
   
-    [[maybe_unused]] static inline consteval auto str() -> std::string_view
+    [[nodiscard]] [[maybe_unused]] static inline consteval auto str() -> std::string_view
     {
       return FOXY_VERSION_STR;
     }

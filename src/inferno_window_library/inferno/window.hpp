@@ -24,8 +24,6 @@ namespace fx {
     explicit Window(const CreateInfo&& create_info);
     ~Window();
 
-    auto operator*() -> shared<GLFWwindow>&;
-
     void poll_events();
     void close();
 
@@ -43,7 +41,9 @@ namespace fx {
     [[nodiscard]] auto vsync() const -> bool;
     [[nodiscard]] auto fullscreen() const -> bool;
     [[nodiscard]] auto hidden() const -> bool;
-    [[nodiscard]] auto should_stop() const -> const bool&;
+    [[nodiscard]] auto should_continue() const -> const bool&;
+  
+    auto operator*() -> shared<GLFWwindow>&;
 
   private:
     class Impl;

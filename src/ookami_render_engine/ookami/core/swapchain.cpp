@@ -7,8 +7,8 @@
 namespace fx {
   class Swapchain::Impl {
   public:
-    explicit Impl(shared<GLFWwindow> window, shared<ookami::Context> context)
-      : window_{ std::move(window) },
+    explicit Impl(shared<ookami::Context> context)
+      : window_{ context->window() },
         context_{ std::move(context) },
         swapchain_image_format_{vk::Format::eB8G8R8A8Unorm},
         swapchain_{create_swapchain()},
@@ -30,6 +30,12 @@ namespace fx {
     [[nodiscard]] auto image_views() -> std::vector<vk::raii::ImageView>& {
       return swap_image_views_;
     }
+  
+    auto operator*() -> vk::raii::SwapchainKHR&
+    {
+      return swapchain_;
+    }
+    
   private:
     shared<GLFWwindow> window_;
     shared<ookami::Context> context_;
@@ -43,7 +49,7 @@ namespace fx {
 
     [[nodiscard]] static auto pick_swap_surface_format(const std::vector<vk::SurfaceFormatKHR>& formats) -> vk::SurfaceFormatKHR {
       for (auto& format : formats) {
-        if (format.format == vk::Format::eB8G8R8A8Srgb && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
+        if (format.format == vk::Format::eB8G8R8A8Unorm && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
           return format;
         }
       }
@@ -171,8 +177,8 @@ namespace fx {
   //  Swapchain
   //
 
-  Swapchain::Swapchain(const shared<GLFWwindow>& window, const shared<ookami::Context>& context)
-    : p_impl_{std::make_unique<Impl>(window, context)} {}
+  Swapchain::Swapchain(const shared<ookami::Context>& context)
+    : p_impl_{std::make_unique<Impl>(context)} {}
 
   Swapchain::~Swapchain() = default;
 
@@ -186,5 +192,10 @@ namespace fx {
 
   auto Swapchain::image_views() const -> std::vector<vk::raii::ImageView>& {
     return p_impl_->image_views();
+  }
+  
+  auto Swapchain::operator*() -> vk::raii::SwapchainKHR&
+  {
+    return **p_impl_;
   }
 }

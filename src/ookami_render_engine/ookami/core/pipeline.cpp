@@ -19,11 +19,11 @@ namespace fx {
       Log::trace("Creating Vulkan pipeline...");
 
       std::vector<vk::PipelineShaderStageCreateInfo> shader_stages;
-      for (Shader::Kind kind: Shader::Kind::values) {
-        if (shader_->has_stage(kind)) {
+      for (const auto& stage: Shader::stages) {
+        if (shader_->has_stage(stage)) {
           const vk::PipelineShaderStageCreateInfo info{
-            .stage = static_cast<vk::ShaderStageFlagBits>(*kind.to_vk_flag()),
-            .module = *shader_->module(kind),
+            .stage = static_cast<vk::ShaderStageFlagBits>(*stage.to_vk_flag()),
+            .module = *shader_->module(stage),
             .pName = "main",
           };
           shader_stages.push_back(info);
@@ -159,6 +159,31 @@ namespace fx {
     }
 
     ~Impl() = default;
+    
+    [[nodiscard]] auto render_pass() const -> const shared<vk::raii::RenderPass>&
+    {
+      return render_pass_;
+    }
+  
+    [[nodiscard]] auto framebuffers() -> std::vector<vk::raii::Framebuffer>&
+    {
+      return framebuffers_;
+    }
+  
+    auto operator*() -> unique<vk::raii::Pipeline>&
+    {
+      return pipeline_;
+    }
+  
+    [[nodiscard]] auto viewport() const -> const vk::Viewport&
+    {
+      return viewport_;
+    }
+  
+    [[nodiscard]] auto scissor() const -> const vk::Rect2D&
+    {
+      return scissor_;
+    }
 
   private:
     shared<ookami::Context> context_;
@@ -195,7 +220,16 @@ namespace fx {
         .colorAttachmentCount = 1,
         .pColorAttachments = &color_attachment_ref,
       };
-
+  
+      vk::SubpassDependency dependency{
+        .srcSubpass = VK_SUBPASS_EXTERNAL,
+        .dstSubpass = 0,
+        .srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
+        .dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
+        .srcAccessMask = vk::AccessFlagBits::eNone,
+        .dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite,
+      };
+      
       try {
         return std::make_unique<vk::raii::RenderPass>(
           context_->logical_device(),
@@ -204,6 +238,8 @@ namespace fx {
             .pAttachments = &color_attachment,
             .subpassCount = 1,
             .pSubpasses = &subpass,
+            .dependencyCount = 1,
+            .pDependencies = &dependency,
           }
         );
       } catch (const std::exception& e) {
@@ -221,4 +257,29 @@ namespace fx {
     : p_impl_{ std::make_unique<Impl>(std::move(context), std::move(swap_chain), std::move(shader)) } {}
 
   Pipeline::~Pipeline() = default;
+  
+  auto Pipeline::render_pass() const -> const shared<vk::raii::RenderPass>&
+  {
+    return p_impl_->render_pass();
+  }
+  
+  auto Pipeline::framebuffers() -> std::vector<vk::raii::Framebuffer>&
+  {
+    return p_impl_->framebuffers();
+  }
+  
+  auto Pipeline::viewport() const -> const vk::Viewport&
+  {
+    return p_impl_->viewport();
+  }
+  
+  auto Pipeline::scissor() const -> const vk::Rect2D&
+  {
+    return p_impl_->scissor();
+  }
+  
+  auto Pipeline::operator*() -> unique<vk::raii::Pipeline>&
+  {
+    return **p_impl_;
+  }
 } // foxy // vulkan

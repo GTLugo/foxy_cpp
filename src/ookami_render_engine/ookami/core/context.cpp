@@ -2,6 +2,7 @@
 
 #include "vulkan.hpp"
 #include "version.hpp"
+#include "shader.hpp"
 #include <GLFW/glfw3.h>
 
 namespace fx::ookami {
@@ -49,7 +50,7 @@ namespace fx::ookami {
 
   class Context::Impl {
   public:
-    explicit Impl(fx::shared<GLFWwindow> window, bool enable_validation = true)
+    explicit Impl(const fx::shared<GLFWwindow>& window, bool enable_validation = true)
       : enable_validation_{enable_validation},
         window_{window},
         context_{vk::raii::Context{}},
@@ -88,6 +89,14 @@ namespace fx::ookami {
     [[nodiscard]] auto surface() -> vk::raii::SurfaceKHR& {
       return surface_;
     }
+  
+    [[nodiscard]] auto graphics_queue() -> vk::raii::Queue& {
+      return graphics_queue_;
+    }
+  
+    [[nodiscard]] auto present_queue() -> vk::raii::Queue& {
+      return present_queue_;
+    }
 
     [[nodiscard]] auto query_swapchain_support() const -> SwapchainSupportInfo {
       return query_swapchain_support(physical_device_);
@@ -107,7 +116,8 @@ namespace fx::ookami {
 
   private:
     static inline const std::vector<const char*> validation_layer_names_ = {
-      "VK_LAYER_KHRONOS_validation"
+      "VK_LAYER_KHRONOS_validation",
+      "VK_LAYER_LUNARG_monitor"
     };
 
     bool enable_validation_;
@@ -389,13 +399,14 @@ namespace fx::ookami {
   //  Context
   //
 
-  Context::Context(const fx::shared<GLFWwindow>& window, bool enable_validation)
-    : p_impl_{std::make_unique<Impl>(window, enable_validation)} {}
+  Context::Context(const fx::shared<GLFWwindow>& window, bool enable_validation):
+    p_impl_{std::make_unique<Impl>(window, enable_validation)} {}
 
   Context::~Context() = default;
-
-  auto Context::operator*() -> VulkanContext& {
-    return p_impl_->native();
+  
+  auto Context::window() -> shared<GLFWwindow>
+  {
+    return p_impl_->window();
   }
 
   auto Context::native() -> vk::raii::Context& {
@@ -408,6 +419,14 @@ namespace fx::ookami {
 
   auto Context::surface() -> Surface& {
     return p_impl_->surface();
+  }
+  
+  auto Context::graphics_queue() -> vk::raii::Queue& {
+    return p_impl_->graphics_queue();
+  }
+  
+  auto Context::present_queue() -> vk::raii::Queue& {
+    return p_impl_->present_queue();
   }
 
   auto Context::query_swapchain_support() const -> SwapchainSupportInfo {
@@ -424,5 +443,17 @@ namespace fx::ookami {
 
   auto Context::logical_device() -> vk::raii::Device& {
     return p_impl_->logical_device();
+  }
+  
+  auto Context::create_shader(const ShaderCreateInfo& shader_create_info) -> unique<Shader>
+  {
+    return std::make_unique<Shader>(
+      logical_device(),
+      shader_create_info
+    );
+  }
+  
+  auto Context::operator*() -> VulkanContext& {
+    return p_impl_->native();
   }
 }
