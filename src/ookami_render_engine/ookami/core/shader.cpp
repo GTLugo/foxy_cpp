@@ -213,7 +213,7 @@ namespace fx {
       Log::trace("Built shader modules: {}", name_);
     }
   
-    [[nodiscard]] constexpr auto create_info_has_stage(const ShaderCreateInfo& create_info, const Shader::Stage stage) const -> bool {
+    [[nodiscard]] static constexpr auto create_info_has_stage(const ShaderCreateInfo& create_info, const Shader::Stage stage) -> bool {
       switch (stage) {
         case Shader::Stage::Vertex:   return create_info.vertex;
         case Shader::Stage::Fragment: return create_info.fragment;
@@ -239,20 +239,24 @@ namespace fx {
   
   constexpr auto Shader::Stage::to_string() const -> std::optional<std::string>
   {
-    if (value_ == Vertex)   return "vertex";
-    if (value_ == Fragment) return "fragment";
-    if (value_ == Compute)  return "compute";
-    if (value_ == Geometry) return "geometry";
-    return std::nullopt;
+    switch (value_) {
+      case Vertex:   return "vertex";
+      case Fragment: return "fragment";
+      case Compute:  return "compute";
+      case Geometry: return "geometry";
+      default:       return std::nullopt;  // NOLINT(clang-diagnostic-covered-switch-default)
+    }
   }
   
   constexpr auto Shader::Stage::to_shaderc() const -> std::optional<i32>
   {
-    if (value_ == Vertex)   return shaderc_glsl_vertex_shader;
-    if (value_ == Fragment) return shaderc_glsl_fragment_shader;
-    if (value_ == Compute)  return shaderc_glsl_compute_shader;
-    if (value_ == Geometry) return shaderc_glsl_geometry_shader;
-    return std::nullopt;
+    switch (value_) {
+      case Vertex:   return shaderc_glsl_vertex_shader;
+      case Fragment: return shaderc_glsl_fragment_shader;
+      case Compute:  return shaderc_glsl_compute_shader;
+      case Geometry: return shaderc_glsl_geometry_shader;
+      default:       return std::nullopt;  // NOLINT(clang-diagnostic-covered-switch-default)
+    }
   }
   
   auto Shader::Stage::to_vk_flag() const -> std::optional<i32> { return Impl::to_vk_flag(*this); }

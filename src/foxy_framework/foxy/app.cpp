@@ -204,7 +204,7 @@ namespace fx {
     void update(App& app, const Time& time)
     {
       #if defined(FOXY_PERF_TITLE)
-      //show_perf_stats(time);
+      show_perf_stats(time);
       #endif
     }
     
@@ -246,7 +246,7 @@ namespace fx {
     {
       const double frame_time{ time.delta<secs>() };
       static double timer{ 0 };
-      if (0.25 <= (timer += frame_time)) {
+      if (0.33 <= (timer += frame_time)) {
         std::stringstream perf_stats;
   
         perf_stats << "frametime: "
@@ -255,7 +255,7 @@ namespace fx {
                    << std::defaultfloat << std::setfill(' ') << std::setw(9) << std::setprecision(4)
                    << (frame_time / frame_time_goal_) * 100. << '%';
   
-        // Log::debug("PERF STATS | {}", perf_stats.str());
+        // Log::info("PERF STATS | {}", perf_stats.str());
         window_->set_subtitle(perf_stats.str());
         timer = 0;
       }

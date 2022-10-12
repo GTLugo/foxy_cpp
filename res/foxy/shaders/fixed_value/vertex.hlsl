@@ -22,17 +22,24 @@ FragInput main(uint vertex_index : SV_VertexID)
 {
     FragInput output;
 
+    // Vulkan is (-,-) top-left and (+,+) bottom-right
     float4 positions[3] = {
-        float4(-0.5, -0.5, 0.0, 1.0),
-        float4(0.5, -0.5, 0.0, 1.0),
-        float4(0.0, 0.5, 0.0, 1.0),
+        float4(-0.5,  0.5, 0.0, 1.0),
+        float4( 0.5,  0.5, 0.0, 1.0),
+        float4( 0.0, -0.5, 0.0, 1.0),
+    };
+
+    float4 colors[3] = {
+        float4(1.0, 0.0, 0.0, 1.0),
+        float4(0.0, 1.0, 0.0, 1.0),
+        float4(0.0, 0.0, 1.0, 1.0),
     };
 
     // input.position.w = 1.0f;
 
     // output.position = mul(viewProj, input.position);
     output.position = positions[vertex_index];
-    output.color = float4(1.0, 1.0, 1.0, 1.0);
+    output.color = colors[vertex_index];
 
     return output;
 }
