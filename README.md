@@ -7,9 +7,7 @@
 ## - Dependencies -
  - python3 (for initializing shaderc)
  - GLFW
- - GLM
- - UUIDv4 - Custom fork
- - spdlog - Custom fork
+ - Koyote Utils
  - BS Thread Pool
  - Shaderc
  - Vulkan - ***"Batteries not included!"*** Separate install required.
