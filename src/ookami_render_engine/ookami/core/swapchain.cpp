@@ -11,7 +11,7 @@ namespace fx {
     explicit Impl(const shared<ookami::Context>& context):
       window_{ context->window() },
       context_{ context },
-      swapchain_image_format_{vk::Format::eB8G8R8A8Unorm},
+      swapchain_image_format_{ vk::Format::eB8G8R8A8Unorm },
       swapchain_{create_swapchain()},
       swap_images_{swapchain_.getImages()},
       swap_image_views_{create_image_views()},
@@ -146,9 +146,9 @@ namespace fx {
     shared<vk::raii::RenderPass> render_pass_;
     std::vector<vk::raii::Framebuffer> framebuffers_;
 
-    [[nodiscard]] static auto pick_swap_surface_format(const std::vector<vk::SurfaceFormatKHR>& formats) -> vk::SurfaceFormatKHR {
+    [[nodiscard]] auto pick_swap_surface_format(const std::vector<vk::SurfaceFormatKHR>& formats) const -> vk::SurfaceFormatKHR {
       for (auto& format: formats) {
-        if (format.format == vk::Format::eB8G8R8A8Unorm && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
+        if (format.format == swapchain_image_format_ && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
           return format;
         }
       }
