@@ -3,7 +3,7 @@
 #include "ookami/core/context.hpp"
 #include "ookami/core/shader.hpp"
 #include "ookami/core/low_level_renderer.hpp"
-#include "ookami/core/vulkan.hpp"
+#include <vulkan/static.hpp>
 
 #include "../inferno_window_library/inferno/window.hpp"
 

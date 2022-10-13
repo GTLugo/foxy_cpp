@@ -34,10 +34,8 @@ target_include_directories(${TARGET_NAME} PUBLIC ".")
 target_include_directories(${TARGET_NAME} PUBLIC "${FOXY_EXTERN_DIR}/koyote/include")
 target_link_libraries(${TARGET_NAME} PUBLIC koyote)
 # Vulkan
-set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS "/ignore:4099")
-find_package(Vulkan REQUIRED)
-target_include_directories(${TARGET_NAME} PRIVATE ${Vulkan_INCLUDE_DIRS})
-target_link_libraries(${TARGET_NAME} PRIVATE ${Vulkan_LIBRARIES})
+target_include_directories(${TARGET_NAME} PRIVATE "../vulkan_static/include")
+target_link_libraries(${TARGET_NAME} PRIVATE vulkan_static)
 # Shaderc
 target_include_directories(${TARGET_NAME} PRIVATE "${FOXY_EXTERN_DIR}/shaderc")
 target_link_libraries(${TARGET_NAME} PRIVATE shaderc)

@@ -4,7 +4,7 @@
 
 #include "shader.hpp"
 
-#include "vulkan.hpp"
+#include <vulkan/static.hpp>
 #include <shaderc/shaderc.hpp>
 
 namespace fx {

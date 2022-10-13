@@ -8,7 +8,7 @@
 #include "swapchain.hpp"
 #include "pipeline.hpp"
 #include "shader.hpp"
-#include "vulkan.hpp"
+#include <vulkan/static.hpp>
 
 #include "../inferno_window_library/inferno/window.hpp"
 
