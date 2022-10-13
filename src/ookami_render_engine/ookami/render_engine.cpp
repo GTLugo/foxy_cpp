@@ -4,13 +4,14 @@
 #include "ookami/core/shader.hpp"
 #include "ookami/core/low_level_renderer.hpp"
 #include "ookami/core/vulkan.hpp"
-#include <GLFW/glfw3.h>
+
+#include "../inferno_window_library/inferno/window.hpp"
 
 namespace fx {
   class RenderEngine::Impl: types::SingleInstance<RenderEngine> {
   public:
-    explicit Impl(const shared<GLFWwindow>& window):
-      context_{ std::make_shared<ookami::Context>(window) }
+    explicit Impl(const shared<Window>& window):
+      context_{ std::make_shared<ookami::Context>(**window) }
     {
       shared<Shader> fixed_value_shader{
         context_->create_shader(
@@ -22,7 +23,7 @@ namespace fx {
         )
       };
       
-      renderer_ = std::make_unique<LowLevelRenderer>(context_, fixed_value_shader);
+      renderer_ = std::make_unique<LowLevelRenderer>(window, context_, fixed_value_shader, 2);
       
       Log::trace("Ookami Render Engine ready.");
     }
@@ -56,7 +57,7 @@ namespace fx {
   //  Renderer
   //
   
-  RenderEngine::RenderEngine(const shared<GLFWwindow>& window):
+  RenderEngine::RenderEngine(const shared<Window>& window):
     p_impl_{ std::make_unique<Impl>(window) } {}
   
   RenderEngine::~RenderEngine() = default;

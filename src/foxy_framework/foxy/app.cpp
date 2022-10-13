@@ -46,7 +46,7 @@ namespace fx {
     explicit Impl(App& app, const CreateInfo& create_info):
       app_{ app },
       window_{
-        std::make_unique<Window>(
+        std::make_shared<Window>(
           Window::CreateInfo{
             .title = create_info.title,
             .width = create_info.width,
@@ -57,7 +57,7 @@ namespace fx {
           }
         )
       },
-      render_engine_{ std::make_unique<RenderEngine>(**window_) }
+      render_engine_{ std::make_unique<RenderEngine>(window_) }
     {
       window_->set_hidden(false);
       set_callbacks();
@@ -93,7 +93,7 @@ namespace fx {
     shared<void> user_data_;
     App& app_;
     
-    unique<Window> window_;
+    shared<Window> window_;
     unique<RenderEngine> render_engine_;
     
     BS::thread_pool thread_pool_{ std::thread::hardware_concurrency() - 1 };

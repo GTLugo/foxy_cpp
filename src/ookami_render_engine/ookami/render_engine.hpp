@@ -4,12 +4,12 @@
 
 #pragma once
 
-class GLFWwindow;
-
 namespace fx {
+  class Window;
+  
   class RenderEngine {
   public:
-    explicit RenderEngine(const shared<GLFWwindow>& window);
+    explicit RenderEngine(const shared<Window>& window);
     ~RenderEngine();
     
     void submit();

@@ -23,10 +23,12 @@ namespace fx {
 
     explicit Window(const CreateInfo&& create_info);
     ~Window();
+  
+    void add_framebuffer_resized_callback(const std::function<void(i32, i32)>& callback);
 
     void poll_events();
     void close();
-
+    
     void set_icon(i8* image, i32 width, i32 height);
     void set_title(const std::string& title);
     void set_subtitle(const std::string& title);

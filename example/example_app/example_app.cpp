@@ -38,11 +38,9 @@ struct ExampleApp: fx::App {
         extra_message = ", Fubuki!";
       }
 
-      fx::Log::info("{} fox{}", counter++, extra_message);
+      fx::Log::info("{} fox{}", counter, extra_message);
 
-      if (counter > 10) {
-        counter = 1;
-      }
+      counter = (counter % 10) + 1;
       timer = 0;
     }
   }

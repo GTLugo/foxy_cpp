@@ -12,10 +12,15 @@
 namespace fx {
   class Pipeline::Impl {
   public:
-    explicit Impl(shared<ookami::Context> context, shared<Swapchain> swap_chain, shared<Shader> shader)
-      : context_{ std::move(context) },
-        swapchain_{ std::move(swap_chain) },
-        shader_{ std::move(shader) } {
+    explicit Impl(
+      const shared<ookami::Context>& context,
+      const shared<Swapchain>& swapchain,
+      const shared<Shader>& shader
+    ):
+      context_{ context },
+      swapchain_{ swapchain },
+      shader_{ shader }
+    {
       Log::trace("Creating Vulkan pipeline...");
 
       std::vector<vk::PipelineShaderStageCreateInfo> shader_stages;
@@ -118,8 +123,6 @@ namespace fx {
         Log::fatal("Failed to create pipeline layout: {}", e.what());
       }
 
-      render_pass_ = create_render_pass();
-
       vk::GraphicsPipelineCreateInfo pipeline_info{
         .stageCount = static_cast<u32>(shader_stages.size()),
         .pStages = shader_stages.data(),
@@ -132,7 +135,7 @@ namespace fx {
         .pColorBlendState = &color_blend_info,
         .pDynamicState = &dynamic_state,
         .layout = **layout_,
-        .renderPass = **render_pass_,
+        .renderPass = **swapchain_->render_pass(),
         .subpass = 0,
       };
 
@@ -142,38 +145,10 @@ namespace fx {
         Log::fatal("Failed to create graphics pipeline: {}", e.what());
       }
 
-      for (const auto& image_view : swapchain_->image_views()) {
-        framebuffers_.emplace_back(
-          context_->logical_device(),
-          vk::FramebufferCreateInfo{
-            .renderPass = **render_pass_,
-            .attachmentCount = 1,
-            .pAttachments = &*image_view,
-            .width = swapchain_->extent().width,
-            .height = swapchain_->extent().height,
-            .layers = 1,
-          });
-      }
-
       Log::trace("Created Vulkan pipeline.");
     }
 
     ~Impl() = default;
-    
-    [[nodiscard]] auto render_pass() const -> const shared<vk::raii::RenderPass>&
-    {
-      return render_pass_;
-    }
-  
-    [[nodiscard]] auto framebuffers() -> std::vector<vk::raii::Framebuffer>&
-    {
-      return framebuffers_;
-    }
-  
-    auto operator*() -> unique<vk::raii::Pipeline>&
-    {
-      return pipeline_;
-    }
   
     [[nodiscard]] auto viewport() const -> const vk::Viewport&
     {
@@ -184,89 +159,36 @@ namespace fx {
     {
       return scissor_;
     }
+  
+    auto operator*() -> unique<vk::raii::Pipeline>&
+    {
+      return pipeline_;
+    }
 
   private:
     shared<ookami::Context> context_;
     shared<Swapchain> swapchain_;
-
     shared<Shader> shader_;
+    
     vk::Viewport viewport_;
     vk::Rect2D scissor_;
     vk::PipelineColorBlendAttachmentState color_blend_attachment_;
     unique<vk::raii::PipelineLayout> layout_;
-    shared<vk::raii::RenderPass> render_pass_;
     unique<vk::raii::Pipeline> pipeline_;
-    std::vector<vk::raii::Framebuffer> framebuffers_;
-
-    [[nodiscard]] auto create_render_pass() const -> unique<vk::raii::RenderPass> {
-      vk::AttachmentDescription color_attachment{
-        .format = swapchain_->format(),
-        .samples = vk::SampleCountFlagBits::e1,
-        .loadOp = vk::AttachmentLoadOp::eClear,
-        .storeOp = vk::AttachmentStoreOp::eStore,
-        .stencilLoadOp = vk::AttachmentLoadOp::eDontCare,
-        .stencilStoreOp = vk::AttachmentStoreOp::eDontCare,
-        .initialLayout = vk::ImageLayout::eUndefined,
-        .finalLayout = vk::ImageLayout::ePresentSrcKHR,
-      };
-
-      vk::AttachmentReference color_attachment_ref{
-        .attachment = 0,
-        .layout = vk::ImageLayout::eColorAttachmentOptimal,
-      };
-
-      vk::SubpassDescription subpass{
-        .pipelineBindPoint = vk::PipelineBindPoint::eGraphics,
-        .colorAttachmentCount = 1,
-        .pColorAttachments = &color_attachment_ref,
-      };
-  
-      vk::SubpassDependency dependency{
-        .srcSubpass = VK_SUBPASS_EXTERNAL,
-        .dstSubpass = 0,
-        .srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
-        .dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
-        .srcAccessMask = vk::AccessFlagBits::eNone,
-        .dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite,
-      };
-      
-      try {
-        return std::make_unique<vk::raii::RenderPass>(
-          context_->logical_device(),
-          vk::RenderPassCreateInfo{
-            .attachmentCount = 1,
-            .pAttachments = &color_attachment,
-            .subpassCount = 1,
-            .pSubpasses = &subpass,
-            .dependencyCount = 1,
-            .pDependencies = &dependency,
-          }
-        );
-      } catch (const std::exception& e) {
-        Log::fatal("Failed to create render pass: {}", e.what());
-        return nullptr;
-      }
-    }
   };
 
   //
   //  Pipeline
   //
 
-  Pipeline::Pipeline(shared<ookami::Context> context, shared<Swapchain> swap_chain, shared<Shader> shader)
-    : p_impl_{ std::make_unique<Impl>(std::move(context), std::move(swap_chain), std::move(shader)) } {}
+  Pipeline::Pipeline(
+    const shared<ookami::Context>& context,
+    const shared<Swapchain>& swapchain,
+    const shared<Shader>& shader
+  ):
+    p_impl_{ std::make_unique<Impl>(context, swapchain, shader) } {}
 
   Pipeline::~Pipeline() = default;
-  
-  auto Pipeline::render_pass() const -> const shared<vk::raii::RenderPass>&
-  {
-    return p_impl_->render_pass();
-  }
-  
-  auto Pipeline::framebuffers() -> std::vector<vk::raii::Framebuffer>&
-  {
-    return p_impl_->framebuffers();
-  }
   
   auto Pipeline::viewport() const -> const vk::Viewport&
   {

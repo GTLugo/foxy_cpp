@@ -4,13 +4,12 @@
 
 #pragma once
 
-class GLFWwindow;
-
 namespace vk::raii {
   class CommandBuffer;
 }
 
 namespace fx {
+  class Window;
   class Shader;
   
   namespace ookami {
@@ -19,7 +18,12 @@ namespace fx {
   
   class LowLevelRenderer {
   public:
-    explicit LowLevelRenderer(shared<ookami::Context> context, shared<Shader> shader);
+    explicit LowLevelRenderer(
+      const shared<Window>& window,
+      const shared<ookami::Context>& context,
+      const shared<Shader>& shader,
+      u32 max_frames_in_flight = 1
+    );
     ~LowLevelRenderer();
   
     void record_command_buffer(vk::raii::CommandBuffer& command_buffer, u32 image_index);
