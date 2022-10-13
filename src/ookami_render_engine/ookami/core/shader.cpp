@@ -161,7 +161,7 @@ namespace fx {
         }
 
         if (program.getInfoLog()) {
-          Log::trace("Shader[{}]: {} | {}", name_, shader.getInfoLog(), shader.getInfoDebugLog());
+          Log::trace("Shader[{}]: {} | {}", name_, program.getInfoLog(), program.getInfoDebugLog());
         }
 
         glslang::TIntermediate* intermediate{ program.getIntermediate(language) };
