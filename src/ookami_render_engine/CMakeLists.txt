@@ -34,7 +34,7 @@ target_include_directories(${TARGET_NAME} PUBLIC ".")
 target_include_directories(${TARGET_NAME} PUBLIC "${FOXY_EXTERN_DIR}/koyote/include")
 target_link_libraries(${TARGET_NAME} PUBLIC koyote)
 # Vulkan
-target_include_directories(${TARGET_NAME} PRIVATE "../../../vulkan_static/include")
+target_include_directories(${TARGET_NAME} PRIVATE "../vulkan_static/include")
 target_link_libraries(${TARGET_NAME} PRIVATE vulkan_static)
 # Shaderc
 target_include_directories(${TARGET_NAME} PRIVATE "${FOXY_EXTERN_DIR}/shaderc")
