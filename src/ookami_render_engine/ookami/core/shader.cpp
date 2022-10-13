@@ -144,7 +144,7 @@ namespace fx {
         shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_3);
         shader.setEnvTarget(glslang::EshTargetSpv, glslang::EShTargetSpv_1_3);
         
-        if (!shader.parse(&init_resources(), 100, false, messages)) {
+        if (!shader.parse(&init_resources(), 130, false, messages)) {
           Log::error("Failed to parse shader[{}]: {} | {}", name_, shader.getInfoLog(), shader.getInfoDebugLog());
           return std::nullopt;
         }
