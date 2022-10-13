@@ -12,9 +12,9 @@ namespace fx {
       window_{ context->window() },
       context_{ context },
       swapchain_image_format_{ vk::Format::eB8G8R8A8Unorm },
-      swapchain_{create_swapchain()},
-      swap_images_{swapchain_.getImages()},
-      swap_image_views_{create_image_views()},
+      swapchain_{ create_swapchain() },
+      swap_images_{ swapchain_.getImages() },
+      swap_image_views_{ create_image_views() },
       render_pass_{ create_render_pass() }
     {
       for (const auto& image_view: swap_image_views_) {
@@ -38,7 +38,7 @@ namespace fx {
   
     [[nodiscard]] auto dirty() const -> bool
     {
-      return false;
+      return dirty_;
     }
   
     void rebuild()
