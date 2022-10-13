@@ -32,7 +32,7 @@ namespace fx {
 
     public:
       explicit Context(
-        const fx::shared<GLFWwindow>& window,
+        const shared<GLFWwindow>& window,
       #ifdef FOXY_DEBUG_MODE
         bool enable_validation = true
       #else

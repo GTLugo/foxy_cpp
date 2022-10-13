@@ -13,7 +13,7 @@ namespace fx {
     explicit Impl(const shared<Window>& window):
       context_{ std::make_shared<ookami::Context>(**window) }
     {
-      shared<Shader> fixed_value_shader{
+      std::shared_ptr fixed_value_shader{
         context_->create_shader(
           ShaderCreateInfo{
             .vertex = true,
