@@ -4,8 +4,7 @@
 
 #include "shader.hpp"
 
-#include <vulkan/static.hpp>
-#include <shaderc/shaderc.hpp>
+#include "vulkan/static.hpp"
 
 namespace fx {
   class Shader::Impl {
@@ -129,28 +128,57 @@ namespace fx {
       const bool disable_optimizations
     ) -> std::optional<std::vector<u32>>
     {
-      if (auto result{ fx::io::read_file(in_file) }) {
-        auto& code_str{ *result };
+      if (const auto result{ io::read_file(in_file) }) {
+        auto code_str{ (*result).c_str() };
         
         Log::trace("Compiling {}: {}...", *stage.to_string(), name_);
-        const shaderc::Compiler compiler;
-        shaderc::CompileOptions options{};
-        options.SetSourceLanguage(shaderc_source_language_hlsl);
-        if (!disable_optimizations) {
-          options.SetOptimizationLevel(shaderc_optimization_level_performance);
-        }
-        const auto compiled{ compiler.CompileGlslToSpv(
-          preprocess(code_str, stage),
-          static_cast<shaderc_shader_kind>(*stage.to_shaderc()),
-          name_.c_str(),
-          options
-        ) };
-        if (compiled.GetCompilationStatus() != shaderc_compilation_status_success) {
-          Log::error("Shaderc Compile: {}", compiled.GetErrorMessage());
+        glslang::InitializeProcess();
+
+        auto messages{ static_cast<EShMessages>(EShMsgReadHlsl | EShMsgDefault | EShMsgVulkanRules | EShMsgSpvRules) };
+        auto language{ static_cast<EShLanguage>(*stage.to_glslang()) };
+        glslang::TShader shader{ language };
+        shader.setStringsWithLengths(&code_str, nullptr, 1);
+        shader.setEnvInput(glslang::EShSourceHlsl, language, glslang::EShClientVulkan, 1);
+        shader.setEntryPoint("main");
+        shader.setSourceEntryPoint("main");
+        shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_3);
+        shader.setEnvTarget(glslang::EshTargetSpv, glslang::EShTargetSpv_1_3);
+        
+        if (!shader.parse(&init_resources(), 100, false, messages)) {
+          Log::error("Failed to parse shader[{}]: {} | {}", name_, shader.getInfoLog(), shader.getInfoDebugLog());
           return std::nullopt;
         }
-        const std::vector<u32> spv = { compiled.begin(), compiled.end() };
-        if (!fx::io::write_words(out_file, spv)) {
+
+        glslang::TProgram program;
+        program.addShader(&shader);
+
+        if (!program.link(messages)) {
+          Log::error("Failed to compile shader[{}]: {} | {}", name_, shader.getInfoLog(), shader.getInfoDebugLog());
+          return std::nullopt;
+        }
+
+        if (shader.getInfoLog()) {
+          Log::trace("Shader[{}]: {} | {}", name_, shader.getInfoLog(), shader.getInfoDebugLog());
+        }
+
+        if (program.getInfoLog()) {
+          Log::trace("Shader[{}]: {} | {}", name_, shader.getInfoLog(), shader.getInfoDebugLog());
+        }
+
+        glslang::TIntermediate* intermediate{ program.getIntermediate(language) };
+        if (intermediate == nullptr) {
+          Log::error("Failed to get intermediate code for shader[{}]", name_);
+          return std::nullopt;
+        }
+
+        spv::SpvBuildLogger logger;
+        std::vector<u32> spv;
+        GlslangToSpv(*intermediate, spv, &logger);
+  
+        Log::trace("Shader[{}]: {}", name_, logger.getAllMessages());
+  
+        glslang::FinalizeProcess();
+        if (!io::write_words(out_file, spv)) {
           Log::error("Could not write to output shader file.");
         }
         
@@ -158,21 +186,6 @@ namespace fx {
       }
       
       return std::nullopt;
-    }
-    
-    [[nodiscard]] auto preprocess(const std::string& code_str, const Stage stage) const -> std::string
-    {
-      const shaderc::Compiler compiler{};
-      shaderc::CompileOptions options{};
-      options.SetSourceLanguage(shaderc_source_language_hlsl);
-      
-      if (const auto result{ compiler.PreprocessGlsl(code_str, static_cast<shaderc_shader_kind>(*stage.to_shaderc()), name_.c_str(), options) };
-          result.GetCompilationStatus() == shaderc_compilation_status_success) {
-        return { result.begin(), result.end() };
-      } else {
-        Log::error("Shaderc Preprocess: {}", result.GetErrorMessage());
-        return "";
-      }
     }
     
     void create_shader_modules(const ShaderCreateInfo& shader_create_info, const vk::raii::Device& device)
@@ -213,12 +226,12 @@ namespace fx {
       Log::trace("Built shader modules: {}", name_);
     }
   
-    [[nodiscard]] static constexpr auto create_info_has_stage(const ShaderCreateInfo& create_info, const Shader::Stage stage) -> bool {
+    [[nodiscard]] static constexpr auto create_info_has_stage(const ShaderCreateInfo& create_info, const Stage stage) -> bool {
       switch (stage) {
-        case Shader::Stage::Vertex:   return create_info.vertex;
-        case Shader::Stage::Fragment: return create_info.fragment;
-        case Shader::Stage::Compute:  return create_info.compute;
-        case Shader::Stage::Geometry: return create_info.geometry;
+        case Stage::Vertex:   return create_info.vertex;
+        case Stage::Fragment: return create_info.fragment;
+        case Stage::Compute:  return create_info.compute;
+        case Stage::Geometry: return create_info.geometry;
         default:             return false;  // NOLINT(clang-diagnostic-covered-switch-default)
       }
     }
@@ -248,13 +261,13 @@ namespace fx {
     }
   }
   
-  constexpr auto Shader::Stage::to_shaderc() const -> std::optional<i32>
+  constexpr auto Shader::Stage::to_glslang() const -> std::optional<i32>
   {
     switch (value_) {
-      case Vertex:   return shaderc_glsl_vertex_shader;
-      case Fragment: return shaderc_glsl_fragment_shader;
-      case Compute:  return shaderc_glsl_compute_shader;
-      case Geometry: return shaderc_glsl_geometry_shader;
+      case Vertex:   return EShLangVertex;
+      case Fragment: return EShLangFragment;
+      case Compute:  return EShLangCompute;
+      case Geometry: return EShLangGeometry;
       default:       return std::nullopt;  // NOLINT(clang-diagnostic-covered-switch-default)
     }
   }

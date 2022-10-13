@@ -6,7 +6,7 @@ struct ExampleApp: fx::App {
   
   std::string waifu{ "Fubuki" };
   int hololive_members{ 71 };
-  bool crash_test{ false };
+  fx::u64 counter{ 1 };
 
   ExampleApp():
     App{
@@ -17,8 +17,6 @@ struct ExampleApp: fx::App {
   {
     add_function_to_stage(Stage::Start, FOXY_LAMBDA(start));
     add_function_to_stage(Stage::Update, FOXY_LAMBDA(update));
-    add_function_to_stage(Stage::Stop, FOXY_LAMBDA(stop));
-    add_function_to_stage(Stage::Asleep, FOXY_LAMBDA(asleep));
   }
 
   void start(App&, const Time&)
@@ -28,9 +26,7 @@ struct ExampleApp: fx::App {
 
   void update(App&, const Time& time)
   {
-    static double timer{ 0 };
-    static fx::u64 counter{ 1 };
-    if (1. <= (timer += time.delta<fx::secs>())) {
+    if (static double timer{ 0 }; 1. <= (timer += time.delta<fx::secs>())) {
       std::string extra_message{};
       if (counter == 10) {
         extra_message = ", kawaii~oooh! ...chan!";
@@ -42,20 +38,6 @@ struct ExampleApp: fx::App {
 
       counter = (counter % 10) + 1;
       timer = 0;
-    }
-  }
-
-  void stop(App&, const Time&)
-  {
-    if (crash_test) {
-      fx::Log::info("Crash test incoming...");
-    }
-  }
-
-  void asleep(App&, const Time&)
-  {
-    if (crash_test) {
-      fx::Log::fatal("Crash test!");
     }
   }
 };

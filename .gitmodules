@@ -6,9 +6,9 @@
 	ignore = dirty
 	path = extern/bs_thread_pool
 	url = https://github.com/bshoshany/thread-pool.git
-[submodule "extern/shaderc"]
-	path = extern/shaderc
-	url = https://github.com/google/shaderc.git
 [submodule "extern/koyote_utils"]
 	path = extern/koyote_utils
 	url = https://github.com/lugo-studio/koyote_utils.git
+[submodule "extern/glslang"]
+	path = extern/glslang
+	url = https://github.com/KhronosGroup/glslang.git
