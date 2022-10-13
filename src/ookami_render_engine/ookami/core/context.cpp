@@ -30,7 +30,6 @@ namespace fx::ookami {
     return true;
   }
 
-
   auto required_instance_extensions_strings() -> std::vector<std::string> {
     std::vector<std::string> result;
     auto count = fx::u32{ 0 };
@@ -72,6 +71,19 @@ namespace fx::ookami {
 
     ~Impl() {
       fx::Log::trace("Destroying Vulkan context...");
+    }
+    
+    void wait_for_fence(const vk::raii::Fence& fence)
+    {
+      if (auto result{ logical_device_.waitForFences(*fence, true, std::numeric_limits<u64>::max()) };
+          result != vk::Result::eSuccess) {
+        Log::error(to_string(result));
+      }
+    }
+  
+    void reset_fence(const vk::raii::Fence& fence)
+    {
+      logical_device_.resetFences(*fence);
     }
 
     [[nodiscard]] auto window() -> fx::shared<GLFWwindow> {
@@ -403,6 +415,16 @@ namespace fx::ookami {
     p_impl_{std::make_unique<Impl>(window, enable_validation)} {}
 
   Context::~Context() = default;
+  
+  void Context::wait_for_fence(const vk::raii::Fence& fence)
+  {
+    p_impl_->wait_for_fence(fence);
+  }
+  
+  void Context::reset_fence(const vk::raii::Fence& fence)
+  {
+    p_impl_->reset_fence(fence);
+  }
   
   auto Context::window() -> shared<GLFWwindow>
   {

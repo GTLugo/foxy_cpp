@@ -10,6 +10,7 @@ namespace vk::raii {
   class SurfaceKHR;
   class PhysicalDevice;
   class Queue;
+  class Fence;
 }
 
 namespace fx {
@@ -39,8 +40,9 @@ namespace fx {
       #endif
       );
       ~Context();
-
-      auto operator*() -> VulkanContext&;
+  
+      void wait_for_fence(const vk::raii::Fence& fence);
+      void reset_fence(const vk::raii::Fence& fence);
       
       [[nodiscard]] auto window() -> shared<GLFWwindow>;
       [[nodiscard]] auto native() -> VulkanContext&;
@@ -54,6 +56,8 @@ namespace fx {
       [[nodiscard]] auto logical_device() -> LogicalDevice&;
       
       [[nodiscard]] auto create_shader(const ShaderCreateInfo& shader_create_info) -> unique<Shader>;
+  
+      auto operator*() -> VulkanContext&;
 
     private:
       class Impl;

@@ -11,6 +11,7 @@ namespace vk {
     class SwapchainKHR;
     class RenderPass;
     class Framebuffer;
+    class Semaphore;
   }
 }
 
@@ -26,6 +27,7 @@ namespace fx {
   
     [[nodiscard]] auto dirty() const -> bool;
     void rebuild();
+    [[nodiscard]] auto acquire_next_image(const vk::raii::Semaphore& semaphore) -> std::optional<u32>;
   
     [[nodiscard]] auto context() const -> const shared<ookami::Context>&;
     [[nodiscard]] auto format() const -> vk::Format;
