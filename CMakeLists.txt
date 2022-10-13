@@ -26,10 +26,12 @@ add_subdirectory(extern)
 add_subdirectory(extern/glfw)
 # Koyote
 add_subdirectory(extern/koyote_utils)
-# ShaderC
-set(SHADERC_SKIP_TESTS ON)
-set(SHADERC_SKIP_EXAMPLES ON)
-add_subdirectory(extern/shaderc)
+## ShaderC
+#set(SHADERC_SKIP_TESTS ON)
+#set(SHADERC_SKIP_EXAMPLES ON)
+#add_subdirectory(extern/shaderc)
+# Glslang
+add_subdirectory(extern/glslang)
 
 # ===================================================
 # SUBDIRECTORIES

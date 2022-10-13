@@ -2,7 +2,7 @@
 
 #include "shader.hpp"
 
-#include <vulkan/static.hpp>
+#include "vulkan/static.hpp"
 #include <GLFW/glfw3.h>
 
 namespace fx::ookami {
@@ -17,10 +17,10 @@ namespace fx::ookami {
     msg << callback_data->pMessage << " | code " << callback_data->messageIdNumber << ", " << callback_data->pMessageIdName;
     switch (severity) {
       case vk::DebugUtilsMessageSeverityFlagBitsEXT::eError:
-        fx::Log::error(msg.str());
+        Log::error(msg.str());
         break;
       case vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning:
-        fx::Log::trace(msg.str());
+        Log::trace(msg.str());
         break;
       case vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose:
       case vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo:
@@ -32,16 +32,16 @@ namespace fx::ookami {
 
   auto required_instance_extensions_strings() -> std::vector<std::string> {
     std::vector<std::string> result;
-    auto count = fx::u32{ 0 };
+    auto count = u32{ 0 };
     const char** extensions = glfwGetRequiredInstanceExtensions(&count);
-    for (auto i = fx::u32{ 0 }; i < count; ++i) {
+    for (auto i = u32{ 0 }; i < count; ++i) {
       result.emplace_back(extensions[i]);
     }
     return result;
   }
 
   auto required_instance_extensions() -> std::vector<const char*> {
-    auto count = fx::u32{ 0 };
+    auto count = u32{ 0 };
     const char** extensions = glfwGetRequiredInstanceExtensions(&count);
     std::vector<const char*> result{extensions, extensions + count};
     return result;
@@ -49,23 +49,24 @@ namespace fx::ookami {
 
   class Context::Impl {
   public:
-    explicit Impl(const fx::shared<GLFWwindow>& window, bool enable_validation = true)
-      : enable_validation_{enable_validation},
-        window_{window},
-        context_{vk::raii::Context{}},
-        extension_data_{ExtensionData{
-          .device_extensions = std::vector<const char*>{
-            VK_KHR_SWAPCHAIN_EXTENSION_NAME
-          }
-        }},
-        instance_{create_instance()},
-        debug_messenger_{try_create_debug_messenger()},
-        surface_{create_surface(window)},
-        physical_device_{pick_physical_device()},
-        queue_family_indices_{find_queue_families(physical_device_)},
-        logical_device_{create_logical_device()},
-        graphics_queue_{logical_device_.getQueue(queue_family_indices_.graphics.value(), 0)},
-        present_queue_{logical_device_.getQueue(queue_family_indices_.present.value(), 0)} {
+    explicit Impl(const shared<GLFWwindow>& window, bool enable_validation = true):
+      enable_validation_{ enable_validation },
+      window_{ window },
+      context_{ vk::raii::Context{} },
+      extension_data_{ ExtensionData{
+        .device_extensions = std::vector{
+          VK_KHR_SWAPCHAIN_EXTENSION_NAME
+        }
+      }},
+      instance_{ create_instance() },
+      debug_messenger_{ try_create_debug_messenger() },
+      surface_{ create_surface(window) },
+      physical_device_{ pick_physical_device() },
+      queue_family_indices_{ find_queue_families(physical_device_) },
+      logical_device_{ create_logical_device() },
+      graphics_queue_{ logical_device_.getQueue(queue_family_indices_.graphics.value(), 0) },
+      present_queue_{ logical_device_.getQueue(queue_family_indices_.present.value(), 0) }
+    {
       fx::Log::trace("Vulkan context ready.");
     }
 

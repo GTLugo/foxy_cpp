@@ -49,7 +49,7 @@ namespace fx {
       
       [[nodiscard]] static constexpr auto from_string(std::string_view str) -> std::optional<Stage>;
       [[nodiscard]] constexpr auto to_string() const -> std::optional<std::string>;
-      [[nodiscard]] constexpr auto to_shaderc() const -> std::optional<i32>;
+      [[nodiscard]] constexpr auto to_glslang() const -> std::optional<i32>;
       [[nodiscard]] auto to_vk_flag() const -> std::optional<i32>; // This cannot be constexpr or inline without introducing a linker error
       
       [[nodiscard]] constexpr auto underlying_value() const -> Value { return value_; }

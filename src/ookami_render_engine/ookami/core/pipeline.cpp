@@ -8,7 +8,7 @@
 #include "swapchain.hpp"
 #include "shader.hpp"
 
-#include <vulkan/static.hpp>
+#include "vulkan/static.hpp"
 
 namespace fx {
   class Pipeline::Impl {

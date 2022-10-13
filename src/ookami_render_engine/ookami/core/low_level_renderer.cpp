@@ -9,7 +9,7 @@
 #include "pipeline.hpp"
 #include "shader.hpp"
 
-#include <vulkan/static.hpp>
+#include "vulkan/static.hpp"
 #include <inferno/window.hpp>
 
 namespace fx {
