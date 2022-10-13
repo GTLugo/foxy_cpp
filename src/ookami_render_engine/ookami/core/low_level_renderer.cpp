@@ -8,9 +8,9 @@
 #include "swapchain.hpp"
 #include "pipeline.hpp"
 #include "shader.hpp"
-#include <vulkan/static.hpp>
 
-#include "../inferno_window_library/inferno/window.hpp"
+#include <vulkan/static.hpp>
+#include <inferno/window.hpp>
 
 namespace fx {
   class LowLevelRenderer::Impl: types::SingleInstance<LowLevelRenderer> {
@@ -41,6 +41,8 @@ namespace fx {
       },
       pipeline_{ std::make_shared<Pipeline>(context_, swapchain_, shader) }
     {
+      Log::trace("Preparing Low Level Renderer...");
+      
       for (u32 i: std::views::iota(0U, max_frames_in_flight_)) {
         try {
           image_available_semaphores_.emplace_back(context_->logical_device(), vk::SemaphoreCreateInfo{});

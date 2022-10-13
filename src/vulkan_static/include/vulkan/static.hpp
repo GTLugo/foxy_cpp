@@ -1,4 +1,4 @@
 #pragma once
 
-#include "vulkan/lib.hpp"
-#include "vulkan/version.hpp"
+#include "vulkan/internal/lib.hpp"
+#include "vulkan/internal/version.hpp"

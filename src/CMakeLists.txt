@@ -4,8 +4,8 @@
 # ===================================================
 # SUBDIRECTORIES
 # ===================================================
+add_subdirectory(vulkan_static)
 add_subdirectory(inferno_window_library)
 add_subdirectory(neko_ecs)
-add_subdirectory(vulkan_static)
 add_subdirectory(ookami_render_engine)
 add_subdirectory(foxy_framework)
