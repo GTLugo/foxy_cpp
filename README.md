@@ -1,18 +1,20 @@
 # < Foxy Framework (C++) >
  Experimental C++ app framework. This is WIP still and not anywhere near completion yet; hence, the "experimental" tag.
 
-## - Requirements -
+## === Requirements ===
  Built with CMake 3.24, C++23, Visual C++ compiler, and Visual Studio 2022 generator.
  
-## - Dependencies -
- - python3 (for initializing shaderc)
+## === Dependencies ===
+### Included:
  - GLFW
  - Koyote Utils
  - BS Thread Pool
  - Shaderc
- - Vulkan - ***"Batteries not included!"*** Separate install required.
+### Not Included:
+ - python3 (to download shaderc dependencies)
+ - Vulkan
 
-## - Setup -
+## === Setup ===
 
  Run "setup.bat" once downloaded. This just sets up shaderc's dependencies for now.
 
@@ -22,13 +24,13 @@
  - Debug has the slowest compile time for shaders. It might be smarter to do shader development 
  in Release with Debug Info.
 
-## - Credits -
+## === Credits ===
  - https://github.com/jherico/Vulkan - Sascha Willems' examples translated to Vulkan's C++ API
  - https://github.com/blurrypiano/littleVulkanEngine - Brendan Galea's Vulkan series on YouTube
  - https://github.com/TheCherno/Hazel - The Cherno's game engine series on YouTube
  - More code snippets credited in comments which I will add here over time
 
-## - License -
+## === License ===
 
 Modified MIT License
 
