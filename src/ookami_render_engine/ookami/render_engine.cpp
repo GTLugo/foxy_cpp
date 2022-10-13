@@ -3,9 +3,9 @@
 #include "ookami/core/context.hpp"
 #include "ookami/core/shader.hpp"
 #include "ookami/core/low_level_renderer.hpp"
-#include <vulkan/static.hpp>
 
-#include "../inferno_window_library/inferno/window.hpp"
+#include <vulkan/static.hpp>
+#include <inferno/window.hpp>
 
 namespace fx {
   class RenderEngine::Impl: types::SingleInstance<RenderEngine> {

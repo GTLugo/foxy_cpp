@@ -33,6 +33,9 @@ target_include_directories(${TARGET_NAME} PUBLIC ".")
 # Koyote
 target_include_directories(${TARGET_NAME} PUBLIC "${FOXY_EXTERN_DIR}/koyote/include")
 target_link_libraries(${TARGET_NAME} PUBLIC koyote)
+# Inferno
+target_include_directories(${TARGET_NAME} PRIVATE "../inferno_window_library/include")
+target_link_libraries(${TARGET_NAME} PRIVATE inferno)
 # Vulkan
 target_include_directories(${TARGET_NAME} PRIVATE "../vulkan_static/include")
 target_link_libraries(${TARGET_NAME} PRIVATE vulkan_static)
