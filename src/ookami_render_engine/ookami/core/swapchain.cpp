@@ -83,6 +83,20 @@ namespace fx {
       dirty_ = false;
     }
   
+    auto acquire_next_image(const vk::raii::Semaphore& semaphore) -> std::optional<u32>
+    {
+      try {
+        auto [acquire_result, image_index]{ swapchain_.acquireNextImage(std::numeric_limits<u64>::max(), *semaphore) };
+        return image_index;
+      } catch (const vk::OutOfDateKHRError& e) {
+        // recreate swapchain and try drawing in the next frame (make sure not to draw THIS frame!)
+        rebuild();
+      } catch (const std::exception& e) {
+        Log::error(e.what());
+      }
+      return std::nullopt;
+    }
+  
     [[nodiscard]] auto context() const -> const shared<ookami::Context>&
     {
       return context_;
@@ -356,5 +370,10 @@ namespace fx {
   auto Swapchain::operator*() -> vk::raii::SwapchainKHR&
   {
     return **p_impl_;
+  }
+  
+  auto Swapchain::acquire_next_image(const vk::raii::Semaphore& semaphore) -> std::optional<u32>
+  {
+    return p_impl_->acquire_next_image(semaphore);
   }
 }

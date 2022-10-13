@@ -66,81 +66,12 @@ namespace fx {
     
     void draw()
     {
-      if (auto result{ context_->logical_device().waitForFences(
-            *image_in_flight_fences_[current_frame_index_],
-            true,
-            std::numeric_limits<u64>::max())
-          }; result != vk::Result::eSuccess) {
-        Log::error(to_string(result));
-      }
-      
-      try {
-        auto [acquire_result, image_index]{
-          (**swapchain_).acquireNextImage(
-            std::numeric_limits<u64>::max(),
-            *image_available_semaphores_[current_frame_index_]
-          )
-        };
-  
-        context_->logical_device().resetFences(*image_in_flight_fences_[current_frame_index_]);
-  
-        { // Record / Submit
-          auto& command_buffer{ command_buffers_[current_frame_index_] };
-    
-          command_buffer.reset();
-          record_command_buffer(command_buffer, image_index);
-    
-          vk::PipelineStageFlags wait_stage_flags{ vk::PipelineStageFlagBits::eColorAttachmentOutput };
-          vk::SubmitInfo submit_info{
-            .waitSemaphoreCount = 1,
-            .pWaitSemaphores = &*image_available_semaphores_[current_frame_index_],
-            .pWaitDstStageMask = &wait_stage_flags,
-            .commandBufferCount = 1,
-            .pCommandBuffers = &*command_buffer,
-            .signalSemaphoreCount = 1,
-            .pSignalSemaphores = &*render_complete_semaphores_[current_frame_index_],
-          };
-    
-          context_->graphics_queue().submit(submit_info, *image_in_flight_fences_[current_frame_index_]);
-        } // Record / Submit
-  
-        { // Present
-          vk::PresentInfoKHR present_info{
-            .waitSemaphoreCount = 1,
-            .pWaitSemaphores = &*render_complete_semaphores_[current_frame_index_],
-            .swapchainCount = 1,
-            .pSwapchains = &***swapchain_,
-            .pImageIndices = &image_index
-          };
-    
-          try {
-            if (!swapchain_->dirty()) {
-              auto present_result{ context_->present_queue().presentKHR(present_info) };
-            } else {
-              swapchain_->rebuild();
-            }
-  
-            if (framebuffer_resized_) {
-              // recreate swapchain and try drawing in the next frame (make sure not to draw THIS frame!)
-              framebuffer_resized_ = false;
-              swapchain_->rebuild();
-              return;
-            }
-          } catch (const vk::OutOfDateKHRError& e) {
-            swapchain_->rebuild();
-          } catch (const vk::SurfaceLostKHRError& e) {
-            swapchain_->rebuild();
-          } catch (const std::exception& e) {
-            Log::error("Presentation failure. {}", e.what());
-          }
-        } // Present
-  
+      context_->wait_for_fence(image_in_flight_fences_[current_frame_index_]);
+      if (auto image_index{ swapchain_->acquire_next_image(image_available_semaphores_[current_frame_index_]) }) {
+        context_->reset_fence(image_in_flight_fences_[current_frame_index_]);
+        submit(*image_index);
+        present(*image_index);
         current_frame_index_ = (current_frame_index_ + 1) % max_frames_in_flight_;
-      } catch (const vk::OutOfDateKHRError& e) {
-        // recreate swapchain and try drawing in the next frame (make sure not to draw THIS frame!)
-        swapchain_->rebuild();
-      } catch (const std::exception& e) {
-        Log::error(e.what());
       }
     }
   
@@ -195,6 +126,59 @@ namespace fx {
     std::vector<vk::raii::Semaphore> image_available_semaphores_;
     std::vector<vk::raii::Semaphore> render_complete_semaphores_;
     std::vector<vk::raii::Fence> image_in_flight_fences_;
+    
+    void submit(u32 image_index)
+    {
+      auto& command_buffer{ command_buffers_[current_frame_index_] };
+  
+      command_buffer.reset();
+      record_command_buffer(command_buffer, image_index);
+  
+      vk::PipelineStageFlags wait_stage_flags{ vk::PipelineStageFlagBits::eColorAttachmentOutput };
+      vk::SubmitInfo submit_info{
+        .waitSemaphoreCount = 1,
+        .pWaitSemaphores = &*image_available_semaphores_[current_frame_index_],
+        .pWaitDstStageMask = &wait_stage_flags,
+        .commandBufferCount = 1,
+        .pCommandBuffers = &*command_buffer,
+        .signalSemaphoreCount = 1,
+        .pSignalSemaphores = &*render_complete_semaphores_[current_frame_index_],
+      };
+  
+      context_->graphics_queue().submit(submit_info, *image_in_flight_fences_[current_frame_index_]);
+    }
+    
+    void present(u32 image_index)
+    {
+      vk::PresentInfoKHR present_info{
+        .waitSemaphoreCount = 1,
+        .pWaitSemaphores = &*render_complete_semaphores_[current_frame_index_],
+        .swapchainCount = 1,
+        .pSwapchains = &***swapchain_,
+        .pImageIndices = &image_index
+      };
+  
+      try {
+        if (!swapchain_->dirty()) {
+          auto present_result{ context_->present_queue().presentKHR(present_info) };
+        } else {
+          swapchain_->rebuild();
+        }
+    
+        if (framebuffer_resized_) {
+          // recreate swapchain and try drawing in the next frame (make sure not to draw THIS frame!)
+          framebuffer_resized_ = false;
+          swapchain_->rebuild();
+          return;
+        }
+      } catch (const vk::OutOfDateKHRError& e) {
+        swapchain_->rebuild();
+      } catch (const vk::SurfaceLostKHRError& e) {
+        swapchain_->rebuild();
+      } catch (const std::exception& e) {
+        Log::error("Presentation failure. {}", e.what());
+      }
+    }
   };
   
   //
