@@ -12,10 +12,11 @@
 namespace fx {
   class Pipeline::Impl {
   public:
-    explicit Impl(shared<ookami::Context> context, shared<Swapchain> swap_chain, shared<Shader> shader)
-      : context_{ std::move(context) },
-        swapchain_{ std::move(swap_chain) },
-        shader_{ std::move(shader) } {
+    explicit Impl(shared<ookami::Context> context, shared<Swapchain> swap_chain, shared<Shader> shader):
+      context_{ std::move(context) },
+      swapchain_{ std::move(swap_chain) },
+      shader_{ std::move(shader) }
+    {
       Log::trace("Creating Vulkan pipeline...");
 
       std::vector<vk::PipelineShaderStageCreateInfo> shader_stages;

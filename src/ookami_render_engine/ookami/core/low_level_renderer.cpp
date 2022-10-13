@@ -62,14 +62,14 @@ namespace fx {
                 })
               }; acquire_result) {
         case vk::Result::eSuccess: {
+          // Reset
           for (auto& command_buffer: command_buffers_) {
             command_buffer.reset();
           }
-  
+          
+          // Record / Submit
           { // Command buffer [0]
             auto& command_buffer{ command_buffers_[0] };
-            
-            command_buffer.reset();
             record_command_buffer(command_buffer, image_index);
             
             vk::PipelineStageFlags wait_stage_flags{ vk::PipelineStageFlagBits::eColorAttachmentOutput };
@@ -86,28 +86,30 @@ namespace fx {
             context_->graphics_queue().submit(submit_info, *image_in_flight_);
           } // Command buffer [0]
           
-          vk::PresentInfoKHR present_info{
-            .waitSemaphoreCount = 1,
-            .pWaitSemaphores = &*render_complete_,
-            .swapchainCount = 1,
-            .pSwapchains = &***swapchain_,
-            .pImageIndices = &image_index
-          };
-          
-          if (const auto present_result{ context_->present_queue().presentKHR(present_info) };
+          { // Present
+            vk::PresentInfoKHR present_info{
+              .waitSemaphoreCount = 1,
+              .pWaitSemaphores = &*render_complete_,
+              .swapchainCount = 1,
+              .pSwapchains = &***swapchain_,
+              .pImageIndices = &image_index
+            };
+  
+            if (const auto present_result{ context_->present_queue().presentKHR(present_info) };
               present_result != vk::Result::eSuccess ) {
-            Log::error("{}", to_string(present_result));
-          }
+              Log::error("{}", to_string(present_result));
+            }
+          } // Present
           break;
-        } // case vk::Result::eSuccess
+        }
         case vk::Result::eTimeout:
         case vk::Result::eNotReady:
         case vk::Result::eSuboptimalKHR: {
           Log::error("{}", to_string(acquire_result));
           break;
-        } // vk::Result::eSuboptimalKHR
-        default: {
-          // should not happen, as other return codes are considered to be an error and throw an exception
+        }
+        default: { // should not happen, as other return codes are considered to be an error and throw an exception
+          Log::error("{}", to_string(acquire_result));
           break;
         }
       }
@@ -164,8 +166,8 @@ namespace fx {
   //  Renderer
   //
   
-  LowLevelRenderer::LowLevelRenderer(shared<ookami::Context> context, shared<Shader> shader):
-    p_impl_{ std::make_unique<Impl>(std::move(context), std::move(shader)) } {}
+  LowLevelRenderer::LowLevelRenderer(const shared<ookami::Context>& context, const shared<Shader>& shader):
+    p_impl_{ std::make_unique<Impl>(context, shader) } {}
   
   LowLevelRenderer::~LowLevelRenderer() = default;
   

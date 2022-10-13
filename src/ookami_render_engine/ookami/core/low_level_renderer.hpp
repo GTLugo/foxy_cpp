@@ -19,7 +19,7 @@ namespace fx {
   
   class LowLevelRenderer {
   public:
-    explicit LowLevelRenderer(shared<ookami::Context> context, shared<Shader> shader);
+    explicit LowLevelRenderer(const shared<ookami::Context>& context, const shared<Shader>& shader);
     ~LowLevelRenderer();
   
     void record_command_buffer(vk::raii::CommandBuffer& command_buffer, u32 image_index);

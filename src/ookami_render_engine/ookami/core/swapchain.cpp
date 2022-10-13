@@ -48,7 +48,7 @@ namespace fx {
     std::vector<vk::raii::ImageView> swap_image_views_;
 
     [[nodiscard]] static auto pick_swap_surface_format(const std::vector<vk::SurfaceFormatKHR>& formats) -> vk::SurfaceFormatKHR {
-      for (auto& format : formats) {
+      for (auto& format: formats) {
         if (format.format == vk::Format::eB8G8R8A8Unorm && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
           return format;
         }
