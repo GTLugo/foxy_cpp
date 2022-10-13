@@ -1,8 +1,7 @@
 #include "context.hpp"
 
-#include "vulkan.hpp"
-#include "version.hpp"
 #include "shader.hpp"
+#include <vulkan/static.hpp>
 #include <GLFW/glfw3.h>
 
 namespace fx::ookami {

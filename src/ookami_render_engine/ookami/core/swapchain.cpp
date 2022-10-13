@@ -1,7 +1,7 @@
 #include "swapchain.hpp"
 
 #include "context.hpp"
-#include "vulkan.hpp"
+#include <vulkan/static.hpp>
 #include <GLFW/glfw3.h>
 
 namespace fx {
