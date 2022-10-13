@@ -36,7 +36,6 @@ namespace fx {
       set_callbacks();
 
       Log::trace("Window ready.");
-      std::stop_token stop_token{};
     }
 
     ~Impl()
