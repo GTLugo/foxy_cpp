@@ -5,7 +5,7 @@ set(TARGET_NAME "vulkan_static")
 # LIBRARY
 # ===================================================
 set(SOURCES
-    "vulkan/lib.cpp"
+    "vulkan/lib.hpp"
     )
 add_library(${TARGET_NAME} STATIC ${SOURCES})
 target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)

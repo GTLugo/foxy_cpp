@@ -4,9 +4,6 @@
 
 #pragma once
 
-#define VULKAN_HPP_NO_CONSTRUCTORS
-#include <vulkan/vulkan_raii.hpp>
-
 namespace fx {
   struct ExtensionData {
     std::vector<const char*> window_extensions{};
