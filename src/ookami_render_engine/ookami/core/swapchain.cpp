@@ -7,18 +7,87 @@
 namespace fx {
   class Swapchain::Impl {
   public:
-    explicit Impl(shared<ookami::Context> context)
-      : window_{ context->window() },
-        context_{ std::move(context) },
-        swapchain_image_format_{vk::Format::eB8G8R8A8Unorm},
-        swapchain_{create_swapchain()},
-        swap_images_{swapchain_.getImages()},
-        swap_image_views_{create_image_views()} {
+    explicit Impl(const shared<ookami::Context>& context):
+      window_{ context->window() },
+      context_{ context },
+      swapchain_image_format_{vk::Format::eB8G8R8A8Unorm},
+      swapchain_{create_swapchain()},
+      swap_images_{swapchain_.getImages()},
+      swap_image_views_{create_image_views()},
+      render_pass_{ create_render_pass() }
+    {
+      for (const auto& image_view: swap_image_views_) {
+        framebuffers_.emplace_back(
+          context_->logical_device(),
+          vk::FramebufferCreateInfo{
+            .renderPass = **render_pass_,
+            .attachmentCount = 1,
+            .pAttachments = &*image_view,
+            .width = swapchain_extent_.width,
+            .height = swapchain_extent_.height,
+            .layers = 1,
+          }
+        );
+      }
+      
       Log::trace("Created Vulkan swapchain.");
     }
 
     ~Impl() = default;
-
+  
+    [[nodiscard]] auto dirty() const -> bool
+    {
+      return false;
+    }
+  
+    void rebuild()
+    {
+      Log::trace("Rebuilding Vulkan swapchain...");
+      dirty_ = true;
+      
+      ivec2 size{};
+      glfwGetFramebufferSize(window_.get(), &size.x, &size.y);
+      if (size.x == 0 || size.y == 0) {
+        return;
+      }
+      
+      context_->logical_device().waitIdle();
+      
+      // Reset
+      swapchain_.clear();
+      swap_images_.clear();
+      swap_image_views_.clear();
+      render_pass_->clear();
+      framebuffers_.clear();
+  
+      // Rebuild
+      swapchain_ = create_swapchain();
+      swap_images_ = swapchain_.getImages();
+      swap_image_views_ = create_image_views();
+      render_pass_ = create_render_pass();
+      for (const auto& image_view: swap_image_views_) {
+        framebuffers_.emplace_back(
+          context_->logical_device(),
+          vk::FramebufferCreateInfo{
+            .renderPass = **render_pass_,
+            .attachmentCount = 1,
+            .pAttachments = &*image_view,
+            .width = swapchain_extent_.width,
+            .height = swapchain_extent_.height,
+            .layers = 1,
+          }
+        );
+      }
+    
+      Log::trace("Rebuilt Vulkan swapchain.");
+      dirty_ = false;
+    }
+  
+    [[nodiscard]] auto context() const -> const shared<ookami::Context>&
+    {
+      return context_;
+    }
+    
     [[nodiscard]] auto format() -> vk::Format {
       return swapchain_image_format_;
     }
@@ -31,12 +100,24 @@ namespace fx {
       return swap_image_views_;
     }
   
+    [[nodiscard]] auto render_pass() const -> const shared<vk::raii::RenderPass>&
+    {
+      return render_pass_;
+    }
+  
+    [[nodiscard]] auto framebuffers() -> std::vector<vk::raii::Framebuffer>&
+    {
+      return framebuffers_;
+    }
+  
     auto operator*() -> vk::raii::SwapchainKHR&
     {
       return swapchain_;
     }
     
   private:
+    bool dirty_{ false };
+    
     shared<GLFWwindow> window_;
     shared<ookami::Context> context_;
 
@@ -46,6 +127,9 @@ namespace fx {
 
     std::vector<VkImage> swap_images_;
     std::vector<vk::raii::ImageView> swap_image_views_;
+    
+    shared<vk::raii::RenderPass> render_pass_;
+    std::vector<vk::raii::Framebuffer> framebuffers_;
 
     [[nodiscard]] static auto pick_swap_surface_format(const std::vector<vk::SurfaceFormatKHR>& formats) -> vk::SurfaceFormatKHR {
       for (auto& format: formats) {
@@ -171,6 +255,56 @@ namespace fx {
       );
       return image_views;
     }
+  
+    [[nodiscard]] auto create_render_pass() const -> unique<vk::raii::RenderPass> {
+      vk::AttachmentDescription color_attachment{
+        .format = swapchain_image_format_,
+        .samples = vk::SampleCountFlagBits::e1,
+        .loadOp = vk::AttachmentLoadOp::eClear,
+        .storeOp = vk::AttachmentStoreOp::eStore,
+        .stencilLoadOp = vk::AttachmentLoadOp::eDontCare,
+        .stencilStoreOp = vk::AttachmentStoreOp::eDontCare,
+        .initialLayout = vk::ImageLayout::eUndefined,
+        .finalLayout = vk::ImageLayout::ePresentSrcKHR,
+      };
+    
+      vk::AttachmentReference color_attachment_ref{
+        .attachment = 0,
+        .layout = vk::ImageLayout::eColorAttachmentOptimal,
+      };
+    
+      vk::SubpassDescription subpass{
+        .pipelineBindPoint = vk::PipelineBindPoint::eGraphics,
+        .colorAttachmentCount = 1,
+        .pColorAttachments = &color_attachment_ref,
+      };
+    
+      vk::SubpassDependency dependency{
+        .srcSubpass = VK_SUBPASS_EXTERNAL,
+        .dstSubpass = 0,
+        .srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
+        .dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
+        .srcAccessMask = vk::AccessFlagBits::eNone,
+        .dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite,
+      };
+    
+      try {
+        return std::make_unique<vk::raii::RenderPass>(
+          context_->logical_device(),
+          vk::RenderPassCreateInfo{
+            .attachmentCount = 1,
+            .pAttachments = &color_attachment,
+            .subpassCount = 1,
+            .pSubpasses = &subpass,
+            .dependencyCount = 1,
+            .pDependencies = &dependency,
+          }
+        );
+      } catch (const std::exception& e) {
+        Log::fatal("Failed to create render pass: {}", e.what());
+        return nullptr;
+      }
+    }
   };
 
   //
@@ -181,6 +315,21 @@ namespace fx {
     : p_impl_{std::make_unique<Impl>(context)} {}
 
   Swapchain::~Swapchain() = default;
+  
+  auto Swapchain::dirty() const -> bool
+  {
+    return p_impl_->dirty();
+  }
+  
+  void Swapchain::rebuild()
+  {
+    p_impl_->rebuild();
+  }
+  
+  auto Swapchain::context() const -> const shared<ookami::Context>&
+  {
+    return p_impl_->context();
+  }
 
   auto Swapchain::format() const -> vk::Format {
     return p_impl_->format();
@@ -192,6 +341,16 @@ namespace fx {
 
   auto Swapchain::image_views() const -> std::vector<vk::raii::ImageView>& {
     return p_impl_->image_views();
+  }
+  
+  auto Swapchain::render_pass() const -> const shared<vk::raii::RenderPass>&
+  {
+    return p_impl_->render_pass();
+  }
+  
+  auto Swapchain::framebuffers() -> std::vector<vk::raii::Framebuffer>&
+  {
+    return p_impl_->framebuffers();
   }
   
   auto Swapchain::operator*() -> vk::raii::SwapchainKHR&

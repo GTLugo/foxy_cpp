@@ -10,7 +10,6 @@ namespace vk {
   
   namespace raii {
     class RenderPass;
-    class Framebuffer;
     class Pipeline;
   }
 }
@@ -25,11 +24,13 @@ namespace fx {
 
   class Pipeline {
   public:
-    explicit Pipeline(shared<ookami::Context> context, shared<Swapchain> swap_chain, shared<Shader> shader);
+    explicit Pipeline(
+      const shared<ookami::Context>& context,
+      const shared<Swapchain>& swapchain,
+      const shared<Shader>& shader
+    );
     ~Pipeline();
-  
-    [[nodiscard]] auto render_pass() const -> const shared<vk::raii::RenderPass>&;
-    [[nodiscard]] auto framebuffers() -> std::vector<vk::raii::Framebuffer>&;
+    
     [[nodiscard]] auto viewport() const -> const vk::Viewport&;
     [[nodiscard]] auto scissor() const -> const vk::Rect2D&;
   

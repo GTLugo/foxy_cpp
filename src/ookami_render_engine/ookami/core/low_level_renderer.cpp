@@ -10,11 +10,19 @@
 #include "shader.hpp"
 #include "vulkan.hpp"
 
+#include "../inferno_window_library/inferno/window.hpp"
+
 namespace fx {
   class LowLevelRenderer::Impl: types::SingleInstance<LowLevelRenderer> {
   public:
-    explicit Impl(const shared<ookami::Context>& context, const shared<Shader>& shader, const u32 max_frames_in_flight):
+    explicit Impl(
+      const shared<Window>& window,
+      const shared<ookami::Context>& context,
+      const shared<Shader>& shader,
+      const u32 max_frames_in_flight
+    ):
       max_frames_in_flight_{ max_frames_in_flight },
+      window_{ window },
       context_{ context },
       swapchain_{ std::make_shared<Swapchain>(context_) },
       command_pool_{
@@ -47,6 +55,10 @@ namespace fx {
         }
       }
       
+      window_->add_framebuffer_resized_callback([this](i32 width, i32 height) {
+        framebuffer_resized_ = true;
+      });
+      
       Log::trace("Low Level Renderer ready.");
     }
     
@@ -54,70 +66,81 @@ namespace fx {
     
     void draw()
     {
-      if (auto result{ context_->logical_device().waitForFences(*image_in_flight_fences_[current_frame_index_], true, std::numeric_limits<u64>::max()) };
-          result != vk::Result::eSuccess) {
-        Log::error("{}", to_string(result));
+      if (auto result{ context_->logical_device().waitForFences(
+            *image_in_flight_fences_[current_frame_index_],
+            true,
+            std::numeric_limits<u64>::max())
+          }; result != vk::Result::eSuccess) {
+        Log::error(to_string(result));
       }
-  
-      context_->logical_device().resetFences(*image_in_flight_fences_[current_frame_index_]);
       
-      switch (auto [acquire_result, image_index]{
-                context_->logical_device().acquireNextImage2KHR(vk::AcquireNextImageInfoKHR{
-                  .swapchain = ***swapchain_,
-                  .timeout = std::numeric_limits<u64>::max(),
-                  .semaphore = *image_available_semaphores_[current_frame_index_],
-                  .deviceMask = 1,
-                })
-              }; acquire_result) {
-        case vk::Result::eSuccess: {
-          { // Record / Submit
-            auto& command_buffer{ command_buffers_[current_frame_index_] };
-            
-            command_buffer.reset();
-            record_command_buffer(command_buffer, image_index);
-            
-            vk::PipelineStageFlags wait_stage_flags{ vk::PipelineStageFlagBits::eColorAttachmentOutput };
-            vk::SubmitInfo submit_info{
-              .waitSemaphoreCount = 1,
-              .pWaitSemaphores = &*image_available_semaphores_[current_frame_index_],
-              .pWaitDstStageMask = &wait_stage_flags,
-              .commandBufferCount = 1,
-              .pCommandBuffers = &*command_buffer,
-              .signalSemaphoreCount = 1,
-              .pSignalSemaphores = &*render_complete_semaphores_[current_frame_index_],
-            };
-            
-            context_->graphics_queue().submit(submit_info, *image_in_flight_fences_[current_frame_index_]);
-          } // Record / Submit
-          
-          { // Present
-            vk::PresentInfoKHR present_info{
-              .waitSemaphoreCount = 1,
-              .pWaitSemaphores = &*render_complete_semaphores_[current_frame_index_],
-              .swapchainCount = 1,
-              .pSwapchains = &***swapchain_,
-              .pImageIndices = &image_index
-            };
+      try {
+        auto [acquire_result, image_index]{
+          (**swapchain_).acquireNextImage(
+            std::numeric_limits<u64>::max(),
+            *image_available_semaphores_[current_frame_index_]
+          )
+        };
   
-            if (const auto present_result{ context_->present_queue().presentKHR(present_info) };
-              present_result != vk::Result::eSuccess ) {
-              Log::error("{}", to_string(present_result));
+        context_->logical_device().resetFences(*image_in_flight_fences_[current_frame_index_]);
+  
+        { // Record / Submit
+          auto& command_buffer{ command_buffers_[current_frame_index_] };
+    
+          command_buffer.reset();
+          record_command_buffer(command_buffer, image_index);
+    
+          vk::PipelineStageFlags wait_stage_flags{ vk::PipelineStageFlagBits::eColorAttachmentOutput };
+          vk::SubmitInfo submit_info{
+            .waitSemaphoreCount = 1,
+            .pWaitSemaphores = &*image_available_semaphores_[current_frame_index_],
+            .pWaitDstStageMask = &wait_stage_flags,
+            .commandBufferCount = 1,
+            .pCommandBuffers = &*command_buffer,
+            .signalSemaphoreCount = 1,
+            .pSignalSemaphores = &*render_complete_semaphores_[current_frame_index_],
+          };
+    
+          context_->graphics_queue().submit(submit_info, *image_in_flight_fences_[current_frame_index_]);
+        } // Record / Submit
+  
+        { // Present
+          vk::PresentInfoKHR present_info{
+            .waitSemaphoreCount = 1,
+            .pWaitSemaphores = &*render_complete_semaphores_[current_frame_index_],
+            .swapchainCount = 1,
+            .pSwapchains = &***swapchain_,
+            .pImageIndices = &image_index
+          };
+    
+          try {
+            if (!swapchain_->dirty()) {
+              auto present_result{ context_->present_queue().presentKHR(present_info) };
+            } else {
+              swapchain_->rebuild();
             }
-          } // Present
-          
-          current_frame_index_ = (current_frame_index_ + 1) % max_frames_in_flight_;
-          break;
-        }
-        case vk::Result::eTimeout:
-        case vk::Result::eNotReady:
-        case vk::Result::eSuboptimalKHR: {
-          Log::error("{}", to_string(acquire_result));
-          break;
-        }
-        default: { // should not happen, as other return codes are considered to be an error and throw an exception
-          Log::error("{}", to_string(acquire_result));
-          break;
-        }
+  
+            if (framebuffer_resized_) {
+              // recreate swapchain and try drawing in the next frame (make sure not to draw THIS frame!)
+              framebuffer_resized_ = false;
+              swapchain_->rebuild();
+              return;
+            }
+          } catch (const vk::OutOfDateKHRError& e) {
+            swapchain_->rebuild();
+          } catch (const vk::SurfaceLostKHRError& e) {
+            swapchain_->rebuild();
+          } catch (const std::exception& e) {
+            Log::error("Presentation failure. {}", e.what());
+          }
+        } // Present
+  
+        current_frame_index_ = (current_frame_index_ + 1) % max_frames_in_flight_;
+      } catch (const vk::OutOfDateKHRError& e) {
+        // recreate swapchain and try drawing in the next frame (make sure not to draw THIS frame!)
+        swapchain_->rebuild();
+      } catch (const std::exception& e) {
+        Log::error(e.what());
       }
     }
   
@@ -130,8 +153,8 @@ namespace fx {
       };
     
       vk::RenderPassBeginInfo render_pass_begin_info{
-        .renderPass = **pipeline_->render_pass(),
-        .framebuffer = *pipeline_->framebuffers()[image_index],
+        .renderPass = **swapchain_->render_pass(),
+        .framebuffer = *swapchain_->framebuffers()[image_index],
         .renderArea = {
           .offset = { 0, 0 },
           .extent = swapchain_->extent()
@@ -158,8 +181,11 @@ namespace fx {
   private:
     const u32 max_frames_in_flight_;
     u32 current_frame_index_{ 0 };
-    
+    bool framebuffer_resized_{ false };
+  
+    shared<Window> window_;
     shared<ookami::Context> context_;
+    
     shared<Swapchain> swapchain_;
     shared<Pipeline> pipeline_;
     
@@ -175,8 +201,13 @@ namespace fx {
   //  Renderer
   //
   
-  LowLevelRenderer::LowLevelRenderer(const shared<ookami::Context>& context, const shared<Shader>& shader, const u32 max_frames_in_flight):
-    p_impl_{ std::make_unique<Impl>(context, shader, max_frames_in_flight) } {}
+  LowLevelRenderer::LowLevelRenderer(
+    const shared<Window>& window,
+    const shared<ookami::Context>& context,
+    const shared<Shader>& shader,
+    const u32 max_frames_in_flight
+  ):
+    p_impl_{ std::make_unique<Impl>(window, context, shader, max_frames_in_flight) } {}
   
   LowLevelRenderer::~LowLevelRenderer() = default;
   

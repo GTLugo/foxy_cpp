@@ -20,7 +20,7 @@ namespace fx {
       Log::trace("Creating Window...");
 
       // Create GLFW window
-      glfwWindowHint(GLFW_RESIZABLE, false);
+      //glfwWindowHint(GLFW_RESIZABLE, false);
       glfwWindowHint(GLFW_VISIBLE, false);
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
@@ -41,6 +41,11 @@ namespace fx {
     ~Impl()
     {
       Log::trace("Destroying Window...");
+    }
+    
+    void add_framebuffer_resized_callback(const std::function<void(i32, i32)>& callback)
+    {
+      state_.framebuffer_resized_event.add_callback(callback);
     }
 
     void poll_events()
@@ -74,7 +79,6 @@ namespace fx {
       } else {
         glfwSetWindowTitle(glfw_window_.get(), state_.title.c_str());
       }
-      
     }
 
     void set_pos(ivec2 position)
@@ -109,6 +113,7 @@ namespace fx {
     [[nodiscard]] auto fullscreen() const -> bool { return state_.vsync; }
     [[nodiscard]] auto hidden() const -> bool { return state_.hidden; }
     [[nodiscard]] auto should_continue() const -> const bool& { return state_.should_continue; }
+    
   private:
     struct State {
       std::string title;
@@ -123,6 +128,7 @@ namespace fx {
 
       // Window events
       Event<> close_event;
+      Event<i32, i32> framebuffer_resized_event;
       // Input events
       Event<> key_event;
       Event<> modifier_event;
@@ -150,13 +156,17 @@ namespace fx {
     void set_callbacks()
     {
       // Foxy
-      shared<GLFWwindow> x;
       state_.close_event.add_callback(FOXY_LAMBDA(close));
 
       // GLFW
       glfwSetWindowCloseCallback(glfw_window_.get(), [](GLFWwindow* window) {
         auto ptr = reinterpret_cast<State*>(glfwGetWindowUserPointer(window));
         ptr->close_event();
+      });
+  
+      glfwSetFramebufferSizeCallback(glfw_window_.get(), [](GLFWwindow* window, i32 width, i32 height) {
+        auto ptr = reinterpret_cast<State*>(glfwGetWindowUserPointer(window));
+        ptr->framebuffer_resized_event(width, height);
       });
     }
   };
@@ -169,6 +179,11 @@ namespace fx {
       : p_impl_{std::make_unique<Impl>(properties)} {}
 
   Window::~Window() = default;
+  
+  void Window::add_framebuffer_resized_callback(const std::function<void(i32, i32)>& callback)
+  {
+    p_impl_->add_framebuffer_resized_callback(callback);
+  }
 
   void Window::poll_events()
   {
