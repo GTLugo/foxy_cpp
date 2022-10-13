@@ -118,14 +118,13 @@ namespace fx {
       );
       
       create_directories(shader_cache_dir);
-      return compile_shader_type(in_shader_path, out_shader_path, stage, create_info.disable_optimizations);
+      return compile_shader_type(in_shader_path, out_shader_path, stage);
     }
     
     [[nodiscard]] auto compile_shader_type(
       const std::filesystem::path& in_file,
       const std::filesystem::path& out_file,
-      const Stage stage,
-      const bool disable_optimizations
+      const Stage stage
     ) -> std::optional<std::vector<u32>>
     {
       if (const auto result{ io::read_file(in_file) }) {
@@ -214,7 +213,7 @@ namespace fx {
                 };
                 const fs::path in_shader_path{ shader_create_info.shader_directory / fs::path{ *stage.to_string() + ".hlsl" } };
                 const fs::path out_shader_path{ shader_cache_dir / fs::path{ *stage.to_string() + ".spv" } };
-                bytecode_[stage] = *compile_shader_type(in_shader_path, out_shader_path, stage, shader_create_info.disable_optimizations);
+                bytecode_[stage] = *compile_shader_type(in_shader_path, out_shader_path, stage);
               } else {
                 Log::error("Could not recover from shader module creation failure ({})", e.what());
               }
