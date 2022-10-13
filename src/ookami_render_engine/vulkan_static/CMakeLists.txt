@@ -20,6 +20,7 @@ target_compile_definitions(${TARGET_NAME}
                            )
 target_precompile_headers(${TARGET_NAME} PUBLIC "include/vulkan/internal/pch.hpp")
 target_include_directories(${TARGET_NAME} PUBLIC "include")
+set_target_properties(${TARGET_NAME} PROPERTIES STATIC_LIBRARY_FLAGS "/ignore:4099")
 
 # ===================================================
 # DEPENDENCIES
@@ -28,7 +29,6 @@ target_include_directories(${TARGET_NAME} PUBLIC "include")
 target_include_directories(${TARGET_NAME} PUBLIC "${FOXY_EXTERN_DIR}/koyote/include")
 target_link_libraries(${TARGET_NAME} PUBLIC koyote)
 # Vulkan
-set_target_properties(${TARGET_NAME} PROPERTIES STATIC_LIBRARY_FLAGS "/ignore:4099")
 find_package(Vulkan REQUIRED)
 target_include_directories(${TARGET_NAME} PUBLIC "${Vulkan_INCLUDE_DIR}")
 target_link_libraries(${TARGET_NAME} PUBLIC Vulkan::Vulkan)
