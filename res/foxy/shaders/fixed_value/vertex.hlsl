@@ -30,9 +30,9 @@ FragInput main(uint vertex_index : SV_VertexID)
     };
 
     float4 colors[3] = {
-        float4(1.0, 0.0, 0.0, 1.0),
-        float4(0.0, 1.0, 0.0, 1.0),
-        float4(0.0, 0.0, 1.0, 1.0),
+        float4(1.0, 0.25, 0.25, 1.0),
+        float4(0.25, 1.0, 0.25, 1.0),
+        float4(0.25, 0.25, 1.0, 1.0),
     };
 
     // input.position.w = 1.0f;
