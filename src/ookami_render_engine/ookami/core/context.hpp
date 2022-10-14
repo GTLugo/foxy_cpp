@@ -54,8 +54,9 @@ namespace fx {
       [[nodiscard]] auto queue_families() const -> const QueueFamilyIndices&;
       [[nodiscard]] auto physical_device() -> PhysicalDevice&;
       [[nodiscard]] auto logical_device() -> LogicalDevice&;
+      [[nodiscard]] auto logical_device() const -> const LogicalDevice&;
       
-      [[nodiscard]] auto create_shader(const ShaderCreateInfo& shader_create_info) -> unique<Shader>;
+      [[nodiscard]] auto create_shader(const ShaderCreateInfo& shader_create_info) const -> unique<Shader>;
   
       auto operator*() -> VulkanContext&;
 

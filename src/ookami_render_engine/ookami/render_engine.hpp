@@ -6,6 +6,8 @@
 
 namespace fx {
   class Window;
+  class Shader;
+  class ShaderCreateInfo;
   
   class RenderEngine {
   public:
@@ -15,6 +17,8 @@ namespace fx {
     void submit();
     void draw_frame();
     void wait_idle();
+
+    [[nodiscard]] auto create_shader(const ShaderCreateInfo& shader_create_info) const -> unique<Shader>;
 
   private:
     class Impl;

@@ -467,8 +467,12 @@ namespace fx::ookami {
   auto Context::logical_device() -> vk::raii::Device& {
     return p_impl_->logical_device();
   }
+
+  auto Context::logical_device() const -> const vk::raii::Device& {
+    return p_impl_->logical_device();
+  }
   
-  auto Context::create_shader(const ShaderCreateInfo& shader_create_info) -> unique<Shader>
+  auto Context::create_shader(const ShaderCreateInfo& shader_create_info) const -> unique<Shader>
   {
     return std::make_unique<Shader>(
       logical_device(),

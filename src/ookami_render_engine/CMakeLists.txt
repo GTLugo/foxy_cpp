@@ -40,9 +40,6 @@ target_link_libraries(${TARGET_NAME} PRIVATE inferno)
 add_subdirectory(vulkan_static)
 target_include_directories(${TARGET_NAME} PRIVATE "../vulkan_static/include")
 target_link_libraries(${TARGET_NAME} PRIVATE vulkan_static)
-## Glslang
-#target_include_directories(${TARGET_NAME} PRIVATE "${FOXY_EXTERN_DIR}/glslang")
-#target_link_libraries(${TARGET_NAME} PRIVATE glslang)
 # GLFW
 target_include_directories(${TARGET_NAME} PRIVATE "${FOXY_EXTERN_DIR}/glfw/include")
 target_link_libraries(${TARGET_NAME} PRIVATE glfw)

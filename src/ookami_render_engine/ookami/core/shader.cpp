@@ -10,7 +10,7 @@ namespace fx {
   class Shader::Impl {
   public:
     Impl(const vk::raii::Device& device, const ShaderCreateInfo& shader_create_info):
-      name_{ shader_create_info.shader_directory.stem().string() }
+      name_{ shader_create_info.directory.stem().string() }
     {
       Log::info("Please wait while shader[\"{}\"] loads...", name_);
       const auto sw{ Stopwatch() };
@@ -63,13 +63,13 @@ namespace fx {
       bool found_shader{ true };
       namespace fs = std::filesystem;
       const fs::path shader_cache_dir{
-        fs::path{ "tmp" } / fs::path{ "shader_cache" } / relative(create_info.shader_directory, {"res/foxy/shaders"}).parent_path() / create_info.shader_directory.stem()
+        fs::path{ "tmp" } / fs::path{ "shader_cache" } / relative(create_info.directory, {"res/foxy/shaders"}).parent_path() / create_info.directory.stem()
       };
       
-      if (!exists(create_info.shader_directory)) {
-        Log::error("Directory {} does not exist", create_info.shader_directory.string());
+      if (!exists(create_info.directory)) {
+        Log::error("Directory {} does not exist", create_info.directory.string());
       } else {
-        if (is_directory(create_info.shader_directory)) {
+        if (is_directory(create_info.directory)) {
           Log::trace("Fetching shader from dir: {}", name_);
           
           for (const auto& stage: stages) {
@@ -99,7 +99,7 @@ namespace fx {
     ) -> std::optional<std::vector<word>>
     {
       namespace fs = std::filesystem;
-      const fs::path in_shader_path{ create_info.shader_directory / fs::path{ *stage.to_string() + ".hlsl" } };
+      const fs::path in_shader_path{ create_info.directory / fs::path{ *stage.to_string() + ".hlsl" } };
       
       Log::trace("Looking for {}: {}", *stage.to_string(), name_);
       const fs::path out_shader_path{ shader_cache_dir / fs::path{ *stage.to_string() + ".spv" }};
@@ -131,6 +131,7 @@ namespace fx {
         auto code_str{ (*result).c_str() };
         
         Log::trace("Compiling {}: {}...", *stage.to_string(), name_);
+
         glslang::InitializeProcess();
 
         auto messages{ static_cast<EShMessages>(EShMsgReadHlsl | EShMsgDefault | EShMsgVulkanRules | EShMsgSpvRules) };
@@ -208,10 +209,10 @@ namespace fx {
                 namespace fs = std::filesystem;
                 const fs::path shader_cache_dir{
                   fs::path{ "tmp" } / fs::path{ "shader_cache" } / relative(
-                    shader_create_info.shader_directory, {"res/foxy/shaders"}
-                  ).parent_path() / shader_create_info.shader_directory.stem()
+                    shader_create_info.directory, {"res/foxy/shaders"}
+                  ).parent_path() / shader_create_info.directory.stem()
                 };
-                const fs::path in_shader_path{ shader_create_info.shader_directory / fs::path{ *stage.to_string() + ".hlsl" } };
+                const fs::path in_shader_path{ shader_create_info.directory / fs::path{ *stage.to_string() + ".hlsl" } };
                 const fs::path out_shader_path{ shader_cache_dir / fs::path{ *stage.to_string() + ".spv" } };
                 bytecode_[stage] = *compile_shader_type(in_shader_path, out_shader_path, stage);
               } else {

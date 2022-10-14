@@ -26,8 +26,8 @@ namespace fx {
     );
     ~LowLevelRenderer();
   
-    void record_command_buffer(vk::raii::CommandBuffer& command_buffer, u32 image_index);
-    void draw();
+    void record_command_buffer(const vk::raii::CommandBuffer& command_buffer, u32 image_index) const;
+    void draw() const;
 
   private:
     class Impl;

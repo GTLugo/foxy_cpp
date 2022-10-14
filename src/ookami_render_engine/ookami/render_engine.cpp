@@ -14,11 +14,11 @@ namespace fx {
       context_{ std::make_shared<ookami::Context>(**window) }
     {
       std::shared_ptr fixed_value_shader{
-        context_->create_shader(
+        create_shader(
           ShaderCreateInfo{
+            .directory = "res/foxy/shaders/fixed_value",
             .vertex = true,
             .fragment = true,
-            .shader_directory = "res/foxy/shaders/fixed_value"
           }
         )
       };
@@ -46,6 +46,11 @@ namespace fx {
     void wait_idle()
     {
       context_->logical_device().waitIdle();
+    }
+
+    [[nodiscard]] auto create_shader(const ShaderCreateInfo& shader_create_info) const -> unique<Shader>
+    {
+      return context_->create_shader(shader_create_info);
     }
   
   private:
@@ -75,5 +80,10 @@ namespace fx {
   void RenderEngine::wait_idle()
   {
     p_impl_->wait_idle();
+  }
+
+  auto RenderEngine::create_shader(const ShaderCreateInfo& shader_create_info) const -> unique<Shader>
+  {
+    return p_impl_->create_shader(shader_create_info);
   }
 }

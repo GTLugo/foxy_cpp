@@ -25,10 +25,11 @@ namespace fx {
       window_{ window },
       context_{ context },
       swapchain_{ std::make_shared<Swapchain>(context_) },
+      pipeline_{ std::make_shared<Pipeline>(context_, swapchain_, shader) },
       command_pool_{
         context_->logical_device().createCommandPool(vk::CommandPoolCreateInfo{
-        .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-        .queueFamilyIndex = *context_->queue_families().graphics,
+          .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+          .queueFamilyIndex = *context_->queue_families().graphics,
         })
       },
       command_buffers_{
@@ -38,12 +39,11 @@ namespace fx {
           .level = vk::CommandBufferLevel::ePrimary,
           .commandBufferCount = max_frames_in_flight,
         }
-      },
-      pipeline_{ std::make_shared<Pipeline>(context_, swapchain_, shader) }
+      }
     {
       Log::trace("Preparing Low Level Renderer...");
       
-      for (u32 i: std::views::iota(0U, max_frames_in_flight_)) {
+      for ([[maybe_unused]] u32 i: std::views::iota(0U, max_frames_in_flight_)) {
         try {
           image_available_semaphores_.emplace_back(context_->logical_device(), vk::SemaphoreCreateInfo{});
           render_complete_semaphores_.emplace_back(context_->logical_device(), vk::SemaphoreCreateInfo{});
@@ -57,7 +57,7 @@ namespace fx {
         }
       }
       
-      window_->add_framebuffer_resized_callback([this](i32 width, i32 height) {
+      window_->add_framebuffer_resized_callback([this](i32, i32) {
         framebuffer_resized_ = true;
       });
       
@@ -69,7 +69,7 @@ namespace fx {
     void draw()
     {
       context_->wait_for_fence(image_in_flight_fences_[current_frame_index_]);
-      if (auto image_index{ swapchain_->acquire_next_image(image_available_semaphores_[current_frame_index_]) }) {
+      if (const auto image_index{ swapchain_->acquire_next_image(image_available_semaphores_[current_frame_index_]) }) {
         context_->reset_fence(image_in_flight_fences_[current_frame_index_]);
         submit(*image_index);
         present(*image_index);
@@ -77,15 +77,15 @@ namespace fx {
       }
     }
   
-    void record_command_buffer(vk::raii::CommandBuffer& command_buffer, u32 image_index)
+    void record_command_buffer(const vk::raii::CommandBuffer& command_buffer, const u32 image_index) const
     {
       command_buffer.begin(vk::CommandBufferBeginInfo{});
     
       vk::ClearValue clear_value{
         .color = {{{ 0.f, 0.f, 0.f, 1.f }}}
       };
-    
-      vk::RenderPassBeginInfo render_pass_begin_info{
+
+      const vk::RenderPassBeginInfo render_pass_begin_info{
         .renderPass = **swapchain_->render_pass(),
         .framebuffer = *swapchain_->framebuffers()[image_index],
         .renderArea = {
@@ -129,9 +129,9 @@ namespace fx {
     std::vector<vk::raii::Semaphore> render_complete_semaphores_;
     std::vector<vk::raii::Fence> image_in_flight_fences_;
     
-    void submit(u32 image_index)
+    void submit(const u32 image_index) const
     {
-      auto& command_buffer{ command_buffers_[current_frame_index_] };
+      const auto& command_buffer{ command_buffers_[current_frame_index_] };
   
       command_buffer.reset();
       record_command_buffer(command_buffer, image_index);
@@ -152,7 +152,7 @@ namespace fx {
     
     void present(u32 image_index)
     {
-      vk::PresentInfoKHR present_info{
+      const vk::PresentInfoKHR present_info{
         .waitSemaphoreCount = 1,
         .pWaitSemaphores = &*render_complete_semaphores_[current_frame_index_],
         .swapchainCount = 1,
@@ -162,7 +162,7 @@ namespace fx {
   
       try {
         if (!swapchain_->dirty()) {
-          auto present_result{ context_->present_queue().presentKHR(present_info) };
+          [[maybe_unused]] auto present_result{ context_->present_queue().presentKHR(present_info) };
         } else {
           swapchain_->rebuild();
         }
@@ -171,7 +171,6 @@ namespace fx {
           // recreate swapchain and try drawing in the next frame (make sure not to draw THIS frame!)
           framebuffer_resized_ = false;
           swapchain_->rebuild();
-          return;
         }
       } catch (const vk::OutOfDateKHRError& e) {
         swapchain_->rebuild();
@@ -197,12 +196,12 @@ namespace fx {
   
   LowLevelRenderer::~LowLevelRenderer() = default;
   
-  void LowLevelRenderer::draw()
+  void LowLevelRenderer::draw() const
   {
     p_impl_->draw();
   }
   
-  void LowLevelRenderer::record_command_buffer(vk::raii::CommandBuffer& command_buffer, u32 image_index)
+  void LowLevelRenderer::record_command_buffer(const vk::raii::CommandBuffer& command_buffer, const u32 image_index) const
   {
     p_impl_->record_command_buffer(command_buffer, image_index);
   }

@@ -5,12 +5,12 @@
 ----------------------*/
 #include "koyote/utilities.hpp"
 
-// /*----------------------
-//   VENDOR LIBRARIES
-// ----------------------*/
-// #ifdef _WIN32
-// #include <Windows.h>
-// #endif // _WIN32
+/*----------------------
+  VENDOR LIBRARIES
+----------------------*/
+#ifdef _WIN32
+#include <windows.h>
+#endif // _WIN32
 
 /*----------------------
   STD LIBRARY

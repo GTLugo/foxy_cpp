@@ -11,20 +11,13 @@ namespace vk::raii {
 
 namespace fx {
   struct ShaderCreateInfo {
+    std::filesystem::path directory;
     bool vertex{ false };
     bool fragment{ false };
     bool compute{ false };
     bool geometry{ false };
-    std::filesystem::path shader_directory;
-    bool disable_optimizations{
-      #if defined(FOXY_DEBUG_MODE) and not(defined(FOXY_RELEASE_MODE))
-      true
-      #else
-      false
-      #endif
-    };
   };
-  
+
   class Shader {
   public:
     class Stage {
