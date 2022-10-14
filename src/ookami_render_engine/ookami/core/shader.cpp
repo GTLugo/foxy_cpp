@@ -50,13 +50,11 @@ namespace fx {
       return std::nullopt;
     }
   private:
-    static constexpr inline word spirv_magic_number_{ 0x07230203 };
+    [[maybe_unused]] static constexpr inline word spirv_magic_number_{ 0x07230203 };
     
     std::string name_;
     std::unordered_map<Stage, std::vector<word>> bytecode_;
     std::unordered_map<Stage, vk::raii::ShaderModule> shader_modules_;
-    
-    static inline const std::string preproc_token_type_{ "#type" };
     
     [[nodiscard]] auto fetch_shader_bytecode(const ShaderCreateInfo& create_info) -> bool
     {
