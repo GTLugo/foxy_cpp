@@ -26,11 +26,9 @@ add_subdirectory(extern)
 add_subdirectory(extern/glfw)
 # Koyote
 add_subdirectory(extern/koyote_utils)
-## ShaderC
-#set(SHADERC_SKIP_TESTS ON)
-#set(SHADERC_SKIP_EXAMPLES ON)
-#add_subdirectory(extern/shaderc)
 # Glslang
+set(ENABLE_GLSLANG_INSTALL OFF)
+set(ENABLE_GLSLANG_BINARIES OFF)
 add_subdirectory(extern/glslang)
 
 # ===================================================

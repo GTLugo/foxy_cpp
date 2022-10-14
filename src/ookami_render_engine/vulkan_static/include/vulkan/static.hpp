@@ -1,12 +1,14 @@
 #pragma once
 
 // ReSharper disable CppUnusedIncludeDirective
+FOXY_DISABLE_WARNINGS()
 #include "vulkan/internal/lib.hpp"
 #include "vulkan/internal/version.hpp"
 #include "SPIRV/GlslangToSpv.h"
 #include "Standalone/ResourceLimits.h"
 #include "glslang/Include/ResourceLimits.h"
 #include "glslang/Public/ShaderLang.h"
+FOXY_ENABLE_WARNINGS()
 
 inline auto init_resources() -> TBuiltInResource&
 {
