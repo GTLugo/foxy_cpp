@@ -9,6 +9,8 @@
 
 namespace fx {
   struct AppLoggingHelper {
+    bool exit_success{ true };
+
     AppLoggingHelper()
     {
       Log::info(R"(--------------=============[])");
@@ -34,7 +36,11 @@ namespace fx {
     ~AppLoggingHelper()
     {
       #if defined(FOXY_DEBUG_MODE) or defined(FOXY_RELDEB_MODE)
-      Log::info("Foxy shutdown: Otsukon deshita! Bye bye!");
+      if (exit_success) {
+        Log::info("Foxy shutdown: Otsukon deshita! Bye bye!");
+      } else {
+        Log::info("Foxy emergency shutdown: YABE!");
+      }
       #endif
     }
   };
@@ -146,34 +152,30 @@ namespace fx {
       Log::set_thread_name("game");
       Log::trace("Starting game thread...");
       
-      try {
-        GameLoop{
-          .start = [this](const Time& time) {
-            awake_event_(app_, time);
-            start_event_(app_, time);
-          },
-          .tick = [this](const Time& time) { // Tick
-            fixed_time_entity_.set<Time_C>(time.delta<secs>());
-            early_tick_event_(app_, time);
-            tick_event_(app_, time);
-            late_tick_event_(app_, time);
-          },
-          .update = [this](const Time& time) { // Update
-            time_entity_.set<Time_C>(time.delta<secs>());
-            early_update_event_(app_, time);
-            update_event_(app_, time);
-            late_update_event_(app_, time);
-            render_engine_->draw_frame();
-          },
-          .stop = [this](const Time& time) {
-            render_engine_->wait_idle();
-            stop_event_(app_, time);
-            asleep_event_(app_, time);
-          }
-        }(window_->should_continue());
-      } catch (const std::exception& e) {
-        Log::fatal(e.what());
-      }
+      GameLoop{
+        .start = [this](const Time& time) {
+          awake_event_(app_, time);
+          start_event_(app_, time);
+        },
+        .tick = [this](const Time& time) { // Tick
+          fixed_time_entity_.set<Time_C>(time.delta<secs>());
+          early_tick_event_(app_, time);
+          tick_event_(app_, time);
+          late_tick_event_(app_, time);
+        },
+        .update = [this](const Time& time) { // Update
+          time_entity_.set<Time_C>(time.delta<secs>());
+          early_update_event_(app_, time);
+          update_event_(app_, time);
+          late_update_event_(app_, time);
+          render_engine_->draw_frame();
+        },
+        .stop = [this](const Time& time) {
+          render_engine_->wait_idle();
+          stop_event_(app_, time);
+          asleep_event_(app_, time);
+        }
+      }(window_->should_continue());
       
       Log::trace("Joining game thread into main thread...");
     }
@@ -301,21 +303,34 @@ namespace fx {
   //  App
   //
   
-  App::App(CreateInfo&& create_info):
-    p_impl_{ std::make_unique<Impl>(*this, create_info) }
-  {}
+  App::App(CreateInfo&& create_info)
+  {
+    try {
+      p_impl_ = std::make_unique<Impl>(*this, create_info);
+    } catch (const std::exception& e) {
+      Log::fatal(e.what());
+    }
+  }
   
   App::~App() = default;
   
   auto App::set_user_data_ptr(shared<void> data) -> App&
   {
-    p_impl_->set_user_data(std::move(data));
+    try {
+      p_impl_->set_user_data(std::move(data));
+    } catch (const std::exception& e) {
+      Log::fatal(e.what());
+    }
     return *this;
   }
   
   auto App::add_function_to_stage(const Stage stage, StageCallback&& callback) -> App&
   {
-    p_impl_->add_function_to_stage(stage, std::forward<StageCallback>(callback));
+    try {
+      p_impl_->add_function_to_stage(stage, std::forward<StageCallback>(callback));
+    } catch (const std::exception& e) {
+      Log::fatal(e.what());
+    }
     return *this;
   }
   
@@ -326,7 +341,11 @@ namespace fx {
   
   void App::run()
   {
-    p_impl_->run();
+    try {
+      p_impl_->run();
+    } catch (const std::exception& e) {
+      Log::fatal(e.what());
+    }
   }
   
   auto App::operator()() -> void

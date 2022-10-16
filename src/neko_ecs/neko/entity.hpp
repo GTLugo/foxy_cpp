@@ -48,8 +48,8 @@ namespace fx {
   
     Entity& operator=(const Entity& rhs);
 
-    auto operator<(const Entity & rhs) const -> bool { return id_ < rhs.id_; }
-    auto operator==(const Entity & rhs) const -> bool { return id_ == rhs.id_; }
+    auto operator<(const Entity& rhs) const -> bool { return id_ < rhs.id_; }
+    auto operator==(const Entity& rhs) const -> bool { return id_ == rhs.id_; }
 
   private:
     // shared<EntityBase> entity_base_;
