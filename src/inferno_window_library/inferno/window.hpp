@@ -29,7 +29,8 @@ namespace fx {
     void poll_events();
     void close();
     
-    void set_icon(i8* image, i32 width, i32 height);
+    void set_icon(byte* image, i32 width, i32 height);
+    void set_icon(const std::filesystem::path& image_path);
     void set_title(const std::string& title);
     void set_subtitle(const std::string& title);
     void set_pos(ivec2 position);

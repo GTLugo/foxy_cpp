@@ -1,6 +1,7 @@
 #include "window.hpp"
 
 #include "glfw/context.hpp"
+#include <stb_image.h>
 
 namespace fx {
   class Window::Impl: types::SingleInstance<Window> {
@@ -57,9 +58,22 @@ namespace fx {
       state_.should_continue = false;
     }
 
-    void set_icon(i8* image, i32 width, i32 height)
+    void set_icon(byte* image, i32 width, i32 height)
     {
+      const GLFWimage icon{
+        .width = width,
+        .height = height,
+        .pixels = image,
+      };
+      glfwSetWindowIcon(glfw_window_.get(), 1, &icon);
+    }
 
+    void set_icon(const std::filesystem::path& image_path)
+    {
+      i32 width{}, height{};
+      byte* image{ stbi_load(image_path.string().c_str(), &width, &height, nullptr, 4) };
+      set_icon(image, width, height);
+      stbi_image_free(image);
     }
 
     void set_title(const std::string& title)
@@ -193,9 +207,14 @@ namespace fx {
     p_impl_->close();
   }
 
-  void Window::set_icon(i8* image, i32 width, i32 height)
+  void Window::set_icon(byte* image, i32 width, i32 height)
   {
     p_impl_->set_icon(image, width, height);
+  }
+
+  void Window::set_icon(const std::filesystem::path& image_path)
+  {
+    p_impl_->set_icon(image_path);
   }
 
   void Window::set_title(const std::string& title)

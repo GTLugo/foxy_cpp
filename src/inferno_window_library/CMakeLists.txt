@@ -32,3 +32,6 @@ target_link_libraries(${TARGET_NAME} PUBLIC koyote)
 # GLFW
 target_include_directories(${TARGET_NAME} PRIVATE "${FOXY_EXTERN_DIR}/glfw/include")
 target_link_libraries(${TARGET_NAME} PRIVATE glfw)
+# STB
+target_include_directories(${TARGET_NAME} PRIVATE "${FOXY_EXTERN_DIR}/stb/include")
+target_link_libraries(${TARGET_NAME} PRIVATE stb)

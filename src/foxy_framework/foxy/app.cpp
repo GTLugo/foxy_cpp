@@ -66,6 +66,7 @@ namespace fx {
       render_engine_{ std::make_unique<RenderEngine>(window_) }
     {
       window_->set_hidden(false);
+      window_->set_icon("res/foxy/default_icon.png");
       set_callbacks();
       time_entity_.add<Time_C>();
       fixed_time_entity_.add<Time_C>();
