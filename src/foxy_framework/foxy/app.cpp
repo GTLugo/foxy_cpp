@@ -61,6 +61,8 @@ namespace fx {
     {
       window_->set_hidden(false);
       set_callbacks();
+      time_entity_.add<Time_C>();
+      fixed_time_entity_.add<Time_C>();
     }
     
     ~Impl() = default;
@@ -97,6 +99,9 @@ namespace fx {
     unique<RenderEngine> render_engine_;
     
     BS::thread_pool thread_pool_{ std::thread::hardware_concurrency() - 1 };
+    
+    Entity time_entity_{"time"};
+    Entity fixed_time_entity_{"fixed-time"};
     
     // Main Thread events
     Event<const Time&> main_awake_event_;
@@ -148,11 +153,13 @@ namespace fx {
             start_event_(app_, time);
           },
           .tick = [this](const Time& time) { // Tick
+            fixed_time_entity_.set<Time_C>(time.delta<secs>());
             early_tick_event_(app_, time);
             tick_event_(app_, time);
             late_tick_event_(app_, time);
           },
           .update = [this](const Time& time) { // Update
+            time_entity_.set<Time_C>(time.delta<secs>());
             early_update_event_(app_, time);
             update_event_(app_, time);
             late_update_event_(app_, time);

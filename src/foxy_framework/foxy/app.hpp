@@ -5,6 +5,10 @@
 #pragma once
 
 namespace fx {
+  struct Time_C {
+    double delta{ 0 };
+  };
+  
   class App {
   public:
     struct CreateInfo {
