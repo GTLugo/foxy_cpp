@@ -11,7 +11,7 @@ namespace fx {
     
     #ifdef FOXY_DEBUG_MODE
     if (has<Name>()) {
-      Log::info("CTOR DEFAULT | \"{}\" ref count: {}", get<Name>().value, static_cast<u64>(ref_count_->count()));
+      Log::trace("CTOR DEFAULT | \"{}\" ref count: {}", get<Name>().value, static_cast<u64>(ref_count_->count()));
     }
     #endif
   }
@@ -22,7 +22,7 @@ namespace fx {
     add<Name>(name);
     
     #ifdef FOXY_DEBUG_MODE
-    Log::info("CTOR NAMED | \"{}\" ref count: {}", get<Name>().value, static_cast<u64>(ref_count_->count()));
+    Log::trace("CTOR NAMED | \"{}\" ref count: {}", get<Name>().value, static_cast<u64>(ref_count_->count()));
     #endif
   }
   
@@ -32,7 +32,7 @@ namespace fx {
   {
     #ifdef FOXY_DEBUG_MODE
     if (has<Name>()) {
-      Log::info("CTOR COPY | \"{}\" ref count: {}", get<Name>().value, static_cast<u64>(ref_count_->count()));
+      Log::trace("CTOR COPY | \"{}\" ref count: {}", get<Name>().value, static_cast<u64>(ref_count_->count()));
     }
     #endif
   }
@@ -57,7 +57,7 @@ namespace fx {
       #ifdef FOXY_DEBUG_MODE
       // Debugging
       if (has_name) {
-        Log::info("DTOR {}| \"{}\" ref count: {}", (ref_count_ == nullptr) ? "FINAL " : "", name, static_cast<u64>(count));
+        Log::trace("DTOR {}| \"{}\" ref count: {}", (ref_count_ == nullptr) ? "FINAL " : "", name, static_cast<u64>(count));
       }
       #endif
     }
@@ -75,9 +75,13 @@ namespace fx {
       ref_count_ = &++*rhs.ref_count_;
       id_ = rhs.id_;
     }
+    
+    #ifdef FOXY_DEBUG_MODE
     if (has<Name>()) {
       Log::trace("ASST COPY | \"{}\" ref count: {}", get<Name>().value, static_cast<u64>(ref_count_->count()));
     }
+    #endif
+    
     return *this;
   }
   
