@@ -22,7 +22,7 @@ namespace fx {
           }
         )
       };
-      
+  
       renderer_ = std::make_unique<LowLevelRenderer>(window, context_, fixed_value_shader, 2);
       
       Log::trace("Ookami Render Engine ready.");

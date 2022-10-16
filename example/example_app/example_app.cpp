@@ -30,11 +30,7 @@ struct ExampleApp: fx::App {
   int hololive_members{ 71 };
 
   ExampleApp():
-    App{
-      CreateInfo{
-        .title = "Foxy Example App",
-      }
-    }
+    App{ CreateInfo{ .title = "Foxy Example App" } }
   {
     add_function_to_stage(Stage::Start, FOXY_LAMBDA(start));
     add_function_to_stage(Stage::Update, FOXY_LAMBDA(update));
@@ -66,7 +62,7 @@ auto main(const int, char**) -> int
 {
   try {
     fx::Log::debug_logging_setup();
-    fx::Log::set_level_filter(fx::Log::Info);
+    // fx::Log::set_level_filter(fx::Log::Info);
     ExampleApp{}(); // there is also a standard .run() method if you prefer. Both are identical in functionality.
     return EXIT_SUCCESS;
   } catch (const std::exception& e) {

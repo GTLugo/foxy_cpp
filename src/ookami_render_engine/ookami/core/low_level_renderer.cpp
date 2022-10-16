@@ -41,8 +41,6 @@ namespace fx {
         }
       }
     {
-      Log::trace("Preparing Low Level Renderer...");
-      
       for ([[maybe_unused]] u32 i: std::views::iota(0U, max_frames_in_flight_)) {
         try {
           image_available_semaphores_.emplace_back(context_->logical_device(), vk::SemaphoreCreateInfo{});
@@ -61,7 +59,7 @@ namespace fx {
         framebuffer_resized_ = true;
       });
       
-      Log::trace("Low Level Renderer ready.");
+      Log::trace("Created Low-level Renderer.");
     }
     
     ~Impl() = default;

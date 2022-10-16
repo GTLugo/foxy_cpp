@@ -17,8 +17,6 @@ namespace fx {
         .hidden = true,
       }}
     {
-      Log::trace("Creating Window...");
-
       // Create GLFW window
       //glfwWindowHint(GLFW_RESIZABLE, false);
       glfwWindowHint(GLFW_VISIBLE, false);
@@ -35,7 +33,7 @@ namespace fx {
       set_fullscreen(create_info.fullscreen);
       set_callbacks();
 
-      Log::trace("Window ready.");
+      Log::trace("Created Window.");
     }
 
     ~Impl()

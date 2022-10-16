@@ -22,8 +22,6 @@ namespace fx {
       swapchain_{ swapchain },
       shader_{ shader }
     {
-      Log::trace("Creating Vulkan pipeline...");
-
       std::vector<vk::PipelineShaderStageCreateInfo> shader_stages;
       for (const auto& stage: Shader::stages) {
         if (shader_->has_stage(stage)) {
