@@ -1,5 +1,8 @@
-#pragma once
+#include "system.hpp"
 
 #include "entity.hpp"
 #include "component.hpp"
-#include "system.hpp"
+
+namespace fx {
+
+} // fx

@@ -4,13 +4,13 @@
 
 #include "shader.hpp"
 
-#include "vulkan/static.hpp"
+#include "vulkan/glslang.hpp"
 
 namespace fx {
   class Shader::Impl {
   public:
     Impl(const vk::raii::Device& device, const ShaderCreateInfo& shader_create_info):
-      name_{ shader_create_info.directory.stem().string() }
+      name_{ shader_create_info.path.stem().string() }
     {
       Log::info("Please wait while shader[\"{}\"] loads...", name_);
       const auto sw{ Stopwatch() };
@@ -35,6 +35,14 @@ namespace fx {
       }
       return shader_modules_.at(stage);
     }
+  
+    [[nodiscard]] auto entry_point(const Stage stage) const -> std::string_view
+    {
+      if (!shader_modules_.contains(stage)) {
+        Log::fatal("Shader module for {} stage not found.", *stage.to_string());
+      }
+      return shader_entry_points_.at(stage);
+    }
     
     [[nodiscard]] auto has_stage(const Stage stage) const -> bool
     {
@@ -55,35 +63,37 @@ namespace fx {
     std::string name_;
     std::unordered_map<Stage, std::vector<word>> bytecode_;
     std::unordered_map<Stage, vk::raii::ShaderModule> shader_modules_;
+    std::unordered_map<Stage, std::string> shader_entry_points_;
     
     [[nodiscard]] auto fetch_shader_bytecode(const ShaderCreateInfo& create_info) -> bool
     {
       bool found_shader{ true };
       namespace fs = std::filesystem;
       const fs::path shader_cache_dir{
-        fs::path{ "tmp" } / fs::path{ "shader_cache" } / relative(create_info.directory, {"res/foxy/shaders"}).parent_path() / create_info.directory.stem()
+        fs::path{ "tmp" } / fs::path{ "shader_cache" } / relative(create_info.path, {"res/foxy/shaders"}).parent_path() / create_info.path.stem()
       };
       
-      if (!exists(create_info.directory)) {
-        Log::error("Directory {} does not exist", create_info.directory.string());
+      if (!exists(create_info.path)) {
+        Log::error("File/Directory {} does not exist", create_info.path.string());
       } else {
-        if (is_directory(create_info.directory)) {
+        if (is_directory(create_info.path) && create_info.directory) {
           Log::trace("Fetching shader from dir: {}", name_);
-          
-          for (const auto& stage: stages) {
-            if (!create_info_has_stage(create_info, stage)) {
-              Log::trace("Skipping {}: {}", *stage.to_string(), name_);
-              continue;
-            }
-            
-            if (auto bytecode{ fetch_stage_bytecode(create_info, stage, shader_cache_dir) }) {
-              bytecode_[stage] = *bytecode;
-            } else {
-              found_shader = false;
-            }
+        } else if (!is_directory(create_info.path) && !create_info.directory) {
+          Log::trace("Fetching shader from single file: {}", name_);
+        }
+  
+        for (const auto& stage: stages) {
+          if (!create_info_has_stage(create_info, stage)) {
+            Log::trace("Skipping {}: {}", *stage.to_string(), name_);
+            continue;
           }
-        } else {
-          Log::error("Failed to fetch shader from dir: {}", name_);
+  
+          shader_entry_points_[stage] = (create_info.directory) ? "main" : *stage.to_string() + "_main";
+          if (auto bytecode{ fetch_stage_bytecode(create_info, stage, shader_cache_dir) }) {
+            bytecode_[stage] = *bytecode;
+          } else {
+            found_shader = false;
+          }
         }
       }
       
@@ -97,7 +107,10 @@ namespace fx {
     ) -> std::optional<std::vector<word>>
     {
       namespace fs = std::filesystem;
-      const fs::path in_shader_path{ create_info.directory / fs::path{ *stage.to_string() + ".hlsl" } };
+      const fs::path in_shader_path{
+        (create_info.directory) ? create_info.path / fs::path{ *stage.to_string() + ".hlsl" }
+                                : create_info.path
+      };
       
       Log::trace("Looking for {}: {}", *stage.to_string(), name_);
       const fs::path out_shader_path{ shader_cache_dir / fs::path{ *stage.to_string() + ".spv" }};
@@ -116,13 +129,14 @@ namespace fx {
       );
       
       create_directories(shader_cache_dir);
-      return compile_shader_type(in_shader_path, out_shader_path, stage);
+      return compile_shader_type(in_shader_path, out_shader_path, stage, !create_info.directory);
     }
     
     [[nodiscard]] auto compile_shader_type(
       const std::filesystem::path& in_file,
       const std::filesystem::path& out_file,
-      const Stage stage
+      const Stage stage,
+      bool same_file = false
     ) -> std::optional<std::vector<u32>>
     {
       if (const auto result{ io::read_file(in_file) }) {
@@ -137,10 +151,11 @@ namespace fx {
         glslang::TShader shader{ language };
         shader.setStringsWithLengths(&code_str, nullptr, 1);
         shader.setEnvInput(glslang::EShSourceHlsl, language, glslang::EShClientVulkan, 1);
-        shader.setEntryPoint("main");
-        shader.setSourceEntryPoint("main");
         shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_3);
         shader.setEnvTarget(glslang::EshTargetSpv, glslang::EShTargetSpv_1_3);
+        
+        shader.setEntryPoint(shader_entry_points_[stage].c_str());
+        shader.setSourceEntryPoint(shader_entry_points_[stage].c_str());
         
         if (!shader.parse(&init_resources(), 130, false, messages)) {
           Log::error("Failed to parse shader[{}]: {} | {}", name_, shader.getInfoLog(), shader.getInfoDebugLog());
@@ -155,11 +170,11 @@ namespace fx {
           return std::nullopt;
         }
 
-        if (shader.getInfoLog()) {
+        if (std::string str{ shader.getInfoLog() }; !str.empty()) {
           Log::trace("Shader[{}]: {} | {}", name_, shader.getInfoLog(), shader.getInfoDebugLog());
         }
 
-        if (program.getInfoLog()) {
+        if (std::string str{ program.getInfoLog() }; !str.empty()) {
           Log::trace("Shader[{}]: {} | {}", name_, program.getInfoLog(), program.getInfoDebugLog());
         }
 
@@ -172,10 +187,13 @@ namespace fx {
         spv::SpvBuildLogger logger;
         std::vector<u32> spv;
         GlslangToSpv(*intermediate, spv, &logger);
-  
-        Log::trace("Shader[{}]: {}", name_, logger.getAllMessages());
+        
+        if (std::string str{ logger.getAllMessages() }; !str.empty()) {
+          Log::trace("Shader[{}]: {}", name_, str);
+        }
   
         glslang::FinalizeProcess();
+        
         if (!io::write_words(out_file, spv)) {
           Log::error("Could not write to output shader file.");
         }
@@ -207,10 +225,10 @@ namespace fx {
                 namespace fs = std::filesystem;
                 const fs::path shader_cache_dir{
                   fs::path{ "tmp" } / fs::path{ "shader_cache" } / relative(
-                    shader_create_info.directory, {"res/foxy/shaders"}
-                  ).parent_path() / shader_create_info.directory.stem()
+                    shader_create_info.path, {"res/foxy/shaders"}
+                  ).parent_path() / shader_create_info.path.stem()
                 };
-                const fs::path in_shader_path{ shader_create_info.directory / fs::path{ *stage.to_string() + ".hlsl" } };
+                const fs::path in_shader_path{ shader_create_info.path / fs::path{ *stage.to_string() + ".hlsl" } };
                 const fs::path out_shader_path{ shader_cache_dir / fs::path{ *stage.to_string() + ".spv" } };
                 bytecode_[stage] = *compile_shader_type(in_shader_path, out_shader_path, stage);
               } else {
@@ -238,15 +256,6 @@ namespace fx {
   //
   //  Shader
   //
-  
-  constexpr auto Shader::Stage::from_string(const std::string_view str) -> std::optional<Stage>
-  {
-    if (str == "vertex")   return Vertex;
-    if (str == "fragment") return Fragment;
-    if (str == "compute")  return Compute;
-    if (str == "geometry") return Geometry;
-    return std::nullopt;
-  }
   
   constexpr auto Shader::Stage::to_string() const -> std::optional<std::string>
   {
@@ -278,6 +287,8 @@ namespace fx {
   Shader::~Shader() = default;
   
   auto Shader::module(const Stage stage) const -> const vk::raii::ShaderModule& { return p_impl_->module(stage); }
+  
+  auto Shader::entry_point(const Stage stage) const -> std::string_view { return p_impl_->entry_point(stage); }
   
   auto Shader::has_stage(const Stage stage) const -> bool { return p_impl_->has_stage(stage); }
 }

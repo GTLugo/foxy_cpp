@@ -11,7 +11,8 @@ namespace vk::raii {
 
 namespace fx {
   struct ShaderCreateInfo {
-    std::filesystem::path directory;
+    std::filesystem::path path;
+    bool directory{ false };
     bool vertex{ false };
     bool fragment{ false };
     bool compute{ false };
@@ -39,8 +40,7 @@ namespace fx {
       explicit operator bool() const = delete;
       constexpr bool operator==(const Stage a) const { return value_ == a.value_; }
       constexpr bool operator!=(const Stage a) const { return value_ != a.value_; }
-      
-      [[nodiscard]] static constexpr auto from_string(std::string_view str) -> std::optional<Stage>;
+  
       [[nodiscard]] constexpr auto to_string() const -> std::optional<std::string>;
       [[nodiscard]] constexpr auto to_glslang() const -> std::optional<i32>;
       [[nodiscard]] auto to_vk_flag() const -> std::optional<i32>; // This cannot be constexpr or inline without introducing a linker error
@@ -57,6 +57,7 @@ namespace fx {
     ~Shader();
     
     [[nodiscard]] auto module(Stage stage) const -> const vk::raii::ShaderModule&;
+    [[nodiscard]] auto entry_point(const Stage stage) const -> std::string_view;
     [[nodiscard]] auto has_stage(Stage stage) const -> bool;
   private:
     class Impl;

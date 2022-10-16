@@ -16,7 +16,7 @@ namespace fx {
       std::shared_ptr fixed_value_shader{
         create_shader(
           ShaderCreateInfo{
-            .directory = "res/foxy/shaders/fixed_value",
+            .path = "res/foxy/shaders/fixed_value.hlsl",
             .vertex = true,
             .fragment = true,
           }

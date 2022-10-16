@@ -30,8 +30,11 @@ target_include_directories(${TARGET_NAME} PUBLIC "${FOXY_EXTERN_DIR}/koyote/incl
 target_link_libraries(${TARGET_NAME} PUBLIC koyote)
 # Vulkan
 find_package(Vulkan REQUIRED)
-target_include_directories(${TARGET_NAME} PUBLIC "${Vulkan_INCLUDE_DIR}")
+target_include_directories(${TARGET_NAME} SYSTEM PUBLIC "${Vulkan_INCLUDE_DIR}")
 target_link_libraries(${TARGET_NAME} PUBLIC Vulkan::Vulkan)
 # Glslang
-target_include_directories(${TARGET_NAME} PUBLIC "${FOXY_EXTERN_DIR}/glslang")
+target_include_directories(${TARGET_NAME} SYSTEM PUBLIC "${FOXY_EXTERN_DIR}/glslang")
 target_link_libraries(${TARGET_NAME} PUBLIC glslang HLSL OSDependent OGLCompiler SPIRV)
+## DXC
+#target_include_directories(${TARGET_NAME} SYSTEM PUBLIC "${FOXY_EXTERN_DIR}/dxc/include")
+#target_link_libraries(${TARGET_NAME} PUBLIC dxcompiler)

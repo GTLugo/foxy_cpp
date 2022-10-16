@@ -82,7 +82,8 @@ namespace fx {
       command_buffer.begin(vk::CommandBufferBeginInfo{});
     
       vk::ClearValue clear_value{
-        .color = {{{ 0.f, 0.f, 0.f, 1.f }}}
+        // Pepto-Bismol pink to make sure idiots like me know something is wrong when it's visible
+        .color = {{{ 1.f, 0.f, 1.f, 1.f }}}
       };
 
       const vk::RenderPassBeginInfo render_pass_begin_info{
@@ -172,9 +173,9 @@ namespace fx {
           framebuffer_resized_ = false;
           swapchain_->rebuild();
         }
-      } catch (const vk::OutOfDateKHRError& e) {
+      } catch (const vk::OutOfDateKHRError&) {
         swapchain_->rebuild();
-      } catch (const vk::SurfaceLostKHRError& e) {
+      } catch (const vk::SurfaceLostKHRError&) {
         swapchain_->rebuild();
       } catch (const std::exception& e) {
         Log::error("Presentation failure. {}", e.what());

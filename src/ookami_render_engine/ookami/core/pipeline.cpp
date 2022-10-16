@@ -30,7 +30,7 @@ namespace fx {
           const vk::PipelineShaderStageCreateInfo info{
             .stage = static_cast<vk::ShaderStageFlagBits>(*stage.to_vk_flag()),
             .module = *shader_->module(stage),
-            .pName = "main",
+            .pName = shader->entry_point(stage).data(),
           };
           shader_stages.push_back(info);
         }

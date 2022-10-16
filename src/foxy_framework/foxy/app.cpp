@@ -165,7 +165,7 @@ namespace fx {
           }
         }(window_->should_continue());
       } catch (const std::exception& e) {
-        Log::error(e.what());
+        Log::fatal(e.what());
       }
       
       Log::trace("Joining game thread into main thread...");

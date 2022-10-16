@@ -1,12 +1,33 @@
 #include <foxy/framework.hpp>
 REDIRECT_WINMAIN_TO_MAIN
 
+struct ExampleSystem: public fx::System<fx::Time, fx::i32> {
+  double timer{ 0 };
+  fx::u64 counter{ 1 };
+
+  void execute() override
+  {
+    // if (1. <= (timer += time.delta<fx::secs>())) {
+    //   std::string extra_message{};
+    //   if (counter == 10) {
+    //     extra_message = ", kawaii~oooh! ...chan!";
+    //   } else if (counter % 3 == 0) {
+    //     extra_message = ", Fubuki!";
+    //   }
+    //
+    //   fx::Log::info("{} fox{}", counter, extra_message);
+    //
+    //   counter = (counter % 10) + 1;
+    //   timer = 0;
+    // }
+  }
+};
+
 struct ExampleApp: fx::App {
   using Time = fx::Time;
   
   std::string waifu{ "Fubuki" };
   int hololive_members{ 71 };
-  fx::u64 counter{ 1 };
 
   ExampleApp():
     App{
@@ -22,23 +43,22 @@ struct ExampleApp: fx::App {
   void start(App&, const Time&)
   {
     fx::Log::info("My favorite out of all {} hololive members is {}", hololive_members, waifu);
+    
+    auto e{
+      fx::Entity{"example-entity"}
+        .add<fx::i32>()
+        .add<std::string>()
+    };
+    if (e.has<fx::i32, fx::Entity::Name>()) {
+      fx::Log::info("Found all components!");
+    } else {
+      fx::Log::info("Missing one or more components!");
+    }
   }
 
   void update(App&, const Time& time)
   {
-    if (static double timer{ 0 }; 1. <= (timer += time.delta<fx::secs>())) {
-      std::string extra_message{};
-      if (counter == 10) {
-        extra_message = ", kawaii~oooh! ...chan!";
-      } else if (counter % 3 == 0) {
-        extra_message = ", Fubuki!";
-      }
 
-      fx::Log::info("{} fox{}", counter, extra_message);
-
-      counter = (counter % 10) + 1;
-      timer = 0;
-    }
   }
 };
 

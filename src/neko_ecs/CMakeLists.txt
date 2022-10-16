@@ -8,7 +8,10 @@ message(STATUS "Configuring ${PROJECT_NAME} sub-project: ${TARGET_NAME}")
 # ===================================================
 set(SOURCE_FILES
     "inu/job_system.cpp"
-    "neko/ecs.cpp"
+    
+    "neko/entity.cpp"
+    "neko/component.cpp"
+    "neko/system.cpp"
 )
 add_library(${TARGET_NAME} STATIC ${SOURCE_FILES})
 target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
