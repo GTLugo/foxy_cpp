@@ -1,5 +1,8 @@
-# Foxy Framework (C++)
- Experimental C++ app framework. This is WIP still and not anywhere near completion yet; hence, the "experimental" tag.
+# Introduction
+Foxy Framework is an experimental C++ app framework. This is WIP still and not anywhere near completion yet; hence, the "experimental" tag.
+
+The goal of this API is **not** performance, but rather ease of use. I am **not** a high-performance C++ software developer, I am
+simply a broke college student.
 
 # Requirements
 Built with C++23, MSVC 19.34, CMake 3.24, and Visual Studio 2022 generator.
