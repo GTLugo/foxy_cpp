@@ -51,7 +51,7 @@ namespace fx {
   
       #ifdef FOXY_DEBUG_MODE
       // Debugging
-      Log::trace("DTOR | {}{} | ref count: {}", to_string(id_), has_name ? ":\"" + name + "\"" : "", count);
+      Log::trace("DTOR {}| {}{} | ref count: {}", ref_count_ == nullptr ? "FINAL " : "", to_string(id_), has_name ? ":\"" + name + "\"" : "", count);
       #endif
     }
   }
