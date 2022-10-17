@@ -249,9 +249,9 @@ namespace fx {
     EntityArchetypeMap entities_{}; // what archetype does an entity fall into?
     ArchetypeLookupMap archetypes_{}; // archetype storage and lookup
     ArchetypeLookupMap::iterator empty_archetype_; // this archetype will be accessed frequently as a default for new entities, so caching it is good.
-    std::unordered_map<Component::ID, std::set<Archetype::ID>> component_archetypes_{}; // which archetype does a component have?
-    std::unordered_map<Component::ID, shared<packed_array_t<Entity::ID>>> component_arrays_{}; // what data does each component have?
-    std::unordered_map<std::string, shared<SystemBase>> systems_{};
+    ComponentArchetypeMap component_archetypes_{}; // which archetype does a component have?
+    ComponentDataMap component_arrays_{}; // what data does each component have?
+    SystemMap systems_{};
     
     template<class C>
     auto component_array() -> shared<packed_array<Entity::ID, C>>
