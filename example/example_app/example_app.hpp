@@ -40,13 +40,16 @@ struct ExampleApp : fx::App {
   {
     fx::Log::info("My favorite out of all {} hololive members is {}", hololive_members, waifu);
 
-    auto e{
+    const auto example_entity{
       fx::Entity{"example-entity"}
-        .add<fx::i32>()
-        .add<std::string>()
+        .add<fx::components::Transform>(fx::components::Transform{
+            .position = { 1.f, 1.f, 1.f }
+          })
+        .add<fx::components::Mesh>()
     };
-    if (e.has<fx::i32, fx::Entity::Name>()) {
-      fx::Log::info("Found all components!");
+
+    if (example_entity.has<fx::components::Name, fx::components::Transform>()) {
+      fx::Log::info("Found all components! Name: {}", example_entity.get<fx::components::Name>().value);
     } else {
       fx::Log::info("Missing one or more components!");
     }

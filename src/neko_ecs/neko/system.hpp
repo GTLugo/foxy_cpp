@@ -3,8 +3,6 @@
 namespace fx {
   class EntityCoordinator;
   class Entity;
-  template<class T>
-  class ComponentID;
 
   class SystemBase {
   private:

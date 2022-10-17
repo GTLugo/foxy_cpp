@@ -2,27 +2,24 @@
 
 namespace fx {
   Entity::Entity()
-    // entity_base_{ std::make_shared<EntityBase>() }
   {
     FOXY_ASSERT(EntityCoordinator::current() != nullptr, "Attempted to create Entity while EntityCoordinator was null.");
-    EntityCoordinator::current()->register_entity(id_);
+    EntityCoordinator::current()->register_entity_id(id_);
     ref_count_ = new ReferenceCount{};
     ++*ref_count_;
     
     #ifdef FOXY_DEBUG_MODE
-    if (has<Name>()) {
-      Log::trace("CTOR DEFAULT | \"{}\" ref count: {}", get<Name>().value, static_cast<u64>(ref_count_->count()));
-    }
+    Log::trace("CTOR DEFAULT | {}{} | ref count: {}", to_string(id_), has<components::Name>() ? ":\"" + get<components::Name>().value + "\"" : "", ref_count_->count());
     #endif
   }
   
   Entity::Entity(const std::string& name):
     Entity{}
   {
-    add<Name>(name);
+    add<components::Name>(name);
     
     #ifdef FOXY_DEBUG_MODE
-    Log::trace("CTOR NAMED | \"{}\" ref count: {}", get<Name>().value, static_cast<u64>(ref_count_->count()));
+    Log::trace("CTOR NAMED | {}{} | ref count: {}", to_string(id_), has<components::Name>() ? ":\"" + get<components::Name>().value + "\"" : "", ref_count_->count());
     #endif
   }
   
@@ -31,9 +28,7 @@ namespace fx {
     ref_count_{ &++*rhs.ref_count_ }
   {
     #ifdef FOXY_DEBUG_MODE
-    if (has<Name>()) {
-      Log::trace("CTOR COPY | \"{}\" ref count: {}", get<Name>().value, static_cast<u64>(ref_count_->count()));
-    }
+    Log::trace("CTOR COPY | {}{} | ref count: {}", to_string(id_), has<components::Name>() ? ":\"" + get<components::Name>().value + "\"" : "", ref_count_->count());
     #endif
   }
   
@@ -42,23 +37,21 @@ namespace fx {
     if (ref_count_ != nullptr) {
       #ifdef FOXY_DEBUG_MODE
       // Debugging
-      bool has_name{ has<Name>() };
+      const bool has_name{ has<components::Name>() };
       std::size_t count{ (--*ref_count_).count() };
-      std::string name{ (has_name) ? get<Name>().value : "" };
+      const std::string name{ has_name ? get<components::Name>().value : "" };
       #endif
       
       if (ref_count_->count() <= 0) {
         delete ref_count_;
         FOXY_ASSERT(EntityCoordinator::current() != nullptr, "Attempted to kill Entity while EntityCoordinator was null.");
-        EntityCoordinator::current()->unregister_entity(id_);
+        EntityCoordinator::current()->unregister_entity_id(id_);
         ref_count_ = nullptr;
       }
   
       #ifdef FOXY_DEBUG_MODE
       // Debugging
-      if (has_name) {
-        Log::trace("DTOR {}| \"{}\" ref count: {}", (ref_count_ == nullptr) ? "FINAL " : "", name, static_cast<u64>(count));
-      }
+      Log::trace("DTOR | {}{} | ref count: {}", to_string(id_), has_name ? ":\"" + name + "\"" : "", count);
       #endif
     }
   }
@@ -69,7 +62,7 @@ namespace fx {
       if (ref_count_ != nullptr && (++*ref_count_).count() == 0) {
         delete ref_count_;
         FOXY_ASSERT(EntityCoordinator::current() != nullptr, "Attempted to kill Entity while EntityCoordinator was null.");
-        EntityCoordinator::current()->unregister_entity(id_);
+        EntityCoordinator::current()->unregister_entity_id(id_);
       }
       
       ref_count_ = &++*rhs.ref_count_;
@@ -77,9 +70,7 @@ namespace fx {
     }
     
     #ifdef FOXY_DEBUG_MODE
-    if (has<Name>()) {
-      Log::trace("ASST COPY | \"{}\" ref count: {}", get<Name>().value, static_cast<u64>(ref_count_->count()));
-    }
+    Log::trace("ASST COPY | {}{} | ref count: {}", to_string(id_), has<components::Name>() ? ":\"" + get<components::Name>().value + "\"" : "", ref_count_->count());
     #endif
     
     return *this;
@@ -96,13 +87,19 @@ namespace fx {
     return current_coordinator_;
   }
 
-  EntityCoordinator::EntityCoordinator() = default;
+  EntityCoordinator::EntityCoordinator():
+    archetypes_{ // create empty archetype (as a default)
+      std::unordered_map{
+        std::pair{
+          std::set<Component::ID>{},
+          Archetype{ std::set<Component::ID>{} }
+        }
+      }
+    },
+    empty_archetype_{ archetypes_.find({}) }
+  {
+    FOXY_ASSERT(archetypes_.contains(std::set<Component::ID>{}), "Empty archetype not found.");
+  }
 
   EntityCoordinator::~EntityCoordinator() = default;
-  
-  EntityBase::~EntityBase()
-  {
-    FOXY_ASSERT(EntityCoordinator::current() != nullptr, "Attempted to kill Entity while EntityCoordinator was null.");
-    EntityCoordinator::current()->unregister_entity(id);
-  }
 } // fx
