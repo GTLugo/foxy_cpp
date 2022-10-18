@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-set(TARGET_NAME "example_app")
+set(TARGET_NAME "example")
 #set(CMAKE_CXX_STANDARD 23)
 message(STATUS "Configuring ${PROJECT_NAME} internal project: ${TARGET_NAME}")
 
