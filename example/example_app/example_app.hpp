@@ -40,6 +40,9 @@ struct ExampleApp : fx::App {
   {
     fx::Log::info("My favorite out of all {} hololive members is {}", hololive_members, waifu);
 
+    fx::Log::info("Component::ID for Name: {}", to_string(fx::Component::id<fx::components::Name>()));
+    fx::Log::info("Component::ID for Transform: {}", to_string(fx::Component::id<fx::components::Transform>()));
+    fx::Log::info("Component::ID for Mesh: {}", to_string(fx::Component::id<fx::components::Mesh>()));
     const auto example_entity{
       fx::Entity{"example-entity"}
         .add<fx::components::Transform>(fx::components::Transform{

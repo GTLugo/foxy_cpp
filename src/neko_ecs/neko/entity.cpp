@@ -56,18 +56,11 @@ namespace fx {
     }
   }
   
-  Entity& Entity::operator=(const Entity& rhs)
+  auto Entity::operator=(Entity rhs) -> Entity&
   {
-    if (this != &rhs) {
-      if (ref_count_ != nullptr && (++*ref_count_).count() == 0) {
-        delete ref_count_;
-        FOXY_ASSERT(EntityCoordinator::current() != nullptr, "Attempted to kill Entity while EntityCoordinator was null.");
-        EntityCoordinator::current()->unregister_entity_id(id_);
-      }
-      
-      ref_count_ = &++*rhs.ref_count_;
-      id_ = rhs.id_;
-    }
+    using std::swap;
+    swap(id_, rhs.id_);
+    swap(ref_count_, rhs.ref_count_);
     
     #ifdef FOXY_DEBUG_MODE
     Log::trace("ASST COPY | {}{} | ref count: {}", to_string(id_), has<components::Name>() ? ":\"" + get<components::Name>().value + "\"" : "", ref_count_->count());
@@ -75,6 +68,8 @@ namespace fx {
     
     return *this;
   }
+  
+  auto Entity::operator=(Entity&& rhs) noexcept -> Entity& = default;
   
   shared<EntityCoordinator> EntityCoordinator::current_coordinator_{ std::make_shared<EntityCoordinator>() };
 

@@ -42,18 +42,19 @@ namespace fx {
     void remove();
     
     template<class C>
-    auto get_ref() -> C&;
+    [[nodiscard]] auto get_ref() -> C&;
     
     template<class C>
-    auto get() const -> const C&;
+    [[nodiscard]] auto get() const -> const C&;
     
     template<class C, typename... Args>
     void set(Args&& ...args);
     
     template<class... Cs>
-    auto has() const -> bool;
+    [[nodiscard]] auto has() const -> bool;
     
-    Entity& operator=(const Entity& rhs);
+    auto operator=(Entity rhs) -> Entity&;
+    auto operator=(Entity&& rhs) noexcept -> Entity&;
     
     auto operator<(const Entity& rhs) const -> bool
     { return id_ < rhs.id_; }
@@ -210,7 +211,7 @@ namespace fx {
     }
 
     template<class C>
-    auto get_ref(Entity& entity) -> C&
+    [[nodiscard]] auto get_ref(Entity& entity) -> C&
     {
       FOXY_ASSERT(entities_.contains(entity.id()), "Attempted to access non-existent entity.");
       FOXY_ASSERT(has<C>(entity), "Attempted to access non-existent component data.");
@@ -219,7 +220,7 @@ namespace fx {
     }
 
     template<class C>
-    auto get(const Entity& entity) const -> const C&
+    [[nodiscard]] auto get(const Entity& entity) const -> const C&
     {
       FOXY_ASSERT(entities_.contains(entity.id()), "Attempted to access non-existent entity.");
       FOXY_ASSERT(has<C>(entity), "Attempted to access non-existent component data.");
@@ -234,11 +235,11 @@ namespace fx {
     }
 
     template<typename... Cs>
-    auto has(const Entity& entity) const -> bool
+    [[nodiscard]] auto has(const Entity& entity) const -> bool
     {
       FOXY_ASSERT(entities_.contains(entity.id()), "Attempted to access non-existent entity.");
       const auto& archetype{ entities_.at(entity.id())->second };
-      return std::ranges::all_of(std::set<Component::ID>{ (..., Component::id<Cs>()) }, [&](const Component::ID& component_id) {
+      return std::ranges::all_of(std::set<Component::ID>{ Component::id<Cs>()... }, [&](const Component::ID& component_id) {
         return component_archetypes_.contains(component_id) && component_archetypes_.at(component_id).contains(archetype.id());
       });
     }
