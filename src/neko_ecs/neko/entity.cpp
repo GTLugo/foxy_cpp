@@ -9,7 +9,7 @@ namespace fx {
     ++*ref_count_;
     
     #ifdef FOXY_DEBUG_MODE
-    Log::trace("CTOR DEFAULT | {}{} | ref count: {}", to_string(id_), has<components::Name>() ? ":\"" + get<components::Name>().value + "\"" : "", ref_count_->count());
+    // Log::trace("CTOR DEFAULT | {}{} | ref count: {}", to_string(id_), has<components::Name>() ? ":\"" + get<components::Name>().value + "\"" : "", ref_count_->count());
     #endif
   }
   
@@ -19,7 +19,7 @@ namespace fx {
     add<components::Name>(name);
     
     #ifdef FOXY_DEBUG_MODE
-    Log::trace("CTOR NAMED | {}{} | ref count: {}", to_string(id_), has<components::Name>() ? ":\"" + get<components::Name>().value + "\"" : "", ref_count_->count());
+    // Log::trace("CTOR NAMED | {}{} | ref count: {}", to_string(id_), has<components::Name>() ? ":\"" + get<components::Name>().value + "\"" : "", ref_count_->count());
     #endif
   }
   
@@ -28,7 +28,7 @@ namespace fx {
     ref_count_{ &++*rhs.ref_count_ }
   {
     #ifdef FOXY_DEBUG_MODE
-    Log::trace("CTOR COPY | {}{} | ref count: {}", to_string(id_), has<components::Name>() ? ":\"" + get<components::Name>().value + "\"" : "", ref_count_->count());
+    // Log::trace("CTOR COPY | {}{} | ref count: {}", to_string(id_), has<components::Name>() ? ":\"" + get<components::Name>().value + "\"" : "", ref_count_->count());
     #endif
   }
   
@@ -51,7 +51,7 @@ namespace fx {
   
       #ifdef FOXY_DEBUG_MODE
       // Debugging
-      Log::trace("DTOR {}| {}{} | ref count: {}", ref_count_ == nullptr ? "FINAL " : "", to_string(id_), has_name ? ":\"" + name + "\"" : "", count);
+      // Log::trace("DTOR {}| {}{} | ref count: {}", ref_count_ == nullptr ? "FINAL " : "", to_string(id_), has_name ? ":\"" + name + "\"" : "", count);
       #endif
     }
   }
@@ -63,7 +63,7 @@ namespace fx {
     swap(ref_count_, rhs.ref_count_);
     
     #ifdef FOXY_DEBUG_MODE
-    Log::trace("ASST COPY | {}{} | ref count: {}", to_string(id_), has<components::Name>() ? ":\"" + get<components::Name>().value + "\"" : "", ref_count_->count());
+    // Log::trace("ASST COPY | {}{} | ref count: {}", to_string(id_), has<components::Name>() ? ":\"" + get<components::Name>().value + "\"" : "", ref_count_->count());
     #endif
     
     return *this;
