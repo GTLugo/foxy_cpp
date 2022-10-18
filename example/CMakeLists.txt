@@ -6,7 +6,7 @@ message(STATUS "Configuring ${PROJECT_NAME} internal project: ${TARGET_NAME}")
 # ===================================================
 # EXECUTABLE
 # ===================================================
-set(SOURCE_FILES "example_app/example_app.cpp" )
+set(SOURCE_FILES "example_app/example_app.cpp" "${FOXY_ROOT_DIR}/icon.rc")
 add_executable(${TARGET_NAME} ${SOURCE_FILES})
 target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
 target_compile_options(${TARGET_NAME} PRIVATE "/bigobj" "/std:c++latest" "/experimental:module")

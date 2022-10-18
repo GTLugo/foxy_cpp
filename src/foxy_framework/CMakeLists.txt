@@ -14,8 +14,7 @@ configure_file("foxy/foxy_config.hpp.in" "foxy/foxy_config.hpp")
 # LIBRARY
 # ===================================================
 set(SOURCE_FILES
-    "${FOXY_EXTERN_DIR}/../cpp.hint"
-    "foxy/icon.rc"
+    "${FOXY_ROOT_DIR}/cpp.hint"
     "foxy/app.cpp"
 )
 add_library(${TARGET_NAME} STATIC ${SOURCE_FILES})
