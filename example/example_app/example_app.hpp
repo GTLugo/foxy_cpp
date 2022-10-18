@@ -29,7 +29,7 @@ struct ExampleApp : fx::App {
   std::string waifu{ "Fubuki" };
   int hololive_members{ 71 };
 
-  ExampleApp() :
+  ExampleApp():
     App{ CreateInfo{.title = "Foxy Example App" } }
   {
     add_function_to_stage(Stage::Start, FOXY_LAMBDA(start));
