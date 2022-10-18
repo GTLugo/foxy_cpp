@@ -32,6 +32,18 @@ namespace fx {
     #endif
   }
   
+  Entity::Entity(Entity&& rhs) noexcept:
+    Entity{}
+  {
+    using std::swap;
+    swap(id_, rhs.id_);
+    swap(ref_count_, rhs.ref_count_);
+    
+    #ifdef FOXY_DEBUG_MODE
+    // Log::trace("MOVE CTOR | {}{} | ref count: {}", to_string(id_), has<components::Name>() ? ":\"" + get<components::Name>().value + "\"" : "", ref_count_->count());
+    #endif
+  }
+  
   Entity::~Entity()
   {
     if (ref_count_ != nullptr) {

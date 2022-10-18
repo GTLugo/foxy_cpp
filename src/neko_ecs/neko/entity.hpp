@@ -30,6 +30,8 @@ namespace fx {
     
     Entity(const Entity& rhs);
     
+    Entity(Entity&& rhs) noexcept;
+    
     ~Entity();
     
     [[nodiscard]] auto id() const -> const ID&

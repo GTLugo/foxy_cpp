@@ -52,7 +52,10 @@ struct ExampleApp : fx::App {
     };
 
     if (example_entity.has<fx::components::Name, fx::components::Transform>()) {
-      fx::Log::info("Found all components! Name: {}", example_entity.get<fx::components::Name>().value);
+      const auto& name{ example_entity.get<fx::components::Name>() };
+      const auto& transform{ example_entity.get<fx::components::Transform>() };
+      
+      fx::Log::info("Found all components! Name: {}, Transform: {}", name.value, to_string(transform.position));
     } else {
       fx::Log::info("Missing one or more components!");
     }
@@ -60,6 +63,12 @@ struct ExampleApp : fx::App {
 
   void update(App&, const Time& time)
   {
-
+    // for (const fx::i32& i: std::views::iota(0, 50)) {
+    //   fx::Entity{ std::to_string(i) }
+    //     /*.add<fx::components::Transform>(fx::components::Transform{
+    //       .position = { 1.f, 1.f, 1.f }
+    //     })
+    //     .add<fx::components::Mesh>()*/;
+    // }
   }
 };
