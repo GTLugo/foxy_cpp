@@ -108,5 +108,6 @@ namespace fx {
     FOXY_ASSERT(archetypes_.contains(std::set<Component::ID>{}), "Empty archetype not found.");
   }
 
+  /// TODO: Make EntityCoordinator no longer a global static. Perhaps move the reference back into Entity?
   EntityCoordinator::~EntityCoordinator() = default;
 } // fx

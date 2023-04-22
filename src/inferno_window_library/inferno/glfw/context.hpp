@@ -23,7 +23,9 @@ namespace fx::inferno {
         nullptr
       ),
       [](GLFWwindow* window) {
+        fx::Log::trace("Destroying raw glfw window...");
         glfwDestroyWindow(window);
+        fx::Log::trace("Destroyed raw glfw window.");
       }
     };
   }

@@ -13,7 +13,7 @@ namespace fx {
       name_{ shader_create_info.path.stem().string() }
     {
       Log::info("Please wait while shader[\"{}\"] loads...", name_);
-      const auto sw{ Stopwatch() };
+      Stopwatch sw{ "shader" };
       
       if (fetch_shader_bytecode(shader_create_info)) {
         Log::trace("Fetched shader bytecode: {}", name_);
@@ -23,7 +23,7 @@ namespace fx {
         Log::error("Shader \"{}\" failed creation.", name_);
       }
       
-      Log::info("Shader[\"{}\"] loading complete! ({} s)", name_, sw.get_time_elapsed<secs>());
+      Log::info("Shader[\"{}\"] loading complete! ({} s)", name_, sw.time_elapsed<secs>());
     }
     
     ~Impl() = default;

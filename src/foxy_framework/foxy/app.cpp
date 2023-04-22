@@ -35,13 +35,11 @@ namespace fx {
     
     ~AppLoggingHelper()
     {
-      #if defined(FOXY_DEBUG_MODE) or defined(FOXY_RELDEB_MODE)
       if (exit_success) {
         Log::info("Foxy shutdown: Otsukon deshita! Bye bye!");
       } else {
         Log::info("Foxy emergency shutdown: YABE!");
       }
-      #endif
     }
   };
   
@@ -68,15 +66,15 @@ namespace fx {
       window_->set_icon("res/foxy/default.png");
       window_->set_hidden(false);
       set_callbacks();
-      time_entity_.add<Time_C>();
-      fixed_time_entity_.add<Time_C>();
+      time_entity_.add<components::Time>();
+      fixed_time_entity_.add<components::Time>();
     }
     
     ~Impl() = default;
     
-    void set_user_data(shared<void> data)
+    void set_user_data(const shared<void>& data)
     {
-      user_data_ = std::move(data);
+      user_data_ = data;
     }
     
     void add_function_to_stage(const Stage stage, StageCallback&& callback)
@@ -84,7 +82,7 @@ namespace fx {
       stage_callback(stage).add_callback(std::forward<StageCallback>(callback));
     }
     
-    [[nodiscard]] auto user_data() -> shared<void>
+    [[nodiscard]] auto user_data() -> weak<void>
     {
       return user_data_;
     }
@@ -99,7 +97,7 @@ namespace fx {
   private:
     const double frame_time_goal_{ 1. / 250. };
     
-    shared<void> user_data_;
+    weak<void> user_data_;
     App& app_;
     
     shared<Window> window_;
@@ -159,13 +157,13 @@ namespace fx {
           start_event_(app_, time);
         },
         .tick = [this](const Time& time) { // Tick
-          fixed_time_entity_.set<Time_C>(time.delta<secs>());
+          fixed_time_entity_.set<components::Time>(time.delta<secs>());
           early_tick_event_(app_, time);
           tick_event_(app_, time);
           late_tick_event_(app_, time);
         },
         .update = [this](const Time& time) { // Update
-          time_entity_.set<Time_C>(time.delta<secs>());
+          time_entity_.set<components::Time>(time.delta<secs>());
           early_update_event_(app_, time);
           update_event_(app_, time);
           late_update_event_(app_, time);
@@ -335,7 +333,7 @@ namespace fx {
     return *this;
   }
   
-  auto App::user_data_ptr() -> shared<void>
+  auto App::user_data_ptr() -> weak<void>
   {
     return p_impl_->user_data();
   }

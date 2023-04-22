@@ -21,13 +21,15 @@ add_library(${TARGET_NAME} STATIC ${SOURCE_FILES})
 target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
 target_compile_options(${TARGET_NAME} PRIVATE "/bigobj" "/std:c++latest" "/experimental:module")
 target_compile_definitions(${TARGET_NAME}
-    PRIVATE _CRT_SECURE_NO_WARNINGS=1
-            WIN32_LEAN_AND_MEAN=1
-    PUBLIC $<$<CONFIG:debug>:FOXY_ENABLE_ASSERTS=1;FOXY_DEBUG_MODE=1>
-           $<$<CONFIG:relwithdebinfo>:FOXY_ENABLE_ASSERTS=1;FOXY_DEBUG_MODE=1;FOXY_RELDEB_MODE=1>
+  PRIVATE _CRT_SECURE_NO_WARNINGS=1
+          WIN32_LEAN_AND_MEAN=1
+  PUBLIC NOMINMAX=1
+         $<$<CONFIG:debug>:FOXY_ENABLE_ASSERTS=1;FOXY_DEBUG_MODE=1>
+         $<$<CONFIG:relwithdebinfo>:FOXY_ENABLE_ASSERTS=1;FOXY_DEBUG_MODE=1;FOXY_RELDEB_MODE=1>
+         $<$<CONFIG:release>:FOXY_ENABLE_ASSERTS=1;FOXY_RELEASE_MODE=1>
 )
 if(FOXY_PERF_TITLE)
-  target_compile_definitions(${TARGET_NAME} PRIVATE FOXY_PERF_TITLE=1)
+  target_compile_definitions(${TARGET_NAME} PUBLIC FOXY_PERF_TITLE=1)
 endif()
 target_precompile_headers(${TARGET_NAME} PUBLIC "foxy/internal/foxy_pch.hpp")
 target_include_directories(${TARGET_NAME} PUBLIC "../../include" "." "${PROJECT_BINARY_DIR}") # added binary dir to allow searching for the config file)

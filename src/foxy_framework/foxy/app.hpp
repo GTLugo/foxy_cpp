@@ -5,9 +5,11 @@
 #pragma once
 
 namespace fx {
-  struct Time_C {
-    double delta{ 0 };
-  };
+  namespace components {
+    struct Time {
+      double delta{ 0 };
+    };
+  }
   
   class App {
   public:
@@ -43,7 +45,7 @@ namespace fx {
     auto set_user_data_ptr(shared<void> data) -> App&;
     auto add_function_to_stage(Stage stage, StageCallback&& callback) -> App&;
     
-    [[nodiscard]] auto user_data_ptr() -> shared<void>;
+    [[nodiscard]] auto user_data_ptr() -> weak<void>;
   
     void run();
   

@@ -26,6 +26,8 @@ namespace fx::inferno {
   }
 
   Context::~Context() {
+    fx::Log::trace("Terminating glfw...");
     glfwTerminate();
+    fx::Log::trace("Terminated glfw.");
   }
 }
